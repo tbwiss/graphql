@@ -1,5 +1,11 @@
 module.exports = {
-  content: ["./src/**/*.{html,ts,tsx}"],
+  // eslint-disable-next-line global-require
+  presets: [require('@neo4j-ndl/base/lib/optimised.config')],
+  prefix: "", // Remove "n-" prefix from Design System Library
+  corePlugins: {
+    preflight: false,
+  },
+  content: ["./src/**/*.{html,ts,tsx,css}", "./public/**/*.html"],
   theme: {
     extend: {
       height: {
