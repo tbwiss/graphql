@@ -517,6 +517,14 @@ function createProjectionAndParams({
             [projectionStr] = recurse;
             res.params = { ...res.params, ...recurse[1] };
 
+            // This won't work as "node" in translateRead line 106 is "SomeNode"..
+            // if (recurse[2]) {
+            //     if (recurse[2].interfaceFields) {
+            //         res.meta.interfaceFields = recurse[2].interfaceFields;
+            //     }
+            // }
+            // Find another solution.
+
             let whereStr = "";
             const nodeWhereAndParams = createNodeWhereAndParams({
                 whereInput,
