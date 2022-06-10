@@ -67,6 +67,7 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
                 someNodes {
                     id
                     other {
+                        id
                         interfaceField {
                             id
                         }
@@ -80,12 +81,9 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:SomeNode)
-            RETURN this { .id, other: head([ (this)-[:HAS_OTHER_NODES]->(this_other:OtherNode)   | this_other { interfaceField: interfaceField } ]) } as this"
+            RETURN this { .id, other: head([ (this)-[:HAS_OTHER_NODES]->(this_other:OtherNode)   | this_other { .id, interfaceField: interfaceField } ]) } as this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
     });
 });
-
-// MATCH (this:SomeNode)
-//             RETURN this { .id, other: head([ (this)-[:HAS_OTHER_NODES]->(this_other:OtherNode)   | this_other { interfaceField: [ (this_other)-[:HAS_INTERFACE_NODES]->(:MyImplementation) ]} ]) } as this

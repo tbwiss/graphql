@@ -108,6 +108,7 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
                 ${testSomeNode.plural} {
                     id
                     other {
+                      id
                       interfaceField {
                         id
                       }
@@ -120,7 +121,17 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
         expect(queryResult.errors).toBeUndefined();
 
         expect(queryResult.data as any).toEqual({
-            [` ${testSomeNode.plural}`]: {},
+            [`${testSomeNode.plural}`]: [
+                {
+                    id: "12",
+                    other: {
+                        id: "212",
+                        interfaceField: {
+                            id: "3212",
+                        },
+                    },
+                },
+            ],
         });
     });
 });

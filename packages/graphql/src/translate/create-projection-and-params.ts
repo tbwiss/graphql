@@ -402,8 +402,31 @@ function createProjectionAndParams({
                         return res;
                     }
                 }
+                // Not a good apporach...
+                //
+                // if (field.fieldsByTypeName) {
+                //     const referenceNodes = context.nodes.filter(
+                //         (x) =>
+                //             relationField.interface?.nodes?.includes(x.name) &&
+                //             (!field.args.where || Object.prototype.hasOwnProperty.call(field.args.where, x.name))
+                //     );
+                //     const recurse = createProjectionAndParams({
+                //         resolveTree: field,
+                //         node: refNode,
+                //         context,
+                //         varName: param,
+                //         isRootConnectionField,
+                //     });
+                //     console.log(recurse);
+                // }
 
-                res.projection.push(`${field.alias}: ${field.alias}${offsetLimitStr}`);
+                // This query should work:
+                //     MATCH (this:SomeNode)
+                // RETURN this { .id, other: head([ (this)-[:HAS_OTHER_NODES]->(this_other:OtherNode)   | this_other { .id, interfaceField: head([ (this_other)-[:HAS_INTERFACE_NODES]->(this_pp:MyImplementation)   | this_pp { .id} ]) } ]) } as this
+
+                res.projection.push(
+                    `${field.alias}: head([ (this_other)-[:HAS_INTERFACE_NODES]->(this_pp)   | this_pp { .id, __resolveType: "MyImplementation"} ])`
+                );
 
                 return res;
             }
