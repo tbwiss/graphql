@@ -84,7 +84,7 @@ function createNodeWhereAndParams({
     }
 
     const whereAuth = createAuthAndParams({
-        entity: node,
+        entity: node || {},
         operations: "READ",
         context,
         where: {
@@ -99,7 +99,7 @@ function createNodeWhereAndParams({
     }
 
     const preAuth = createAuthAndParams({
-        entity: node,
+        entity: node || {},
         operations: "READ",
         context,
         allow: {
@@ -384,6 +384,12 @@ function createProjectionAndParams({
 
                 res.meta.interfaceFields.push(field);
 
+                const interfaceRefNodes = context.nodes.filter(
+                    (x) =>
+                        relationField.interface?.implementations?.includes(x.name) &&
+                        (!field.args.where || Object.prototype.hasOwnProperty.call(field.args.where, x.name))
+                );
+
                 let offsetLimitStr = "";
                 if (optionsInput) {
                     offsetLimitStr = createOffsetLimitStr({
@@ -401,7 +407,45 @@ function createProjectionAndParams({
                         );
                         return res;
                     }
+
+                    interfaceRefNodes.map((refNode) => {
+                        // Extract interface names implemented by reference node
+                        const refNodeInterfaceNames = refNode.interfaces.map(
+                            (implementedInterface) => implementedInterface.name.value
+                        );
+
+                        // Determine if there are any fields to project
+                        const hasFields = Object.keys(field.fieldsByTypeName).some((fieldByTypeName) =>
+                            [refNode.name, ...refNodeInterfaceNames].includes(fieldByTypeName)
+                        );
+
+                        if (hasFields) {
+                            let projectionStr = "";
+                            const recurse = createProjectionAndParams({
+                                resolveTree: field,
+                                node: refNode,
+                                context,
+                                varName: `${varName}_${field.alias}`,
+                                chainStr: param,
+                                inRelationshipProjection: true,
+                                isRootConnectionField: false,
+                                resolveType: true,
+                            });
+                            [projectionStr] = recurse;
+                            const innerLabels = refNode?.getLabelString(context);
+                            const innerNodeOutStr = `(${param}${innerLabels})`;
+                            const pathStr = `${nodeMatchStr}${inStr}${relTypeStr}${outStr}${innerNodeOutStr}`;
+                            //  const innerStr = `${pathStr}  ${whereStr} | ${param} ${projectionStr}`;
+                            const innerStr = `${pathStr} | ${param} ${projectionStr}`;
+
+                            const t = `${alias}: ${!isArray ? "head(" : ""}[ ${innerStr} ]${offsetLimitStr}${
+                                !isArray ? ")" : ""
+                            }`;
+                            res.projection.push(t);
+                        }
+                    });
                 }
+
                 // Not a good apporach...
                 //
                 // if (field.fieldsByTypeName) {
@@ -424,9 +468,13 @@ function createProjectionAndParams({
                 //     MATCH (this:SomeNode)
                 // RETURN this { .id, other: head([ (this)-[:HAS_OTHER_NODES]->(this_other:OtherNode)   | this_other { .id, interfaceField: head([ (this_other)-[:HAS_INTERFACE_NODES]->(this_pp:MyImplementation)   | this_pp { .id} ]) } ]) } as this
 
-                res.projection.push(
-                    `${field.alias}: head([ (this_other)-[:HAS_INTERFACE_NODES]->(this_pp)   | this_pp { .id, __resolveType: "MyImplementation"} ])`
-                );
+                // res.projection.push(
+                //     `${field.alias}: head([ (this_other)-[:HAS_INTERFACE_NODES]->(this_pp)   | this_pp { .id, __resolveType: "MyImplementation"} ])`
+                // );
+
+                if (interfaceRefNodes.length === 0) {
+                    res.projection.push(`${field.alias}: ${field.alias}${offsetLimitStr}`);
+                }
 
                 return res;
             }
