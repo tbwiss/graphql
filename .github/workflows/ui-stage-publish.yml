@@ -37,6 +37,10 @@ jobs:
       - id: get-pr-number
         run: |
           number=$(<prnumber)
+          regex='^[0-9]+$'
+          if ! [[ $number =~ $regex ]] ; then
+            echo "error: Provided PR number is not of type number" >&2; exit 1
+          fi
           echo "::set-output name=pr-number::$number"
       - uses: actions/setup-node@v3
         with:
