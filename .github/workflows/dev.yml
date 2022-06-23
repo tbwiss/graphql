@@ -17,31 +17,7 @@ jobs:
     needs:
       - cache-dependencies
 
-    runs-on: ubuntu-latest
-
-    services:
-      neo4j:
-        image: neo4j:latest
-        env:
-          NEO4J_AUTH: neo4j/password
-          NEO4JLABS_PLUGINS: '["apoc"]'
-        ports:
-          - 7687:7687
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
-      - name: Run neo-push tests
-        run: yarn --cwd examples/neo-push/server run test
-        env:
-          NEO_USER: neo4j
-          NEO_PASSWORD: password
-          NEO_URL: bolt://localhost:7687
+    uses: ./.github/workflows/reusable/reusable-neo-push-tests.yml
 
   unit-tests:
     needs:
@@ -153,37 +129,7 @@ jobs:
     needs:
       - cache-dependencies
 
-    strategy:
-      matrix:
-        aura-instance:
-          - free
-          - professional
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
-      - name: Install ts-node and typescript
-        run: npm install -g ts-node typescript
-      - name: Uppercase instance name
-        run: |
-          lowercase_instance=${{ matrix.aura-instance }}
-          echo "AURA_URI_SECRET=AURA_${lowercase_instance^^}_URI" >>"${GITHUB_ENV}"
-          echo "AURA_PASSWORD_SECRET=AURA_${lowercase_instance^^}_PASSWORD" >>"${GITHUB_ENV}"
-      - name: Delete all data in instance
-        run: ts-node tests/integration/teardown.ts
-        working-directory: packages/graphql
-        env:
-          NEO_USER: neo4j
-          NEO_PASSWORD: ${{ secrets[env.AURA_PASSWORD_SECRET] }}
-          NEO_URL: ${{ secrets[env.AURA_URI_SECRET] }}
+    uses: ./.github/workflows/reusable/reusable-aura-teardown.yml
 
   integration-tests-aura:
     needs:
