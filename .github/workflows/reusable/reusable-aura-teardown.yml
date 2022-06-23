@@ -16,12 +16,6 @@ on:
         description: "Contains the URI for the Aura professional instance"
         required: true
 
-env:
-  AURA_FREE_PASSWORD: ${{ secrets.AURA_FREE_PASSWORD }}
-  AURA_FREE_URI: ${{ secrets.AURA_FREE_URI }}
-  AURA_PROFESSIONAL_PASSWORD: ${{ secrets.AURA_PROFESSIONAL_PASSWORD }}
-  AURA_PROFESSIONAL_URI: ${{ secrets.AURA_PROFESSIONAL_URI }}
-
 jobs:
   aura-teardown:
     strategy:

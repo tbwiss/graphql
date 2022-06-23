@@ -95,6 +95,7 @@ jobs:
       - cache-dependencies
 
     uses: ./.github/workflows/reusable/reusable-aura-teardown.yml
+    secrets: inherit
 
   integration-tests-aura:
     needs:
