@@ -9,16 +9,7 @@ on:
 
 jobs:
   cache-dependencies:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
+    uses: ./.github/workflows/reusable/reusable-cache-dependencies.yml
 
   unit-tests:
     needs:
@@ -42,7 +33,7 @@ jobs:
     needs:
       - cache-dependencies
 
-    uses: ./.github/workflows/reusable-toolbox-tests.yml
+    uses: ./.github/workflows/reusable/reusable-toolbox-tests.yml
 
   bump-version:
     needs:

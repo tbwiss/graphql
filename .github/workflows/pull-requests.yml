@@ -10,16 +10,7 @@ on:
 
 jobs:
   cache-dependencies:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
+    uses: ./.github/workflows/reusable/reusable-cache-dependencies.yml
 
   reviewdog-eslint:
     needs:
@@ -41,7 +32,7 @@ jobs:
           eslint_flags: "."
 
   package-tests:
-    uses: ./.github/workflows/reusable-package-tests.yml
+    uses: ./.github/workflows/reusable/reusable-package-tests.yml
 
   neo-push-tests:
     needs:
@@ -178,16 +169,16 @@ jobs:
           path: packages/plugins/${{ matrix.package }}/coverage/
 
   e2e-tests-plugins:
-    uses: ./.github/workflows/reusable-subscriptions-plugin-amqp-e2e-test.yml
+    uses: ./.github/workflows/reusable/reusable-subscriptions-plugin-amqp-e2e-test.yml
 
   api-library-tests:
-    uses: ./.github/workflows/reusable-api-library-tests.yml
+    uses: ./.github/workflows/reusable/reusable-api-library-tests.yml
 
   # nextjs-app-setup:
-  #   uses: ./.github/workflows/reusable-nextjs-app-setup.yml
+  #   uses: ./.github/workflows/reusable/reusable-nextjs-app-setup.yml
 
   toolbox-tests:
-    uses: ./.github/workflows/reusable-toolbox-tests.yml
+    uses: ./.github/workflows/reusable/reusable-toolbox-tests.yml
 
   integration-tests-on-prem:
     needs:

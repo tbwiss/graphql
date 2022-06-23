@@ -10,16 +10,7 @@ on:
 
 jobs:
   cache-dependencies:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn
+    uses: ./.github/workflows/reusable/reusable-cache-dependencies.yml
 
   unit-tests:
     needs:
@@ -58,13 +49,13 @@ jobs:
           fail_ci_if_error: true
 
   api-library-tests:
-    uses: ./.github/workflows/reusable-api-library-tests.yml
+    uses: ./.github/workflows/reusable/reusable-api-library-tests.yml
 
   # nextjs-app-setup:
-  #   uses: ./.github/workflows/reusable-nextjs-app-setup.yml
+  #   uses: ./.github/workflows/reusable/reusable-nextjs-app-setup.yml
 
   package-tests:
-    uses: ./.github/workflows/reusable-package-tests.yml
+    uses: ./.github/workflows/reusable/reusable-package-tests.yml
 
   integration-tests-on-prem:
     needs:
