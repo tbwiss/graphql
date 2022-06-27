@@ -79,7 +79,7 @@ jobs:
 
     uses: ./.github/workflows/reusable/reusable-unit-tests.yml
     with:
-      packages: "['graphql','ogm', 'introspector']"
+      packages: '["graphql","ogm","introspector"]'
     secrets: inherit
 
   unit-tests-plugins:

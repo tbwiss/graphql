@@ -25,7 +25,7 @@ jobs:
 
     uses: ./.github/workflows/reusable/reusable-unit-tests.yml
     with:
-      packages: "['graphql','ogm', 'introspector', 'plugins/graphql-plugin-auth']"
+      packages: '["graphql","ogm","introspector","plugins/graphql-plugin-auth"]'
     secrets: inherit
 
   api-library-tests:
