@@ -16,37 +16,10 @@ jobs:
     needs:
       - cache-dependencies
 
-    strategy:
-      matrix:
-        package:
-          - graphql
-          - ogm
-        graphql-version:
-          - "^15.0.0"
-          - "^16.0.0"
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: yarn
-      - name: Install dependencies
-        run: yarn
-      - name: Overwrite GraphQL version
-        run: yarn up --exact graphql@${{ matrix.graphql-version }}
-      - name: Run packages/${{ matrix.package }} unit tests
-        run: yarn run test:unit --coverage
-        working-directory: packages/${{ matrix.package }}
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./packages/${{ matrix.package }}/coverage/
-          flags: ${{ matrix.package }},unit
-          fail_ci_if_error: true
+    uses: ./.github/workflows/reusable/reusable-unit-tests.yml
+    with:
+      packages: "['graphql','ogm']"
+    secrets: inherit
 
   api-library-tests:
     uses: ./.github/workflows/reusable/reusable-api-library-tests.yml
