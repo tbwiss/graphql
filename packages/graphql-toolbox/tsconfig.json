@@ -14,7 +14,7 @@
             "@neo4j/introspector": ["../introspector/src"]
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "vite.config.ts"],
     "references": [
         { "path": "../cypher-builder/tsconfig.production.json" },
         { "path": "../graphql/src/tsconfig.production.json" },
