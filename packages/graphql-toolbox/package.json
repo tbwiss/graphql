@@ -49,6 +49,7 @@
         "graphiql-explorer": "0.9.0",
         "graphql": "16.6.0",
         "graphql-query-complexity": "0.12.0",
+        "graphql-ws": "^5.11.2",
         "lodash.debounce": "4.0.8",
         "markdown-it": "13.0.1",
         "neo4j-driver": "5.2.0",

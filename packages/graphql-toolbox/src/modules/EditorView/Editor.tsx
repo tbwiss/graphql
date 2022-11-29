@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useState, useRef, useEffect, useContext, Fragment } from "react";
-import { graphql, GraphQLSchema } from "graphql";
+import { GraphQLSchema, subscribe as GraphQLsubscribe, parse } from "graphql";
 import GraphiQLExplorer from "graphiql-explorer";
 import { Button, HeroIcon, IconButton, Switch } from "@neo4j-ndl/react";
 import tokens from "@neo4j-ndl/base/lib/tokens/js/tokens";
@@ -88,14 +88,21 @@ export const Editor = ({ schema }: Props) => {
             if (!schema) return;
 
             try {
-                const response = await graphql({
+                // const response = await graphql({
+                //     schema: schema,
+                //     source: override || query || "",
+                //     contextValue: {},
+                //     variableValues: safeParse(variableValues, {}),
+                // });
+
+                const test = await GraphQLsubscribe({
                     schema: schema,
-                    source: override || query || "",
+                    document: parse(override || query || ""),
                     contextValue: {},
                     variableValues: safeParse(variableValues, {}),
                 });
 
-                result = JSON.stringify(response);
+                result = JSON.stringify(test);
             } catch (error) {
                 result = JSON.stringify({ errors: [error] });
             }
