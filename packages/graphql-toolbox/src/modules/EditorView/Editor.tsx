@@ -47,6 +47,12 @@ import { Screen } from "../../contexts/screen";
 
 const DEBOUNCE_TIMEOUT = 500;
 
+// const testIter = async (myAsyncIterable: any) => {
+//     for await (const x of myAsyncIterable) {
+//         console.log(x);
+//     }
+// };
+
 export interface Props {
     schema?: GraphQLSchema;
 }
@@ -99,6 +105,15 @@ export const Editor = ({ schema }: Props) => {
                         contextValue: {},
                         variableValues: safeParse(variableValues, {}),
                     });
+
+                    // const t = await createSourceEventStream({
+                    //     schema: schema,
+                    //     document: parse(theQuery),
+                    //     contextValue: {},
+                    //     variableValues: safeParse(variableValues, {}),
+                    // });
+                    // // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                    // testIter(t);
                 } else {
                     response = await graphql({
                         schema: schema,
