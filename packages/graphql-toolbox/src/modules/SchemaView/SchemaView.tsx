@@ -18,11 +18,12 @@
  */
 
 import { useCallback, useContext, useRef, useState } from "react";
-import { Neo4jGraphQL, Neo4jGraphQLSubscriptionsSingleInstancePlugin } from "@neo4j/graphql";
+import { Neo4jGraphQL } from "@neo4j/graphql";
 import { toGraphQLTypeDefs } from "@neo4j/introspector";
 import { Alert } from "@neo4j-ndl/react";
 import { GraphQLError, GraphQLSchema } from "graphql";
 import * as neo4j from "neo4j-driver";
+import { EventEmitter } from "events";
 import { EditorFromTextArea } from "codemirror";
 import {
     DEFAULT_DATABASE_NAME,
@@ -52,6 +53,19 @@ import { rudimentaryTypeDefinitionsAnalytics } from "../../analytics/analytics";
 export interface Props {
     hasSchema: boolean;
     onChange: (schema: GraphQLSchema) => void;
+}
+
+class SubscriptionsPlugin {
+    events: any;
+
+    constructor() {
+        this.events = new EventEmitter();
+    }
+
+    publish(eventMeta) {
+        console.log("fff", eventMeta);
+        this.events.emit(eventMeta.event, eventMeta);
+    }
 }
 
 export const SchemaView = ({ hasSchema, onChange }: Props) => {
@@ -109,7 +123,7 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
                         },
                     },
                     plugins: {
-                        subscriptions: new Neo4jGraphQLSubscriptionsSingleInstancePlugin(),
+                        subscriptions: new SubscriptionsPlugin(),
                     },
                 };
 

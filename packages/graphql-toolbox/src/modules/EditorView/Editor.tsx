@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useState, useRef, useEffect, useContext, Fragment } from "react";
-import { GraphQLSchema, subscribe as GraphQLsubscribe, parse } from "graphql";
+import { GraphQLSchema, subscribe as GraphQLsubscribe, graphql, parse } from "graphql";
 import GraphiQLExplorer from "graphiql-explorer";
 import { Button, HeroIcon, IconButton, Switch } from "@neo4j-ndl/react";
 import tokens from "@neo4j-ndl/base/lib/tokens/js/tokens";
@@ -88,21 +88,27 @@ export const Editor = ({ schema }: Props) => {
             if (!schema) return;
 
             try {
-                // const response = await graphql({
-                //     schema: schema,
-                //     source: override || query || "",
-                //     contextValue: {},
-                //     variableValues: safeParse(variableValues, {}),
-                // });
+                let response: any;
 
-                const test = await GraphQLsubscribe({
-                    schema: schema,
-                    document: parse(override || query || ""),
-                    contextValue: {},
-                    variableValues: safeParse(variableValues, {}),
-                });
+                const theQuery = override || query || "";
+                if (theQuery.trim().startsWith("subscription")) {
+                    console.log("suuub");
+                    response = await GraphQLsubscribe({
+                        schema: schema,
+                        document: parse(theQuery),
+                        contextValue: {},
+                        variableValues: safeParse(variableValues, {}),
+                    });
+                } else {
+                    response = await graphql({
+                        schema: schema,
+                        source: theQuery,
+                        contextValue: {},
+                        variableValues: safeParse(variableValues, {}),
+                    });
+                }
 
-                result = JSON.stringify(test);
+                result = JSON.stringify(response);
             } catch (error) {
                 result = JSON.stringify({ errors: [error] });
             }
