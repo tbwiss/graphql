@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { once } from "events";
+import { on, once } from "events";
 import type { ObjectFields } from "../../../schema/get-obj-field-meta";
 import { Neo4jGraphQLError } from "../../../classes";
 import type Node from "../../../classes/Node";
@@ -63,20 +63,11 @@ export function generateSubscribeMethod({
             }
         }
 
-        try {
-            console.log("context.plugin.events", context.plugin.events, type);
-            console.log(typeof once);
-            console.log(typeof context.plugin.events.on);
-            // once(context.plugin.events, type).then(f => console.log(f)).catch(e => console.log("sss", e))
-            console.log("sdfsdfs");
-        } catch (error) {
-            console.log("ee", error);
-        }
+        const operation = typeof on === "function" ? on : once;
 
-        const iterable: AsyncIterableIterator<[SubscriptionsEvent]> = once(
-            context.plugin.events,
-            type
-        ) as unknown as AsyncIterableIterator<[SubscriptionsEvent]>;
+        const iterable = operation(context.plugin.events, type) as unknown as AsyncIterableIterator<
+            [SubscriptionsEvent]
+        >;
 
         if (["create", "update", "delete"].includes(type)) {
             console.log(type, "type");
