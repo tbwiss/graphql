@@ -47,12 +47,6 @@ import { Screen } from "../../contexts/screen";
 
 const DEBOUNCE_TIMEOUT = 500;
 
-// const testIter = async (myAsyncIterable: any) => {
-//     for await (const x of myAsyncIterable) {
-//         console.log(x);
-//     }
-// };
-
 export interface Props {
     schema?: GraphQLSchema;
 }

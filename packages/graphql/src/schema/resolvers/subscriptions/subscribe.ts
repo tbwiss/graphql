@@ -70,7 +70,6 @@ export function generateSubscribeMethod({
         >;
 
         if (["create", "update", "delete"].includes(type)) {
-            console.log(type, "type");
             return filterAsyncIterator<[SubscriptionsEvent]>(iterable, (data) => {
                 return (
                     (data[0] as NodeSubscriptionsEvent).typename === node.name &&
