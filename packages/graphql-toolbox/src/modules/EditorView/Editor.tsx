@@ -47,10 +47,38 @@ import { Screen } from "../../contexts/screen";
 
 const DEBOUNCE_TIMEOUT = 500;
 
+// function iterate(asyncIter) {
+//     console.log("s", asyncIter);
+//     const promise = Promise.resolve(asyncIter.next());
+
+//     return promise.then((res) => {
+//         console.log(res);
+//         return iterate(asyncIter);
+//     });
+// }
 export interface Props {
     schema?: GraphQLSchema;
 }
 
+// mutation MyMutation {
+//     createMovies(input: {released: "65756", title: "234"}) {
+//       movies {
+//         released
+//         title
+//       }
+//     }
+//   }
+
+//   subscription MySubscription {
+//     movieCreated {
+//       event
+//       timestamp
+//       createdMovie {
+//         title
+//         released
+//       }
+//     }
+//   }
 export const Editor = ({ schema }: Props) => {
     const settings = useContext(SettingsContext);
     const [initialLoad, setInitialLoad] = useState<boolean>(false);
@@ -62,6 +90,11 @@ export const Editor = ({ schema }: Props) => {
     const [showDocs, setShowDocs] = useState<boolean>(false);
     const refForQueryEditorMirror = useRef<EditorFromTextArea | null>(null);
     const showRightPanel = settings.isShowHelpDrawer || settings.isShowSettingsDrawer;
+    let asyncIter;
+
+    // for await (const x of asyncIter) {
+    //   console.log(x);
+    // }
 
     const debouncedSave = useCallback(
         debounce((key, value) => {
@@ -93,12 +126,19 @@ export const Editor = ({ schema }: Props) => {
                 const theQuery = override || query || "";
                 if (theQuery.trim().startsWith("subscription")) {
                     console.log("suuub");
-                    response = await GraphQLsubscribe({
+                    asyncIter = await GraphQLsubscribe({
                         schema: schema,
                         document: parse(theQuery),
                         contextValue: {},
                         variableValues: safeParse(variableValues, {}),
                     });
+                    console.log(asyncIter);
+
+                    // iterate(asyncIter);
+
+                    // for await (const x of asyncIter) {
+                    //     console.log(x);
+                    // }
 
                     // const t = await createSourceEventStream({
                     //     schema: schema,
