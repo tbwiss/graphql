@@ -1,5 +1,61 @@
 # @neo4j/graphql
 
+## 3.14.1
+
+### Patch Changes
+
+-   [#2516](https://github.com/neo4j/graphql/pull/2516) [`95ecaf7c3`](https://github.com/neo4j/graphql/commit/95ecaf7c37b3e6e69bf025d49b5ad00ad44dcb39) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Fixed #2388 - filtering on nested aggregation queries
+
+-   [#2576](https://github.com/neo4j/graphql/pull/2576) [`05280d0f1`](https://github.com/neo4j/graphql/commit/05280d0f16792e8e004c732ab039152d4dd32707) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Reverts #2492 which caused a regression when creating bi-directional Union relationships
+
+-   [#2578](https://github.com/neo4j/graphql/pull/2578) [`26d8a0045`](https://github.com/neo4j/graphql/commit/26d8a00453b03fa14328bcc2f5f4685e7b5e3ba3) Thanks [@angrykoala](https://github.com/angrykoala)! - Fix sorting on multiple fields in the same object #2577
+
+-   [#2580](https://github.com/neo4j/graphql/pull/2580) [`189352546`](https://github.com/neo4j/graphql/commit/18935254652240c1ad826c3c85a5be873c4dbd20) Thanks [@angrykoala](https://github.com/angrykoala)! - Fix sorting by cypher fields when not in the selection set
+
+-   [#2564](https://github.com/neo4j/graphql/pull/2564) [`9243fb3af`](https://github.com/neo4j/graphql/commit/9243fb3afc0c04408bf78c1ba581856ccb0e51fc) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Added checks for constraints on additional labels specified by the `@node` directive when running `assertIndexesAndConstraints`.
+
+-   [#2516](https://github.com/neo4j/graphql/pull/2516) [`95ecaf7c3`](https://github.com/neo4j/graphql/commit/95ecaf7c37b3e6e69bf025d49b5ad00ad44dcb39) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Fixed #2520 - Transaction closed error when using multiple aggregation filters on update mutation
+
+-   [#2516](https://github.com/neo4j/graphql/pull/2516) [`95ecaf7c3`](https://github.com/neo4j/graphql/commit/95ecaf7c37b3e6e69bf025d49b5ad00ad44dcb39) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Performance improved by removing use of `apoc.runFirstColumn` from aggregation projections
+
+-   [#2516](https://github.com/neo4j/graphql/pull/2516) [`1b2913803`](https://github.com/neo4j/graphql/commit/1b2913803880bd1e8e1f1b7f79262ae20b1585e3) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Performance increase by removing use of `apoc.runFirstColumn` from nested aggregate where filters
+
+-   [#2587](https://github.com/neo4j/graphql/pull/2587) [`cd4f57a5d`](https://github.com/neo4j/graphql/commit/cd4f57a5ddc67660f7c41fd67e2006e68a8a0e1d) Thanks [@angrykoala](https://github.com/angrykoala)! - Fix invalid Cypher query on nested fields with `@cypher` directive using `columnName` #2581
+
+-   [#2580](https://github.com/neo4j/graphql/pull/2580) [`88d2cdfc1`](https://github.com/neo4j/graphql/commit/88d2cdfc1265f8a45c384872d32704bf452d36df) Thanks [@angrykoala](https://github.com/angrykoala)! - Improved performance on some connection pagination queries
+
+## 3.14.0
+
+### Minor Changes
+
+-   [#2455](https://github.com/neo4j/graphql/pull/2455) [`9d9bea661`](https://github.com/neo4j/graphql/commit/9d9bea6611851dd3ae9912aa0eb29554ed2b0eb0) Thanks [@angrykoala](https://github.com/angrykoala)! - Add columnName argument to @cypher directive
+
+-   [#2551](https://github.com/neo4j/graphql/pull/2551) [`652ebcdba`](https://github.com/neo4j/graphql/commit/652ebcdbadf71c3e55989672eb1064b52b32828e) Thanks [@angrykoala](https://github.com/angrykoala)! - Subscriptions stable release.
+    -   [Documentation](https://neo4j.com/docs/graphql-manual/current/subscriptions/)
+    -   [Examples](https://github.com/neo4j/graphql/tree/dev/examples/subscriptions)
+
+### Patch Changes
+
+-   Updated dependencies [[`2d2cb2e42`](https://github.com/neo4j/graphql/commit/2d2cb2e42dc0d495b944fa5a49abed8e4c0892e5)]:
+    -   @neo4j/cypher-builder@0.1.8
+
+## 3.13.1
+
+### Patch Changes
+
+-   [#2515](https://github.com/neo4j/graphql/pull/2515) [`1bec3f95d`](https://github.com/neo4j/graphql/commit/1bec3f95d0f469c2a4e879b1904a4d1a4938207e) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Add `bindPredicate` which allows the predicate used to evaluate `bind` rules to be changed
+
+-   [#2503](https://github.com/neo4j/graphql/pull/2503) [`0d70b0704`](https://github.com/neo4j/graphql/commit/0d70b07049a0f4b2391240929aadc54f62eedc42) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Allow scalars to be passed as their native Neo4j values - this might apply to using with the OGM for example
+
+-   [#2472](https://github.com/neo4j/graphql/pull/2472) [`5d349e05c`](https://github.com/neo4j/graphql/commit/5d349e05c08ed655144b9919528ba66047f49443) Thanks [@Liam-Doodson](https://github.com/Liam-Doodson)! - Removes use of runFirstColumn for top-level aggregation queries.
+
+-   [#2501](https://github.com/neo4j/graphql/pull/2501) [`638f3205a`](https://github.com/neo4j/graphql/commit/638f3205ab3b20eb69a7bb33e6c11685d3e53a51) Thanks [@MacondoExpress](https://github.com/MacondoExpress)! - Fix bug during the create operation caused by defining a relational field name as "node"
+
+-   [#2492](https://github.com/neo4j/graphql/pull/2492) [`2710165e0`](https://github.com/neo4j/graphql/commit/2710165e0bfd200a8755e1b94f363ee17258fcac) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Ensure that union create input is non-nullable for required relationships
+
+-   Updated dependencies [[`c8c2d2d4d`](https://github.com/neo4j/graphql/commit/c8c2d2d4d4897adfd1afcd666bf9f46263dfab1f)]:
+    -   @neo4j/cypher-builder@0.1.7
+
 ## 3.13.0
 
 ### Minor Changes
