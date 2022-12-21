@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { on, once } from "events";
+import events, { on, once } from "events";
 import type { ObjectFields } from "../../../schema/get-obj-field-meta";
 import { Neo4jGraphQLError } from "../../../classes";
 import type Node from "../../../classes/Node";
@@ -63,8 +63,10 @@ export function generateSubscribeMethod({
             }
         }
 
+        console.log(new events.EventEmitter());
         const operation = typeof on === "function" ? on : once;
 
+        // I'm not sure "once" has the functionality that we need. the "iterable" fails on line 74
         const iterable = operation(context.plugin.events, type) as unknown as AsyncIterableIterator<
             [SubscriptionsEvent]
         >;
