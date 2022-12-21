@@ -168,6 +168,7 @@ export interface ConnectionField extends BaseField {
  */
 export interface CypherField extends BaseField {
     statement: string;
+    columnName?: string;
     isEnum: boolean;
     isScalar: boolean;
 }
@@ -361,6 +362,7 @@ export type InputField = { type: string; defaultValue?: string; directives?: Dir
 export interface Neo4jGraphQLAuthPlugin {
     rolesPath?: string;
     isGlobalAuthenticationEnabled?: boolean;
+    bindPredicate: "all" | "any";
 
     decode<T>(token: string): Promise<T | undefined>;
 }
@@ -380,7 +382,7 @@ export type RelationshipSubscriptionMeta =
     | RelationshipSubscriptionMetaTypenameParameters
     | RelationshipSubscriptionMetaLabelsParameters;
 type RelationshipSubscriptionMetaCommonParameters = {
-    event: "connect" | "disconnect";
+    event: "create_relationship" | "delete_relationship";
     relationshipName: string;
     id_from: Integer | string | number;
     id_to: Integer | string | number;
@@ -435,7 +437,7 @@ export type NodeSubscriptionsEvent =
       };
 export type RelationshipSubscriptionsEvent =
     | {
-          event: "connect";
+          event: "create_relationship";
           relationshipName: string;
           properties: {
               from: Record<string, any>;
@@ -450,7 +452,7 @@ export type RelationshipSubscriptionsEvent =
           timestamp: number;
       }
     | {
-          event: "disconnect";
+          event: "delete_relationship";
           relationshipName: string;
           properties: {
               from: Record<string, any>;

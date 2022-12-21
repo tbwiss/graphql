@@ -9,7 +9,7 @@ export default defineConfig({
     },
     plugins: [react()],
     server: {
-        port: 9095,
+        port: 4141,
     },
     base: "./",
     build: {
