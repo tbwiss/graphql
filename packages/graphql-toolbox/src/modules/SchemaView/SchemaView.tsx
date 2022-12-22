@@ -18,8 +18,8 @@
  */
 
 import { useCallback, useContext, useRef, useState } from "react";
-import { Neo4jGraphQL } from "@neo4j/graphql";
-import { toGraphQLTypeDefs } from "@neo4j/introspector";
+import * as neo4jGraphQL from "@neo4j/graphql";
+import * as neo4jIntrospector from "@neo4j/introspector";
 import { Alert } from "@neo4j-ndl/react";
 import { GraphQLError, GraphQLSchema } from "graphql";
 import * as neo4j from "neo4j-driver";
@@ -110,7 +110,7 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
                     },
                 };
 
-                const neoSchema = new Neo4jGraphQL(options);
+                const neoSchema = new neo4jGraphQL.Neo4jGraphQL(options);
 
                 const schema = await neoSchema.getSchema();
 
@@ -147,7 +147,7 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
                         database: auth.selectedDatabaseName || DEFAULT_DATABASE_NAME,
                     }) as neo4j.Session;
 
-                const typeDefs = await toGraphQLTypeDefs(sessionFactory);
+                const typeDefs = await neo4jIntrospector.toGraphQLTypeDefs(sessionFactory);
 
                 refForEditorMirror.current?.setValue(typeDefs);
 

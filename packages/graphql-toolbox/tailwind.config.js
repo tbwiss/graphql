@@ -21,4 +21,10 @@ module.exports = {
     },
   },
   plugins: [],
+  // Be sure to disable preflight,
+  // as we provide our own Preflight (CSS Reset)
+  // with Needle out of the box
+  corePlugins: {
+    preflight: false,
+  },
 }

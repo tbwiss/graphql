@@ -8,16 +8,46 @@
         "baseUrl": ".",
         "outDir": "dist",
         "noEmit": false,
+
+
+        // "target": "ESNext",
+        // "useDefineForClassFields": true,
+        // "allowJs": false,
+        // "skipLibCheck": true,
+        // "esModuleInterop": false,
+        // "allowSyntheticDefaultImports": true,
+        // "strict": true,
+        // "forceConsistentCasingInFileNames": true,
+        // "module": "ESNext",
+        // "moduleResolution": "Node",
+        // "resolveJsonModule": true,
+        // "isolatedModules": true,
+        // "noEmit": true,
+        // "composite": true,
+        // "noUncheckedIndexedAccess": true
+
+
+
+
+
+
+
         // "paths": {
         //     "@neo4j/graphql": ["../graphql/src"],
         //     "@neo4j/cypher-builder": ["../cypher-builder/src"],
         //     "@neo4j/introspector": ["../introspector/src"]
         // }
     },
-    "include": ["vite.config.ts", "package.json", "src/**/*", "tests/**/*"],
+    "include": ["src/**/*"],
+
+
+    // "exclude": ["node_modules", "coverage", "dist", "build"],
+    // "types": ["node", "jest"]
+
     // "references": [
     //     { "path": "../cypher-builder/tsconfig.production.json" },
     //     { "path": "../graphql/src/tsconfig.production.json" },
     //     { "path": "../introspector/tsconfig.production.json" }
     // ]
 }
+
