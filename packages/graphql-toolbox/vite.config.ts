@@ -17,4 +17,7 @@ export default defineConfig({
             plugins: [nodePolyfills({ include: null })],
         },
     },
+    // resolve: {
+    //     dedupe: ["@neo4j/graphql"],
+    // },
 });
