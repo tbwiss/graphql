@@ -16,6 +16,15 @@ export default defineConfig({
     esbuild: {
         target: "es2021",
     },
+    // optimizeDeps: {
+    //     esbuildOptions: {
+    //         // mainFields: ["module", "main"],
+    //         resolveExtensions: [".ts", ".tsx", ".mjs", ".json", ".js"],
+    //     },
+    // },
+    resolve: {
+        extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
+    },
     build: {
         rollupOptions: {
             plugins: [nodePolyfills({ include: null })],
