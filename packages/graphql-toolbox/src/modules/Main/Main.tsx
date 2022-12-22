@@ -19,6 +19,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { GraphQLSchema } from "graphql";
+import { EventEmitter } from "events";
 import { TopBar } from "../TopBar/TopBar";
 import { Login } from "../Login/Login";
 import { SchemaView } from "../SchemaView/SchemaView";
@@ -33,6 +34,13 @@ export const Main = () => {
     const auth = useContext(AuthContext);
     const screen = useContext(ScreenContext);
     const [schema, setSchema] = useState<GraphQLSchema | undefined>(undefined);
+
+    const ee = new EventEmitter();
+    // ".on" is available on the EventEmitter yet not in "import { on } from "events" "
+    ee.on("message", function (text) {
+        console.log(text);
+    });
+    ee.emit("message", "hello world");
 
     useEffect(() => {
         const segmentKey =

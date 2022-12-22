@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import events, { on, once } from "events";
+import { EventEmitter, on, once } from "events";
 import type { ObjectFields } from "../../../schema/get-obj-field-meta";
 import { Neo4jGraphQLError } from "../../../classes";
 import type Node from "../../../classes/Node";
@@ -63,7 +63,16 @@ export function generateSubscribeMethod({
             }
         }
 
-        console.log(new events.EventEmitter());
+        // See browserify/events: https://github.com/browserify/events
+        // events.on is an issue/feature request: https://github.com/browserify/events/issues/76
+
+        const ee = new EventEmitter();
+        // ".on" is available on the EventEmitter yet not in "import { on } from "events" "
+        ee.on("message", function (text) {
+            console.log(text);
+        });
+        ee.emit("message", "hello world");
+
         const operation = typeof on === "function" ? on : once;
 
         // I'm not sure "once" has the functionality that we need. the "iterable" fails on line 74
