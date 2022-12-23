@@ -19,6 +19,18 @@ export default defineConfig({
     //         // '/@linked/my-shared-components/': path.dirname(require.resolve('my-shared-components/src/index.ts'))
     //     },
     // },
+    resolve: {
+        alias: {
+            path: "path-browserify",
+            // http: "https",
+            process: "process/browser",
+            stream: "stream-browserify",
+            zlib: "browserify-zlib",
+            util: "util/",
+            buffer: "buffer/",
+        },
+    },
+
     optimizeDeps: {
         include: ["@neo4j/graphql", "@neo4j/introspector"],
     },

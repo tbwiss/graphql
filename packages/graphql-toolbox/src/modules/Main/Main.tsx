@@ -19,6 +19,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { GraphQLSchema } from "graphql";
+import { IncomingMessage } from "http";
 import { TopBar } from "../TopBar/TopBar";
 import { Login } from "../Login/Login";
 import { SchemaView } from "../SchemaView/SchemaView";
@@ -30,6 +31,7 @@ import { tracking } from "../../analytics/tracking";
 import { CannySDK } from "../../common/canny";
 
 export const Main = () => {
+    console.log(IncomingMessage);
     const auth = useContext(AuthContext);
     const screen = useContext(ScreenContext);
     const [schema, setSchema] = useState<GraphQLSchema | undefined>(undefined);

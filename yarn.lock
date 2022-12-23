@@ -3182,8 +3182,8 @@ __metadata:
   dependencies:
     "@neo4j-ndl/base": 0.15.1
     "@neo4j-ndl/react": 0.16.2
-    "@neo4j/graphql": "workspace:*"
-    "@neo4j/introspector": "workspace:*"
+    "@neo4j/graphql": 3.14.1
+    "@neo4j/introspector": 1.0.2
     "@playwright/test": 1.29.0
     "@rollup/plugin-node-resolve": ^15.0.1
     "@tsconfig/create-react-app": 1.0.3
@@ -3195,6 +3195,7 @@ __metadata:
     "@types/webpack": 5.28.0
     "@vitejs/plugin-react": 3.0.0
     autoprefixer: 10.4.13
+    browserify-zlib: ^0.2.0
     codemirror: 5.65.11
     codemirror-graphql: 2.0.2
     compression-webpack-plugin: 10.0.0
@@ -3209,6 +3210,7 @@ __metadata:
     html-inline-script-webpack-plugin: 3.1.0
     html-webpack-inline-source-plugin: 0.0.10
     html-webpack-plugin: 5.5.0
+    http-browserify: ^1.7.0
     jest: 29.3.1
     jest-environment-jsdom: 29.3.1
     lodash.debounce: 4.0.8
@@ -3216,6 +3218,7 @@ __metadata:
     neo4j-driver: 5.3.0
     node-polyfill-webpack-plugin: 2.0.1
     parse5: 5.1.1
+    path-browserify: ^1.0.1
     postcss: 8.4.20
     postcss-loader: 7.0.2
     prettier: 2.8.1
@@ -3225,6 +3228,7 @@ __metadata:
     react-dom: 18.2.0
     react-resizable: 3.0.4
     rollup-plugin-polyfill-node: 0.11.0
+    stream-browserify: ^3.0.0
     style-loader: 3.3.1
     tailwindcss: 3.2.4
     terser-webpack-plugin: 5.3.6
@@ -3242,7 +3246,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neo4j/graphql@^3.1.0, @neo4j/graphql@^3.13.0, @neo4j/graphql@^3.14.0, @neo4j/graphql@^3.14.1, @neo4j/graphql@^3.5.0, @neo4j/graphql@^3.8.0, @neo4j/graphql@workspace:*, @neo4j/graphql@workspace:packages/graphql":
+"@neo4j/graphql@3.14.1, @neo4j/graphql@^3.1.0, @neo4j/graphql@^3.13.0, @neo4j/graphql@^3.14.0, @neo4j/graphql@^3.14.1, @neo4j/graphql@^3.5.0, @neo4j/graphql@^3.8.0, @neo4j/graphql@workspace:packages/graphql":
   version: 0.0.0-use.local
   resolution: "@neo4j/graphql@workspace:packages/graphql"
   dependencies:
@@ -3302,7 +3306,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neo4j/introspector@workspace:*, @neo4j/introspector@workspace:packages/introspector":
+"@neo4j/introspector@1.0.2, @neo4j/introspector@workspace:packages/introspector":
   version: 0.0.0-use.local
   resolution: "@neo4j/introspector@workspace:packages/introspector"
   dependencies:
@@ -5691,6 +5695,13 @@ __metadata:
   version: 4.2.2
   resolution: "@xtuc/long@npm:4.2.2"
   checksum: 8ed0d477ce3bc9c6fe2bf6a6a2cc316bb9c4127c5a7827bae947fa8ec34c7092395c5a283cc300c05b5fa01cbbfa1f938f410a7bf75db7c7846fea41949989ec
+  languageName: node
+  linkType: hard
+
+"Base64@npm:~0.2.0":
+  version: 0.2.1
+  resolution: "Base64@npm:0.2.1"
+  checksum: 7c47e801b52cb9c963ee2cfb9284fbef8a6a34d3bbc5f7503b186ab5fb3a77e3f4a321f14ef20a6b2270d6cc3c89a2a349a538c4690abd2077bbe7caef10272d
   languageName: node
   linkType: hard
 
@@ -12107,6 +12118,16 @@ __metadata:
     deep-equal: ~1.0.1
     http-errors: ~1.8.0
   checksum: 69c9b3c14cf8b2822916360a365089ce936c883c49068f91c365eccba5c141a9964d19fdda589150a480013bf503bf37d8936c732e9635819339e730ab0e7527
+  languageName: node
+  linkType: hard
+
+"http-browserify@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "http-browserify@npm:1.7.0"
+  dependencies:
+    Base64: ~0.2.0
+    inherits: ~2.0.1
+  checksum: 7891aee4a55a0182bcdd8cd59f1d154a8f9b284e006bced7fbf5e9ae2e6762ec6c7ade7742952c509503f23b2b9b94c791a14a77fc85881aa2c51b3b010d029b
   languageName: node
   linkType: hard
 
