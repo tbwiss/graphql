@@ -3182,8 +3182,8 @@ __metadata:
   dependencies:
     "@neo4j-ndl/base": 0.15.1
     "@neo4j-ndl/react": 0.16.2
-    "@neo4j/graphql": 3.14.1
-    "@neo4j/introspector": 1.0.2
+    "@neo4j/graphql": "workspace:*"
+    "@neo4j/introspector": "workspace:*"
     "@playwright/test": 1.29.0
     "@rollup/plugin-node-resolve": ^15.0.1
     "@tsconfig/create-react-app": 1.0.3
@@ -3242,7 +3242,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neo4j/graphql@3.14.1, @neo4j/graphql@^3.1.0, @neo4j/graphql@^3.13.0, @neo4j/graphql@^3.14.0, @neo4j/graphql@^3.14.1, @neo4j/graphql@^3.5.0, @neo4j/graphql@^3.8.0, @neo4j/graphql@workspace:packages/graphql":
+"@neo4j/graphql@^3.1.0, @neo4j/graphql@^3.13.0, @neo4j/graphql@^3.14.0, @neo4j/graphql@^3.14.1, @neo4j/graphql@^3.5.0, @neo4j/graphql@^3.8.0, @neo4j/graphql@workspace:*, @neo4j/graphql@workspace:packages/graphql":
   version: 0.0.0-use.local
   resolution: "@neo4j/graphql@workspace:packages/graphql"
   dependencies:
@@ -3302,7 +3302,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neo4j/introspector@1.0.2, @neo4j/introspector@workspace:packages/introspector":
+"@neo4j/introspector@workspace:*, @neo4j/introspector@workspace:packages/introspector":
   version: 0.0.0-use.local
   resolution: "@neo4j/introspector@workspace:packages/introspector"
   dependencies:

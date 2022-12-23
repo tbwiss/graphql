@@ -22,7 +22,7 @@ import { App } from "./App";
 
 const container = document.getElementById("root");
 
-// @ts-ignore - types are currently missing in @types/react-dom
+// @ts-ignore - types are currently missing in @types/react-dom - ff
 const root = ReactDOM.createRoot(container);
 
 root.render(<App />);

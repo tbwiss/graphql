@@ -10,25 +10,21 @@ export default defineConfig({
     },
     plugins: [react()],
     server: {
-        port: 4141,
+        port: 4242,
     },
     base: "./",
-    // esbuild: {
-    //     target: "es2021",
-    // },
-    // optimizeDeps: {
-    //     esbuildOptions: {
-    //         // mainFields: ["module", "main"],
-    //         resolveExtensions: [".ts", ".tsx", ".mjs", ".json", ".js"],
+    // resolve: {
+    //     alias: {
+    //         "@neo4j/graphql": path.resolve(__dirname, "../graphql/src/index.ts"),
+    //         // '/@linked/my-shared-components/': path.dirname(require.resolve('my-shared-components/src/index.ts'))
     //     },
     // },
-    // resolve: {
-    //     extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
-    // },
+    optimizeDeps: {
+        include: ["@neo4j/graphql", "@neo4j/introspector"],
+    },
     build: {
         rollupOptions: {
             plugins: [nodePolyfills({ include: null })],
         },
-        // target: "es2021",
     },
 });
