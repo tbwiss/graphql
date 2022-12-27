@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import nodePolyfills from "rollup-plugin-polyfill-node";
+// import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 // import { nodeResolve } from "@rollup/plugin-node-resolve";
 import react from "@vitejs/plugin-react";
 
@@ -22,7 +23,6 @@ export default defineConfig({
     resolve: {
         alias: {
             path: "path-browserify",
-            // http: "https",
             process: "process/browser",
             stream: "stream-browserify",
             zlib: "browserify-zlib",
