@@ -24,6 +24,7 @@ export default defineConfig({
         alias: {
             path: "path-browserify",
             process: "process/browser",
+            http: "http-browserify",
             stream: "stream-browserify",
             zlib: "browserify-zlib",
             util: "util/",
@@ -34,9 +35,9 @@ export default defineConfig({
     optimizeDeps: {
         include: ["@neo4j/graphql", "@neo4j/introspector"],
     },
-    build: {
-        rollupOptions: {
-            plugins: [nodePolyfills({ include: null })],
-        },
-    },
+    // build: {
+    //     rollupOptions: {
+    //         plugins: [nodePolyfills({ include: null })],
+    //     },
+    // },
 });
