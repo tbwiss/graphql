@@ -163,7 +163,7 @@ export const SchemaEditor = ({
     }, [appsettings.showLintMarkers]);
 
     return (
-        <div className="rounded-b-xl" style={{ width: "100%", height: "100%" }}>
+        <div className="rounded-b-xl" style={{ width: "100%", height: "50%" }}>
             <FileName
                 extension={Extension.GRAPHQL}
                 name="type-definitions"

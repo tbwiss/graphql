@@ -20,7 +20,8 @@
 import { useCallback, useContext, useRef, useState } from "react";
 import { Neo4jGraphQL } from "@neo4j/graphql";
 import { toGraphQLTypeDefs } from "@neo4j/introspector";
-import { Alert } from "@neo4j-ndl/react";
+import { Alert, Button } from "@neo4j-ndl/react";
+import { BasicNevadaWrapper } from "@neo4j-nevada/react";
 import { GraphQLError, GraphQLSchema } from "graphql";
 import * as neo4j from "neo4j-driver";
 import { EditorFromTextArea } from "codemirror";
@@ -54,6 +55,8 @@ export interface Props {
     onChange: (schema: GraphQLSchema) => void;
 }
 
+const initialGraph = { nodes: [], rels: [] };
+
 export const SchemaView = ({ hasSchema, onChange }: Props) => {
     const auth = useContext(AuthContext);
     const settings = useContext(SettingsContext);
@@ -68,6 +71,56 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
     const [constraintState, setConstraintState] = useState<string | null>(Storage.retrieve(LOCAL_STATE_CONSTRAINT));
     const [favorites, setFavorites] = useState<Favorite[] | null>(Storage.retrieveJSON(LOCAL_STATE_FAVORITES));
     const showRightPanel = settings.isShowHelpDrawer || settings.isShowSettingsDrawer;
+
+    const [graph, setGraph] = useState<any>(initialGraph);
+
+    const viz = () => {
+        const typeDefs = refForEditorMirror.current?.getValue();
+        if (typeDefs) {
+            try {
+                const options = {
+                    typeDefs,
+                };
+
+                const neoSchema = new Neo4jGraphQL(options);
+
+                neoSchema
+                    .getSchema()
+                    .then(() => {
+                        if (!neoSchema) {
+                            console.log("no neoSchema");
+                            return;
+                        }
+
+                        const nodes: any = [];
+                        const rels: any = [];
+                        neoSchema.nodes.forEach((node) => {
+                            nodes.push({
+                                id: node.name || "",
+                                caption: node.getMainLabel() || "",
+                            });
+
+                            node.relationFields.forEach((relField) => {
+                                const storedRelTypes = rels.map((r) => r.caption);
+                                if (!storedRelTypes.includes(relField.type)) {
+                                    rels.push({
+                                        id: relField.fieldName,
+                                        caption: relField.type,
+                                        from: relField.typeMeta.name,
+                                        to: node.name,
+                                    });
+                                }
+                            });
+                        });
+
+                        setGraph({ nodes, rels });
+                    })
+                    .catch((e) => console.log("dd", e));
+            } catch (error) {
+                console.log("setInterval err: ", error);
+            }
+        }
+    };
 
     const formatTheCode = (): void => {
         if (!refForEditorMirror.current) return;
@@ -232,6 +285,34 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
                                 introspect={onClickIntrospect}
                                 saveAsFavorite={saveAsFavorite}
                             />
+
+                            <div className="w-30 mt-20">
+                                <Button
+                                    aria-label="Generate type definitions"
+                                    className="mr-2"
+                                    color="primary"
+                                    fill="outlined"
+                                    buttonSize="small"
+                                    onClick={viz}
+                                >
+                                    Visualize
+                                </Button>
+                            </div>
+                            <div
+                                style={{
+                                    marginTop: 30,
+                                    borderRadius: 20,
+                                    height: 400,
+                                    border: "1px solid grey",
+                                }}
+                            >
+                                <BasicNevadaWrapper
+                                    nevadaOptions={{ useWebGL: false, initialZoom: 2 }}
+                                    nodes={graph.nodes}
+                                    rels={graph.rels}
+                                />
+                            </div>
+
                             {!appSettings.hideProductUsageMessage ? (
                                 <Alert
                                     className="absolute bottom-7 ml-4 w-[57rem] z-40"
