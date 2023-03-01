@@ -295,15 +295,15 @@ export const SchemaView = ({ hasSchema, onChange }: Props) => {
                                     buttonSize="small"
                                     onClick={viz}
                                 >
-                                    Visualize
+                                    Visualize type definitions
                                 </Button>
                             </div>
                             <div
                                 style={{
                                     marginTop: 30,
-                                    borderRadius: 20,
-                                    height: 400,
-                                    border: "1px solid grey",
+                                    borderRadius: 15,
+                                    height: 500,
+                                    border: "1px solid #c7c6c5",
                                 }}
                             >
                                 <BasicNevadaWrapper
