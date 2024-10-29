@@ -26,7 +26,7 @@ describe("Plural directive", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Tech @plural(value: "Techs") {
+            type Tech @plural(value: "Techs") @node {
                 name: String
             }
         `;
@@ -143,7 +143,7 @@ describe("Plural directive", () => {
     test("Delete Tech with plural techs using aggregation", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deleteTechs(where: { name: "Matrix" }) {
+                deleteTechs(where: { name_EQ: "Matrix" }) {
                     nodesDeleted
                 }
             }

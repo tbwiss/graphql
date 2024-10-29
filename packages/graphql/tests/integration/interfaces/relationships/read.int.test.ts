@@ -38,12 +38,12 @@ describe("interface relationships", () => {
                 title: String!
             }
 
-            type ${typeMovie} implements Production {
+            type ${typeMovie} implements Production @node {
                 title: String!
                 runtime: Int!
             }
 
-            type ${typeSeries} implements Production {
+            type ${typeSeries} implements Production @node {
                 title: String!
                 episodes: Int!
             }
@@ -52,7 +52,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${typeActor} {
+            type ${typeActor} @node {
                 name: String!
                 currentlyActingIn: Production @relationship(type: "CURRENTLY_ACTING_IN", direction: OUT)
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -90,7 +90,7 @@ describe("interface relationships", () => {
 
         const query = `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
                     actedIn {
                         title
@@ -173,9 +173,9 @@ describe("interface relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
-                    actedIn(options: { sort: [{ title: DESC }] }) {
+                    actedIn(sort: [{ title: DESC }]) {
                         title
                         ... on ${typeMovie} {
                             runtime
@@ -241,7 +241,7 @@ describe("interface relationships", () => {
 
         const query = `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
                     currentlyActingIn {
                         title
@@ -313,9 +313,9 @@ describe("interface relationships", () => {
 
         const query = `
             query Actors($name: String, $title: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
-                    actedIn(where: { title: $title }) {
+                    actedIn(where: { title_EQ: $title }) {
                         title
                         ... on ${typeMovie} {
                             runtime

@@ -31,17 +31,17 @@ describe("https://github.com/neo4j/graphql/issues/4239", () => {
         Person = testHelper.createUniqueType("Person");
 
         const typeDefs = `
-                type ${Movie.name}
+                type ${Movie.name} @node
                 @authorization(
                     validate: [
-                        { when: [BEFORE], where: { node: { directorConnection: { node: { id: "$jwt.sub" } } } } }
+                        { when: [BEFORE], where: { node: { directorConnection_SOME: { node: { id_EQ: "$jwt.sub" } } } } }
                     ]
                 ) {
                 title: String
                 director: [${Person.name}!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type ${Person.name} {
+            type ${Person.name} @node {
                 id: ID
             }
         `;

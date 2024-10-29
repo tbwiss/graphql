@@ -28,13 +28,13 @@ describe("Cypher Auth Projection", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 id: ID
                 name: String
             }
 
             extend type User {
-                id: ID @authorization(validate: [{ when: BEFORE, where: { node: { id: "$jwt.sub" } } }])
+                id: ID @authorization(validate: [{ when: BEFORE, where: { node: { id_EQ: "$jwt.sub" } } }])
             }
         `;
 

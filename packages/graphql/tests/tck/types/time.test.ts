@@ -18,7 +18,7 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("Cypher Time", () => {
     let typeDefs: string;
@@ -26,7 +26,7 @@ describe("Cypher Time", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 id: ID
                 time: Time
             }
@@ -40,7 +40,7 @@ describe("Cypher Time", () => {
     test("Simple Read", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { time: "12:00:00" }) {
+                movies(where: { time_EQ: "12:00:00" }) {
                     time
                 }
             }

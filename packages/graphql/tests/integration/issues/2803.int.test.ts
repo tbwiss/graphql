@@ -99,12 +99,12 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
         Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "${ActedIn}")
                 released: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "${ActedIn}")
                 name: String
             }
@@ -189,7 +189,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                             actors_ALL: {
                                 moviesAggregate: { count_GT: 1 }
                             },
-                            actorsAggregate: { count: 1 }
+                            actorsAggregate: { count_EQ: 1 }
                         }
                     }
                 ) {
@@ -241,13 +241,13 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                         actors_SINGLE: {
                             movies_SOME: {
                                 actors_ALL: { moviesAggregate: { count_GT: 1 } }
-                                actorsAggregate: { node: { name_AVERAGE_LT: 10 } }
+                                actorsAggregate: { node: { name_AVERAGE_LENGTH_LT: 10 } }
                             }
                             moviesAggregate: { node: { released_AVERAGE_EQUAL: ${
                                 (movieInput2.released + movieInput1.released) / 2
                             } } }
                         }
-                        actorsAggregate: { node: { name_AVERAGE_GTE: 3 } }
+                        actorsAggregate: { node: { name_AVERAGE_LENGTH_GTE: 3 } }
                     }
                 ) {
                     released
@@ -301,7 +301,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                                     moviesAggregate: { count_GT: 1 }
                                 }
                             },
-                            actorsAggregate: { count: 1 }
+                            actorsAggregate: { count_EQ: 1 }
                         }
                     }
                 ) {
@@ -365,7 +365,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                                                 moviesAggregate: { count_GT: 1 }
                                             }
                                         }
-                                        actorsAggregate: { node: { name_AVERAGE_LT: 10 } }
+                                        actorsAggregate: { node: { name_AVERAGE_LENGTH_LT: 10 } }
                                     }
                                 }
                                 moviesAggregate: { node: { released_AVERAGE_EQUAL: ${
@@ -373,7 +373,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                                 } } }
                             }
                         }
-                        actorsAggregate: { node: { name_AVERAGE_GTE: 3 } }
+                        actorsAggregate: { node: { name_AVERAGE_LENGTH_GTE: 3 } }
                     }
                 ) {
                     released
@@ -542,7 +542,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                             node: {
                                 actorsConnection_SOME: {
                                     node: { 
-                                        name: "${actorInput4.name}"
+                                        name_EQ: "${actorInput4.name}"
                                         moviesAggregate: { count_GT: 1 }
                                     }
                                     edge: {
@@ -573,7 +573,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                     where: {
                         movies_ALL: {
                             actors_SOME: {
-                                name: "${actorInput4.name}"
+                                name_EQ: "${actorInput4.name}"
                                 moviesAggregate: { count_GT: 1 }
                             }
                         }
@@ -600,7 +600,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                         movies_ALL: {
                             actors_SOME: {
                                 OR: [
-                                    { name: "${actorInput4.name}" }
+                                    { name_EQ: "${actorInput4.name}" }
                                     { moviesAggregate: { count_GT: 1 } }
                                 ]
 
@@ -629,7 +629,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                         movies_ALL: {
                             actors_SOME: {
                                 AND: [
-                                    { name: "${actorInput4.name}" }
+                                    { name_EQ: "${actorInput4.name}" }
                                     { moviesAggregate: { count_GT: 1 } }
                                 ]
 
@@ -698,7 +698,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                             node: {
                                 actorsConnection_SOME: {
                                     node: { 
-                                        name: "${actorInput4.name}"
+                                        name_EQ: "${actorInput4.name}"
                                         moviesAggregate: { count_GT: 1 }
                                     }
                                     edge: {

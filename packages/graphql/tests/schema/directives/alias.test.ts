@@ -25,13 +25,13 @@ import { Neo4jGraphQL } from "../../../src";
 describe("Alias", () => {
     test("Custom Directive Simple", async () => {
         const typeDefs = gql`
-            type Actor {
+            type Actor @node {
                 name: String!
                 city: String @alias(property: "cityPropInDb")
                 actedIn: [Movie!]! @relationship(direction: OUT, type: "ACTED_IN", properties: "ActorActedInProps")
             }
 
-            type Movie {
+            type Movie @node {
                 title: String!
                 rating: Float @alias(property: "ratingPropInDb")
             }
@@ -51,9 +51,9 @@ describe("Alias", () => {
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-              actedInAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieActedInAggregationSelection
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieActedInAggregationSelection
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               city: String
               name: String!
             }
@@ -62,7 +62,8 @@ describe("Alias", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -96,9 +97,7 @@ describe("Alias", () => {
               NOT: ActorActedInConnectionWhere
               OR: [ActorActedInConnectionWhere!]
               edge: ActorActedInPropsWhere
-              edge_NOT: ActorActedInPropsWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: MovieWhere
-              node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ActorActedInCreateFieldInput {
@@ -128,11 +127,6 @@ describe("Alias", () => {
               rating_AVERAGE_GTE: Float
               rating_AVERAGE_LT: Float
               rating_AVERAGE_LTE: Float
-              rating_EQUAL: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              rating_GT: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              rating_GTE: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              rating_LT: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              rating_LTE: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               rating_MAX_EQUAL: Float
               rating_MAX_GT: Float
               rating_MAX_GTE: Float
@@ -148,41 +142,21 @@ describe("Alias", () => {
               rating_SUM_GTE: Float
               rating_SUM_LT: Float
               rating_SUM_LTE: Float
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             \\"\\"\\"
@@ -198,51 +172,26 @@ describe("Alias", () => {
               AND: [ActorActedInPropsAggregationWhereInput!]
               NOT: ActorActedInPropsAggregationWhereInput
               OR: [ActorActedInPropsAggregationWhereInput!]
-              character_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               character_AVERAGE_LENGTH_EQUAL: Float
               character_AVERAGE_LENGTH_GT: Float
               character_AVERAGE_LENGTH_GTE: Float
               character_AVERAGE_LENGTH_LT: Float
               character_AVERAGE_LENGTH_LTE: Float
-              character_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              character_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              character_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              character_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               character_LONGEST_LENGTH_EQUAL: Int
               character_LONGEST_LENGTH_GT: Int
               character_LONGEST_LENGTH_GTE: Int
               character_LONGEST_LENGTH_LT: Int
               character_LONGEST_LENGTH_LTE: Int
-              character_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              character_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              character_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               character_SHORTEST_LENGTH_EQUAL: Int
               character_SHORTEST_LENGTH_GT: Int
               character_SHORTEST_LENGTH_GTE: Int
               character_SHORTEST_LENGTH_LT: Int
               character_SHORTEST_LENGTH_LTE: Int
-              character_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              character_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               screenTime_AVERAGE_EQUAL: Float
               screenTime_AVERAGE_GT: Float
               screenTime_AVERAGE_GTE: Float
               screenTime_AVERAGE_LT: Float
               screenTime_AVERAGE_LTE: Float
-              screenTime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               screenTime_MAX_EQUAL: Int
               screenTime_MAX_GT: Int
               screenTime_MAX_GTE: Int
@@ -281,24 +230,19 @@ describe("Alias", () => {
               AND: [ActorActedInPropsWhere!]
               NOT: ActorActedInPropsWhere
               OR: [ActorActedInPropsWhere!]
-              character: String
+              character: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               character_CONTAINS: String
               character_ENDS_WITH: String
+              character_EQ: String
               character_IN: [String!]
-              character_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              character_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              character_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              character_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              character_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               character_STARTS_WITH: String
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              screenTime_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type ActorActedInRelationship {
@@ -327,10 +271,6 @@ describe("Alias", () => {
               name: StringAggregateSelection!
             }
 
-            input ActorConnectInput {
-              actedIn: [ActorActedInConnectFieldInput!]
-            }
-
             input ActorCreateInput {
               actedIn: ActorActedInFieldInput
               city: String
@@ -339,10 +279,6 @@ describe("Alias", () => {
 
             input ActorDeleteInput {
               actedIn: [ActorActedInDeleteFieldInput!]
-            }
-
-            input ActorDisconnectInput {
-              actedIn: [ActorActedInDisconnectFieldInput!]
             }
 
             type ActorEdge {
@@ -375,10 +311,6 @@ describe("Alias", () => {
               sort: [ActorSort!]
             }
 
-            input ActorRelationInput {
-              actedIn: [ActorActedInCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -397,9 +329,7 @@ describe("Alias", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              actedIn: MovieWhere @deprecated(reason: \\"Use \`actedIn_SOME\` instead.\\")
               actedInAggregate: ActorActedInAggregateInput
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -408,7 +338,6 @@ describe("Alias", () => {
               Return Actors where none of the related ActorActedInConnections match this filter
               \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -421,30 +350,21 @@ describe("Alias", () => {
               actedIn_ALL: MovieWhere
               \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
               actedIn_NONE: MovieWhere
-              actedIn_NOT: MovieWhere @deprecated(reason: \\"Use \`actedIn_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
               actedIn_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               actedIn_SOME: MovieWhere
-              city: String
+              city: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               city_CONTAINS: String
               city_ENDS_WITH: String
+              city_EQ: String
               city_IN: [String]
-              city_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              city_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              city_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              city_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              city_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               city_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -463,7 +383,6 @@ describe("Alias", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -477,7 +396,6 @@ describe("Alias", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -551,23 +469,18 @@ describe("Alias", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              rating: Float
+              rating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              rating_EQ: Float
               rating_GT: Float
               rating_GTE: Float
               rating_IN: [Float]
               rating_LT: Float
               rating_LTE: Float
-              rating_NOT: Float @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              rating_NOT_IN: [Float] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -582,7 +495,7 @@ describe("Alias", () => {
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
               deleteMovies(where: MovieWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
             }
 
@@ -595,12 +508,12 @@ describe("Alias", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -625,7 +538,6 @@ describe("Alias", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

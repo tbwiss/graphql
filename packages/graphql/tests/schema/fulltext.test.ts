@@ -26,6 +26,7 @@ describe("@fulltext schema", () => {
     test("fulltext", async () => {
         const typeDefs = gql`
             type Movie
+                @node
                 @fulltext(
                     indexes: [
                         { name: "MovieTitle", fields: ["title"] }
@@ -50,7 +51,6 @@ describe("@fulltext schema", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -64,7 +64,6 @@ describe("@fulltext schema", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -153,25 +152,17 @@ describe("@fulltext schema", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String
+              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
+              description_EQ: String
               description_IN: [String]
-              description_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              description_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              description_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              description_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              description_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               description_STARTS_WITH: String
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -201,7 +192,10 @@ describe("@fulltext schema", () => {
                 Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
                 \\"\\"\\"
                 fulltext: MovieFulltext
-                options: MovieOptions
+                limit: Int
+                offset: Int
+                options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\")
+                sort: [MovieSort!]
                 where: MovieWhere
               ): [Movie!]!
               moviesAggregate(
@@ -218,7 +212,7 @@ describe("@fulltext schema", () => {
                 Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
                 \\"\\"\\"
                 fulltext: MovieFulltext
-                sort: [MovieSort]
+                sort: [MovieSort!]
                 where: MovieWhere
               ): MoviesConnection!
               \\"\\"\\"
@@ -248,7 +242,6 @@ describe("@fulltext schema", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

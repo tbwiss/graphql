@@ -31,7 +31,7 @@ describe("LocalDateTime", () => {
         Movie = testHelper.createUniqueType("Movie");
 
         const typeDefs = /* GraphQL */ `
-        type ${Movie} {
+        type ${Movie} @node {
             id: ID!
             localDT: LocalDateTime
             localDTs: [LocalDateTime!]
@@ -168,7 +168,7 @@ describe("LocalDateTime", () => {
 
             const mutation = /* GraphQL */ `
                     mutation ($id: ID!, $localDT: LocalDateTime) {
-                        ${Movie.operations.update}(where: { id: $id }, update: { localDT: $localDT }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { localDT: $localDT }) {
                             ${Movie.plural} {
                                 id
                                 localDT
@@ -224,7 +224,7 @@ describe("LocalDateTime", () => {
 
             const query = /* GraphQL */ `
                 query ($localDT: LocalDateTime!) {
-                    ${Movie.plural}(where: { localDT: $localDT }) {
+                    ${Movie.plural}(where: { localDT_EQ: $localDT }) {
                         id
                         localDT
                     }
@@ -302,7 +302,7 @@ describe("LocalDateTime", () => {
 
                 const query = /* GraphQL */ `
                         query ($where: ${Movie.name}Where!) {
-                            ${Movie.plural}(where: $where, options: { sort: [{ localDT: ASC }] }) {
+                            ${Movie.plural}(where: $where, sort: [{ localDT: ASC }]) {
                                 id
                                 localDT
                             }
@@ -416,7 +416,7 @@ describe("LocalDateTime", () => {
                         query ($futureId: ID!, $presentId: ID!, $pastId: ID!, $sort: SortDirection!) {
                             ${Movie.plural}(
                                 where: { id_IN: [$futureId, $presentId, $pastId] }
-                                options: { sort: [{ localDT: $sort }] }
+                                sort: [{ localDT: $sort }] 
                             ) {
                                 id
                                 localDT

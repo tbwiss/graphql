@@ -18,19 +18,19 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("https://github.com/neo4j/graphql/issues/2925", () => {
     let neoSchema: Neo4jGraphQL;
 
     const typeDefs = /* GraphQL */ `
-        type Group {
+        type Group @node {
             name: String
             hasGroupUser: [User!]! @relationship(type: "HAS_GROUP", direction: IN)
             hasRequiredGroupUser: [User!]! @relationship(type: "HAS_REQUIRED_GROUP", direction: IN)
         }
 
-        type User {
+        type User @node {
             name: String
             hasGroup: Group @relationship(type: "HAS_GROUP", direction: OUT)
             hasRequiredGroup: Group! @relationship(type: "HAS_REQUIRED_GROUP", direction: OUT)
@@ -101,7 +101,7 @@ describe("https://github.com/neo4j/graphql/issues/2925", () => {
     test("should query nested relationship", async () => {
         const query = /* GraphQL */ `
             query Query {
-                groups(where: { hasGroupUser: { hasGroup: { name_IN: ["Group A"] } } }) {
+                groups(where: { hasGroupUser_SOME: { hasGroup: { name_IN: ["Group A"] } } }) {
                     name
                 }
             }
@@ -130,7 +130,7 @@ describe("https://github.com/neo4j/graphql/issues/2925", () => {
     test("should query nested required relationship", async () => {
         const query = /* GraphQL */ `
             query Query {
-                groups(where: { hasGroupUser: { hasRequiredGroup: { name_IN: ["Group A"] } } }) {
+                groups(where: { hasGroupUser_SOME: { hasRequiredGroup: { name_IN: ["Group A"] } } }) {
                     name
                 }
             }

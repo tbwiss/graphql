@@ -31,13 +31,13 @@ describe("https://github.com/neo4j/graphql/issues/2262", () => {
         Process = testHelper.createUniqueType("Process");
 
         const typeDefs = `
-            type ${Component} {
+            type ${Component} @node {
                 uuid: String
                 upstreamProcess: ${Process} @relationship(type: "OUTPUT", direction: IN)
                 downstreamProcesses: [${Process}!]! @relationship(type: "INPUT", direction: OUT)
             }
 
-            type ${Process} {
+            type ${Process} @node {
                 uuid: String
                 componentOutputs: [${Component}!]! @relationship(type: "OUTPUT", direction: OUT)
                 componentInputs: [${Component}!]! @relationship(type: "INPUT", direction: IN)
@@ -57,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/2262", () => {
         await testHelper.executeCypher(`CREATE(:${Component} {uuid: "c1"})<-[:OUTPUT]-(:${Process} {uuid: "p1"})`);
         const query = `
             query ComponentsProcesses {
-                ${Component.plural}(where: { uuid: "c1" }) {
+                ${Component.plural}(where: { uuid_EQ: "c1" }) {
                     uuid
                     upstreamProcessConnection {
                         edges {

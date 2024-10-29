@@ -32,12 +32,12 @@ describe("Relationship properties - connect", () => {
         Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -65,7 +65,7 @@ describe("Relationship properties - connect", () => {
                         {
                             title: $movieTitle
                             actors: {
-                                connect: [{ where: { node: { name: $actorName } }, edge: { screenTime: $screenTime } }]
+                                connect: [{ where: { node: { name_EQ: $actorName } }, edge: { screenTime: $screenTime } }]
                             }
                         }
                     ]
@@ -118,8 +118,8 @@ describe("Relationship properties - connect", () => {
         const source = /* GraphQL */ `
             mutation ($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                 ${Movie.operations.update}(
-                    where: { title: $movieTitle }
-                    connect: { actors: { where: { node: { name: $actorName } }, edge: { screenTime: $screenTime } } }
+                    where: { title_EQ: $movieTitle }
+                    update: { actors: { connect: { where: { node: { name_EQ: $actorName } }, edge: { screenTime: $screenTime } } } }
                 ) {
                     ${Movie.plural} {
                         title

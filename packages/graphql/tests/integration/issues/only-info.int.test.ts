@@ -30,7 +30,7 @@ describe("https://github.com/neo4j/graphql/issues/567", () => {
         Movie = testHelper.createUniqueType("Movie");
 
         typeDefs = `
-        type ${Movie} {
+        type ${Movie} @node {
             id: ID!
             title: String!
         }
@@ -58,7 +58,7 @@ describe("https://github.com/neo4j/graphql/issues/567", () => {
 
         const query = `
             mutation {
-                ${Movie.operations.update}(where: { id: "${movieId}" }, update: { title: "${newTitle}" }) {
+                ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: { title: "${newTitle}" }) {
                     info {
                         nodesCreated
                         nodesDeleted

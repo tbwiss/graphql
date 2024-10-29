@@ -35,7 +35,7 @@ describe("interface relationships", () => {
         Series = testHelper.createUniqueType("Series");
 
         const typeDefs = /* GraphQL */ `
-            type ${Episode} {
+            type ${Episode} @node {
                 runtime: Int!
                 series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -45,13 +45,13 @@ describe("interface relationships", () => {
                 actors: [${Actor}!]! @declareRelationship
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: [${Episode}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +61,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -105,9 +105,9 @@ describe("interface relationships", () => {
                 $seriesScreenTime: Int!
             ) {
                 ${Actor.operations.update}(
-                    where: { name: $name }
-                    create: {
-                        actedIn: [
+                    where: { name_EQ: $name }
+                    update: {
+                        actedIn: { create: [
                             {
                                 edge: { screenTime: $movieScreenTime }
                                 node: { ${Movie}: { title: $movieTitle, runtime: $movieRuntime } }
@@ -116,7 +116,7 @@ describe("interface relationships", () => {
                                 edge: { screenTime: $seriesScreenTime }
                                 node: { ${Series}: { title: $seriesTitle, episodes: { create: [{ node: { runtime: 123 } }] } } }
                             }
-                        ]
+                        ]}
                     }
                 ) {
                     ${Actor.plural} {
@@ -206,9 +206,9 @@ describe("interface relationships", () => {
                 $seriesScreenTime: Int!
             ) {
                 ${Actor.operations.update}(
-                    where: { name: $name1 }
-                    create: {
-                        actedIn: [
+                    where: { name_EQ: $name1 }
+                    update: {
+                        actedIn: { create: [
                             {
                                 edge: { screenTime: $movieScreenTime }
                                 node: {
@@ -222,7 +222,7 @@ describe("interface relationships", () => {
                                 }
                             }
                             { edge: { screenTime: $seriesScreenTime }, node: { ${Series}: { title: $seriesTitle, episodes: { create: [{ node: { runtime: 123 } }] }} } }
-                        ]
+                        ]}
                     }
                 ) {
                     ${Actor.plural} {

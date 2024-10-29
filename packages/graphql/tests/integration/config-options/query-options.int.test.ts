@@ -34,13 +34,13 @@ describe("query options", () => {
         Actor = testHelper.createUniqueType("Actor");
         Movie = testHelper.createUniqueType("Movie");
 
-        const typeDefs = `
-            type ${Actor} {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
     
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -63,7 +63,7 @@ describe("query options", () => {
 
         const query = `
             query($id: ID){
-                ${Movie.plural}(where: {id: $id}){
+                ${Movie.plural}(where: {id_EQ: $id}){
                     id
                 }
             }

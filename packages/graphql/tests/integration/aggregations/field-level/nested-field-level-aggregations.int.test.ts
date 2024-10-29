@@ -32,12 +32,12 @@ describe("Nested Field Level Aggregations", () => {
         typeActor = testHelper.createUniqueType("Actor");
 
         typeDefs = `
-        type ${typeMovie.name} {
+        type ${typeMovie.name} @node {
             title: String
             ${typeActor.plural}: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties:"ActedIn")
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
             name: String
             age: Int
             born: DateTime
@@ -66,7 +66,7 @@ describe("Nested Field Level Aggregations", () => {
     test("count actors in movies in actors", async () => {
         const query = `
         query Query {
-          actors: ${typeActor.plural}(where: {name: "Arnold"}) {
+          actors: ${typeActor.plural}(where: {name_EQ: "Arnold"}) {
             name
             movies: ${typeMovie.plural} {
               title

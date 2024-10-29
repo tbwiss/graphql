@@ -31,14 +31,14 @@ describe("https://github.com/neo4j/graphql/issues/1687", () => {
                 title: String
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 id: ID
                 title: String
                 actorCount: Int
                 genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type Genre {
+            type Genre @node {
                 name: String
                 movies: [Production!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
@@ -52,7 +52,7 @@ describe("https://github.com/neo4j/graphql/issues/1687", () => {
     test("should be able to return all the genres related to the Matrix movie using connection fields", async () => {
         const query = /* GraphQL */ `
             query Genres {
-                genres(where: { moviesConnection_ALL: { node: { title: "Matrix" } } }) {
+                genres(where: { moviesConnection_ALL: { node: { title_EQ: "Matrix" } } }) {
                     name
                 }
             }

@@ -30,13 +30,13 @@ describe("Filtering Operations", () => {
         movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-        type ${personType} {
+        type ${personType} @node {
             name: String!
             age: Int!
             movies: [${movieType}!]! @relationship(type: "ACTED_IN", direction: IN)
         }
 
-        type ${movieType} {
+        type ${movieType} @node {
             title: String!
             released: Int!
             actors: [${personType}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -59,7 +59,7 @@ describe("Filtering Operations", () => {
     it("Combine AND and OR operations", async () => {
         const query = `
             query {
-                ${movieType.plural}(where: { OR: [{ title: "The Italian Job", released: 2003 }, { title: "The Lion King" }] }) {
+                ${movieType.plural}(where: { OR: [{ title_EQ: "The Italian Job", released_EQ: 2003 }, { title_EQ: "The Lion King" }] }) {
                     title
                     released
                 }

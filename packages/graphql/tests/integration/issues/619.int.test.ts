@@ -30,14 +30,14 @@ describe("https://github.com/neo4j/graphql/issues/619", () => {
         FooIsARandomName = testHelper.createUniqueType("FooIsARandomName");
         BarIsACoolName = testHelper.createUniqueType("BarIsACoolName");
         typeDefs = `
-            type ${FooIsARandomName} {
+            type ${FooIsARandomName} @node {
                 id: ID @unique
                 Name: String
                 Age: Int
                 DrinksAt: ${BarIsACoolName} @relationship(type: "DRINKS_AT", direction: OUT)
             }
 
-            type ${BarIsACoolName} {
+            type ${BarIsACoolName} @node {
                 id: ID @unique
                 Adress: String
                 Customers: [${FooIsARandomName}!]! @relationship(type: "DRINKS_AT", direction: IN)
@@ -58,7 +58,7 @@ describe("https://github.com/neo4j/graphql/issues/619", () => {
                     input: {
                         DrinksAt: {
                             connectOrCreate: {
-                                where: { node: { id: "b50bd49b-9295-4749-9c0e-91d1e16df0b5" } }
+                                where: { node: { id_EQ: "b50bd49b-9295-4749-9c0e-91d1e16df0b5" } }
                                 onCreate: { node: { Adress: "Some Street" } }
                             }
                         }

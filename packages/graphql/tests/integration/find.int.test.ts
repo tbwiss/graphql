@@ -39,12 +39,12 @@ describe("find", () => {
 
     test("should find Movie by id", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -59,7 +59,7 @@ describe("find", () => {
 
         const query = `
             query($id: ID){
-                ${Movie.plural}(where: {id: $id}){
+                ${Movie.plural}(where: {id_EQ: $id}){
                     id
                 }
             }
@@ -82,12 +82,12 @@ describe("find", () => {
 
     test("should find Move by id and limit", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -100,9 +100,9 @@ describe("find", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             query($id: ID){
-                ${Movie.plural}(where: {id: $id}, options: {limit: 2}){
+                ${Movie.plural}(where: {id_EQ: $id}, limit: 2 ){
                     id
                 }
             }
@@ -126,12 +126,12 @@ describe("find", () => {
 
     test("should find Movie IN ids", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -178,12 +178,12 @@ describe("find", () => {
 
     test("should find Movie IN ids with one other param", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -207,7 +207,7 @@ describe("find", () => {
 
         const query = `
             query($ids: [ID!], $title: String){
-                ${Movie.plural}(where: {id_IN: $ids, title: $title}){
+                ${Movie.plural}(where: {id_IN: $ids, title_EQ: $title}){
                     id
                     title
                 }
@@ -235,12 +235,12 @@ describe("find", () => {
 
     test("should find Movie IN id and many Movie.actor IN id", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 id: ID!
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -367,11 +367,11 @@ describe("find", () => {
 
     test("should find Movie and populate nested cypher query", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 id: ID
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 actors(actorIds: [ID!]): [${Actor}!]! @cypher(
                    statement:  """
@@ -453,12 +453,12 @@ describe("find", () => {
 
     test("should use OR and find Movie by id or title", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -493,7 +493,7 @@ describe("find", () => {
         );
 
         const result = await testHelper.executeGraphQL(query, {
-            variableValues: { movieWhere: { OR: [{ title, id }] } },
+            variableValues: { movieWhere: { OR: [{ title_EQ: title, id_EQ: id }] } },
         });
 
         expect(result.errors).toBeFalsy();

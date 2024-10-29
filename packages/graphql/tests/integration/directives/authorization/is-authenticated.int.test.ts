@@ -20,7 +20,6 @@
 import { IncomingMessage } from "http";
 import { Socket } from "net";
 import { generate } from "randomstring";
-import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 import { createBearerToken } from "../../../utils/create-bearer-token";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
@@ -30,12 +29,14 @@ describe("auth/is-authenticated", () => {
 
     let Product: UniqueType;
     let User: UniqueType;
+    let Post: UniqueType;
 
     const secret = "secret";
 
     beforeEach(async () => {
         Product = testHelper.createUniqueType("Product");
         User = testHelper.createUniqueType("User");
+        Post = testHelper.createUniqueType("Post");
         await testHelper.executeCypher(
             `CREATE(p:${Product} {id: "1", name: "Marvin"})
             CREATE(u:${User} {id: "1", password: "dontpanic42", name: "Arthur"})
@@ -50,7 +51,7 @@ describe("auth/is-authenticated", () => {
     describe("read", () => {
         test("should throw if not authenticated type definition", async () => {
             const typeDefs = `
-                type ${Product} @authentication(operations: [READ]) {
+                type ${Product} @authentication(operations: [READ]) @node {
                     id: ID
                     name: String
                 }
@@ -86,7 +87,7 @@ describe("auth/is-authenticated", () => {
 
         test("should not throw if authenticated type definition", async () => {
             const typeDefs = `
-                type ${Product} @authentication(operations: [READ]) {
+                type ${Product} @authentication(operations: [READ]) @node {
                     id: ID
                     name: String
                 }
@@ -121,7 +122,7 @@ describe("auth/is-authenticated", () => {
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
-                type ${Product} @authentication(operations: [READ], jwt: { roles_INCLUDES: "admin" }) {
+                type ${Product} @authentication(operations: [READ], jwt: { roles_INCLUDES: "admin" }) @node {
                     id: ID
                     name: String
                 }
@@ -156,7 +157,7 @@ describe("auth/is-authenticated", () => {
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
-                type ${Product} @authentication(operations: [READ], jwt: { roles_INCLUDES: "admin" }) {
+                type ${Product} @authentication(operations: [READ], jwt: { roles_INCLUDES: "admin" }) @node {
                     id: ID
                     name: String
                 }
@@ -188,7 +189,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on field definition", async () => {
             const typeDefs = `
-                type ${User}  {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [READ]) 
                 }
@@ -226,7 +227,7 @@ describe("auth/is-authenticated", () => {
     describe("create", () => {
         test("should not throw if authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User} @authentication(operations: [CREATE]) {
+                type ${User} @authentication(operations: [CREATE]) @node {
                     id: ID
                     name: String
                 }
@@ -264,7 +265,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} @authentication(operations: [CREATE], jwt: {roles_INCLUDES: "admin"}) {
+                type ${User} @authentication(operations: [CREATE], jwt: {roles_INCLUDES: "admin"}) @node {
                     id: ID
                     name: String
                 }
@@ -298,7 +299,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User} @authentication(operations: [CREATE]) {
+                type ${User} @authentication(operations: [CREATE]) @node {
                     id: ID
                     name: String
                 }
@@ -339,7 +340,7 @@ describe("auth/is-authenticated", () => {
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
-                type ${User} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) {
+                type ${User} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) @node {
                     id: ID
                     name: String
                 }
@@ -373,13 +374,13 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on nested create type", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} @authentication(operations: [CREATE]) {
+                type ${Product} @authentication(operations: [CREATE]) @node {
                     id: ID
                 }   
             `;
@@ -420,13 +421,13 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
                 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) {
+                type ${Product} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) @node {
                     id: ID
                 }   
             `;
@@ -463,13 +464,13 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
                 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) {
+                type ${Product} @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) @node {
                     id: ID
                 }   
             `;
@@ -480,7 +481,6 @@ describe("auth/is-authenticated", () => {
                     authorization: {
                         key: secret,
                     },
-                    subscriptions: new TestSubscriptionsEngine(),
                 },
             });
 
@@ -503,7 +503,7 @@ describe("auth/is-authenticated", () => {
 
         test("should not throw if authenticated on field definition", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [CREATE]) 
                 }
@@ -536,7 +536,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [CREATE], jwt: {roles_INCLUDES: "admin"}) 
                 }
@@ -566,7 +566,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on field definition", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [CREATE]) 
                 }
@@ -604,7 +604,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
             
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) 
                 }
@@ -638,7 +638,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
             
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) 
                 }
@@ -646,7 +646,7 @@ describe("auth/is-authenticated", () => {
 
             await testHelper.initNeo4jGraphQL({
                 typeDefs,
-                features: { authorization: { key: secret }, subscriptions: new TestSubscriptionsEngine() },
+                features: { authorization: { key: secret } },
             });
 
             const query = `
@@ -668,13 +668,13 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on nested create field", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} {
+                type ${Product} @node {
                     id: ID  @authentication(operations: [CREATE]) 
                 }   
             `;
@@ -715,13 +715,13 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} {
+                type ${Product} @node {
                     id: ID  @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) 
                 }   
             `;
@@ -758,13 +758,13 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     products: [${Product}!]! @relationship(type: "HAS_PRODUCT", direction: OUT) 
                 }
 
-                type ${Product} {
+                type ${Product} @node {
                     id: ID  @authentication(operations: [CREATE], jwt: { roles_INCLUDES: "admin" }) 
                 }   
             `;
@@ -775,7 +775,6 @@ describe("auth/is-authenticated", () => {
                     authorization: {
                         key: secret,
                     },
-                    subscriptions: new TestSubscriptionsEngine(),
                 },
             });
 
@@ -800,7 +799,7 @@ describe("auth/is-authenticated", () => {
     describe("update", () => {
         test("should not throw if authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User}  @authentication(operations: [UPDATE])  {
+                type ${User}  @authentication(operations: [UPDATE])  @node {
                     id: ID
                     name: String
                 }
@@ -838,7 +837,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User}  @authentication(operations: [UPDATE], jwt: {roles_INCLUDES: "admin"})  {
+                type ${User}  @authentication(operations: [UPDATE], jwt: {roles_INCLUDES: "admin"})  @node {
                     id: ID
                     name: String
                 }
@@ -872,7 +871,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User}  @authentication(operations: [UPDATE])  {
+                type ${User}  @authentication(operations: [UPDATE])  @node {
                     id: ID
                     name: String
                 }
@@ -913,7 +912,7 @@ describe("auth/is-authenticated", () => {
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
-                type ${User}  @authentication(operations: [UPDATE],  jwt: { roles_INCLUDES: "admin" })  {
+                type ${User}  @authentication(operations: [UPDATE],  jwt: { roles_INCLUDES: "admin" })  @node {
                     id: ID
                     name: String
                 }
@@ -947,7 +946,7 @@ describe("auth/is-authenticated", () => {
 
         test("should not throw if authenticated on field definition", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE]) 
                 }
@@ -985,7 +984,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
         
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE], jwt: {roles_INCLUDES: "admin"}) 
                 }
@@ -1019,7 +1018,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on field definition", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE]) 
                 }
@@ -1060,7 +1059,7 @@ describe("auth/is-authenticated", () => {
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE],  jwt: { roles_INCLUDES: "admin" }) 
                 }
@@ -1098,12 +1097,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1135,7 +1134,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1163,12 +1162,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1200,7 +1199,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1228,12 +1227,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1262,7 +1261,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1286,12 +1285,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1323,7 +1322,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1352,12 +1351,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1386,7 +1385,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1419,12 +1418,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1456,7 +1455,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1484,12 +1483,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1518,7 +1517,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1544,12 +1543,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1581,7 +1580,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1609,12 +1608,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1646,7 +1645,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1674,12 +1673,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1708,7 +1707,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1732,12 +1731,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1769,7 +1768,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1798,12 +1797,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1832,7 +1831,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1865,12 +1864,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1902,7 +1901,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1930,12 +1929,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String  @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -1964,7 +1963,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -1990,12 +1989,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2027,7 +2026,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2055,12 +2054,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2092,7 +2091,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2120,12 +2119,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2154,7 +2153,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2178,12 +2177,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2215,7 +2214,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2244,12 +2243,12 @@ describe("auth/is-authenticated", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2278,7 +2277,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2311,12 +2310,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2348,7 +2347,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2376,12 +2375,12 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -2410,7 +2409,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -2434,7 +2433,7 @@ describe("auth/is-authenticated", () => {
     describe("delete", () => {
         test("should not throw if authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User} @authentication(operations: [DELETE])  {
+                type ${User} @authentication(operations: [DELETE])  @node {
                     id: ID
                     name: String
                 }
@@ -2470,7 +2469,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} @authentication(operations: [DELETE], jwt: {roles_INCLUDES: "admin"})  {
+                type ${User} @authentication(operations: [DELETE], jwt: {roles_INCLUDES: "admin"}) @node {
                     id: ID
                     name: String
                 }
@@ -2502,7 +2501,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on type definition", async () => {
             const typeDefs = `
-                type ${User} @authentication(operations: [DELETE])  {
+                type ${User} @authentication(operations: [DELETE])  @node {
                     id: ID
                     name: String
                 }
@@ -2538,13 +2537,13 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on type definition (with nested delete)", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
-                    posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
+                    posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type Post @authentication(operations: [DELETE]) {
+                type ${Post} @node @authentication(operations: [DELETE]) {
                     id: ID
                     name: String
                 }
@@ -2569,7 +2568,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.delete}(where: {id: "${userId}"}, delete:{posts: {where:{node: { id: "${postId}"}}} }) {
+                    ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{ posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
                     }
                 }
@@ -2596,7 +2595,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} @authentication(operations: [DELETE],  jwt: { roles_INCLUDES: "admin" })  {
+                type ${User} @authentication(operations: [DELETE],  jwt: { roles_INCLUDES: "admin" })  @node {
                     id: ID
                     name: String
                 }
@@ -2632,13 +2631,13 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
-                    posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
+                    posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type Post @authentication(operations: [DELETE],  jwt: { roles_INCLUDES: "admin" }) {
+                type ${Post} @node @authentication(operations: [DELETE],  jwt: { roles_INCLUDES: "admin" }) {
                     id: ID
                     name: String
                 }
@@ -2663,7 +2662,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.delete}(where: {id: "${userId}"}, delete:{posts: {where:{node: { id: "${postId}"}}} }) {
+                    ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
                     }
                 }
@@ -2682,13 +2681,13 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on type definition (with nested delete) on field", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
-                    posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
+                    posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type Post @authentication(operations: [DELETE]) {
+                type ${Post} @node @authentication(operations: [DELETE]) {
                     id: ID 
                     name: String
                 }
@@ -2713,7 +2712,7 @@ describe("auth/is-authenticated", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.delete}(where: {id: "${userId}"}, delete:{posts: {where:{node: { id: "${postId}"}}} }) {
+                    ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{ posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
                     }
                 }
@@ -2722,7 +2721,7 @@ describe("auth/is-authenticated", () => {
             const token = "not valid token";
 
             await testHelper.executeCypher(`
-                    CREATE (:${User} {id: "${userId}"})-[:HAS_POST]->(:Post {id: "${postId}"})
+                    CREATE (:${User} {id: "${userId}"})-[:HAS_POST]->(:${Post} {id: "${postId}"})
                 `);
 
             const socket = new Socket({ readable: true });
@@ -2738,7 +2737,7 @@ describe("auth/is-authenticated", () => {
     describe("custom-resolvers", () => {
         test("should not throw if authenticated on custom Query with @cypher", async () => {
             const typeDefs = `
-                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) {
+                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
                 }
@@ -2778,7 +2777,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) {
+                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
                 }
@@ -2814,7 +2813,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on custom Query with @cypher", async () => {
             const typeDefs = `
-                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) {
+                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
                 }
@@ -2858,7 +2857,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) {
+                type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
                 }
@@ -2894,7 +2893,7 @@ describe("auth/is-authenticated", () => {
 
         test("should not throw if authenticated on custom Mutation with @cypher", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -2934,7 +2933,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -2970,7 +2969,7 @@ describe("auth/is-authenticated", () => {
 
         test("should throw if not authenticated on custom Mutation with @cypher", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -3014,7 +3013,7 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -3052,11 +3051,11 @@ describe("auth/is-authenticated", () => {
             const History = testHelper.createUniqueType("History");
 
             const typeDefs = `
-                type ${History} {
+                type ${History} @node {
                     url: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     history: [${History}]
                         @cypher(statement: "MATCH (this)-[:HAS_HISTORY]->(h:${History}) RETURN h", columnName: "h")
@@ -3098,11 +3097,11 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${History} {
+                type ${History} @node {
                     url: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     history: [${History}]
                         @cypher(statement: "MATCH (this)-[:HAS_HISTORY]->(h:${History}) RETURN h", columnName: "h")
@@ -3140,11 +3139,11 @@ describe("auth/is-authenticated", () => {
             const History = testHelper.createUniqueType("History");
 
             const typeDefs = `
-                type ${History} {
+                type ${History} @node {
                     url: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     history: [${History}]
                         @cypher(statement: "MATCH (this)-[:HAS_HISTORY]->(h:${History}) RETURN h", columnName: "h")
@@ -3190,11 +3189,11 @@ describe("auth/is-authenticated", () => {
                     roles: [String!]!
                 }
 
-                type ${History} {
+                type ${History} @node {
                     url: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     history: [${History}]
                         @cypher(statement: "MATCH (this)-[:HAS_HISTORY]->(h:${History}) RETURN h", columnName: "h")
@@ -3230,7 +3229,7 @@ describe("auth/is-authenticated", () => {
 
         test("should not throw if decoded JWT passed in context", async () => {
             const typeDefs = `
-                type ${Product} @authentication(operations: [READ])  {
+                type ${Product} @authentication(operations: [READ])  @node {
                     id: ID
                     name: String
                 }
@@ -3272,7 +3271,7 @@ describe("auth/is-authenticated", () => {
                     name: String!
                 }
 
-                type ${Product} @authentication(operations: [READ], jwt: {name_STARTS_WITH: "John"})  {
+                type ${Product} @authentication(operations: [READ], jwt: {name_STARTS_WITH: "John"})  @node {
                     id: ID
                     name: String
                 }
@@ -3314,7 +3313,7 @@ describe("auth/is-authenticated", () => {
                     name: String!
                 }
 
-                type ${Product} @authentication(operations: [READ], jwt: {name_STARTS_WITH: "Doe"})  {
+                type ${Product} @authentication(operations: [READ], jwt: {name_STARTS_WITH: "Doe"})  @node {
                     id: ID
                     name: String
                 }
@@ -3355,7 +3354,7 @@ describe("auth/is-authenticated", () => {
         describe("read", () => {
             beforeEach(async () => {
                 const typeDefs = `
-                type ${Product} {
+                type ${Product} @node {
                     id: ID
                     name: String
                 }
@@ -3411,7 +3410,7 @@ describe("auth/is-authenticated", () => {
         describe("create", () => {
             beforeEach(async () => {
                 const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -3471,7 +3470,7 @@ describe("auth/is-authenticated", () => {
         describe("update", () => {
             beforeEach(async () => {
                 const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -3535,12 +3534,12 @@ describe("auth/is-authenticated", () => {
                 Post = testHelper.createUniqueType("Post");
 
                 const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -3570,7 +3569,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3605,7 +3604,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3632,12 +3631,12 @@ describe("auth/is-authenticated", () => {
                 Post = testHelper.createUniqueType("Post");
 
                 const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String @unique
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -3667,7 +3666,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3702,7 +3701,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, connectOrCreate: { posts: { where: { node: { id: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connectOrCreate: { where: { node: { id_EQ: "${postId}" } }, onCreate: { node: { id: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3729,12 +3728,12 @@ describe("auth/is-authenticated", () => {
                 Post = testHelper.createUniqueType("Post");
 
                 const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: String
                     content: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                     password: String
@@ -3764,7 +3763,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3799,7 +3798,7 @@ describe("auth/is-authenticated", () => {
 
                 const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                         }
@@ -3822,7 +3821,7 @@ describe("auth/is-authenticated", () => {
         describe("delete", () => {
             beforeEach(async () => {
                 const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
@@ -3878,7 +3877,7 @@ describe("auth/is-authenticated", () => {
         describe("custom-resolvers", () => {
             beforeEach(async () => {
                 const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }

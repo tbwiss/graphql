@@ -16,7 +16,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(int1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Int! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -68,7 +68,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(int1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Int! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -89,7 +89,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -134,7 +134,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Int! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -161,7 +161,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -199,7 +199,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("string");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Int! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -247,7 +247,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(1.1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Float! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -298,7 +298,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(1.2);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Float! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -319,7 +319,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -362,7 +362,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Float! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -389,7 +389,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -427,7 +427,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("string");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Float! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -476,7 +476,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(string1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String! @populatedBy(callback: "callback", operations: [CREATE])
                     }
@@ -528,7 +528,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(string1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -549,7 +549,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -594,7 +594,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -621,7 +621,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -659,7 +659,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String! @populatedBy(callback: "callback", operations: [CREATE])
                     }
@@ -707,7 +707,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(true);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Boolean! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -758,7 +758,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(false);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Boolean! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -779,7 +779,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -822,7 +822,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Boolean! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -849,7 +849,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -887,7 +887,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("string");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Boolean! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -935,7 +935,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("12345");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: ID! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -986,7 +986,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(12345);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: ID! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1007,7 +1007,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1050,7 +1050,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: ID! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -1077,7 +1077,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1115,7 +1115,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(true);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: ID! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1163,7 +1163,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("12345");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: BigInt! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1214,7 +1214,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("2147483648");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: BigInt! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1235,7 +1235,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1278,7 +1278,7 @@ describe("@populatedBy directive - Node properties", () => {
             };
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: BigInt! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
                     }
@@ -1305,7 +1305,7 @@ describe("@populatedBy directive - Node properties", () => {
                                 callback
                             }
                         }
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1343,7 +1343,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: BigInt! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1393,7 +1393,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString());
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: DateTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1446,7 +1446,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString());
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: DateTime! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1467,7 +1467,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1501,7 +1501,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: DateTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1551,7 +1551,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString());
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Date! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1604,7 +1604,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString());
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Date! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1625,7 +1625,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1659,7 +1659,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Date! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1709,7 +1709,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("T")[1]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Time! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1762,7 +1762,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("T")[1]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Time! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1783,7 +1783,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1817,7 +1817,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Time! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1867,7 +1867,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("Z")[0]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalDateTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -1920,7 +1920,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("Z")[0]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalDateTime! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -1941,7 +1941,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1975,7 +1975,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalDateTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2025,7 +2025,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("Z")[0]?.split("T")[1]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2078,7 +2078,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(date.toISOString().split("Z")[0]?.split("T")[1]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalTime! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -2099,7 +2099,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -2133,7 +2133,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: LocalTime! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2183,7 +2183,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(duration);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Duration! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2236,7 +2236,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(duration);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Duration! @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -2257,7 +2257,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -2291,7 +2291,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve("banana");
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: Duration! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2340,7 +2340,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => undefined;
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -2361,7 +2361,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -2396,7 +2396,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => null;
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: String @populatedBy(operations: [UPDATE], callback: "callback")
                     }
@@ -2417,7 +2417,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -2450,7 +2450,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = (parent) => `${parent.title}-slug`;
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID!
                         title: String!
                         slug: String @populatedBy(operations: [CREATE], callback: "callback")
@@ -2507,7 +2507,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = (parent) => `${parent.title}-slug`;
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID!
                         title: String!
                         slug: String @populatedBy(operations: [UPDATE], callback: "callback")
@@ -2531,7 +2531,7 @@ describe("@populatedBy directive - Node properties", () => {
 
             const mutation = `
                     mutation {
-                        ${testMovie.operations.update}(where: { id: "${movieId}" }, update: { id: "${movieId}", title: "${movieTitle}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}", title: "${movieTitle}" }) {
                             ${testMovie.plural} {
                                 id
                                 title
@@ -2566,7 +2566,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = (_parent, _args, context) => context.testValue;
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID!
                         title: String!
                         contextValue: String @populatedBy(operations: [CREATE], callback: "callback")
@@ -2624,7 +2624,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve([1, 2, 3, 4, 5]);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: [Int!]! @populatedBy(operations: [CREATE], callback: "callback")
                     }
@@ -2675,7 +2675,7 @@ describe("@populatedBy directive - Node properties", () => {
             const callback = () => Promise.resolve(1);
 
             const typeDefs = /* GraphQL */ `
-                    type ${testMovie.name} {
+                    type ${testMovie.name} @node {
                         id: ID
                         callback: [Int!]! @populatedBy(operations: [CREATE], callback: "callback")
                     }

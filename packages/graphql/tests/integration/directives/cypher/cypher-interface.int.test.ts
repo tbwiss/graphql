@@ -79,17 +79,17 @@ describe("cypher targeting interface", () => {
         );
 
         const typeDefs = `
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: Int
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 productions(title: String!): [Production!]! @cypher(
                     statement: """
@@ -182,7 +182,7 @@ describe("cypher targeting interface", () => {
                     productions(title: $title) {
                         title
                        ... on ${Movie} {
-                           actors(where: {name: $name}) {
+                           actors(where: {name_EQ: $name}) {
                                name
                            }
                        }
@@ -238,7 +238,7 @@ describe("cypher targeting interface", () => {
                     singleProduction(title: $title) {
                         title
                        ... on ${Movie} {
-                           actors(where: {name: $name}) {
+                           actors(where: {name_EQ: $name}) {
                                name
                            }
                        }

@@ -26,7 +26,7 @@ describe("Cypher LocalTime", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 id: ID
                 time: LocalTime
             }
@@ -40,7 +40,7 @@ describe("Cypher LocalTime", () => {
     test("Simple Read", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { time: "12:00:00" }) {
+                movies(where: { time_EQ: "12:00:00" }) {
                     time
                 }
             }

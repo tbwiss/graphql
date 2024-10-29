@@ -34,11 +34,11 @@ describe("https://github.com/neo4j/graphql/issues/3888", () => {
         User = testHelper.createUniqueType("User");
 
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID!
             }
 
-            type ${Post} @authorization(filter: [{ where: { node: { author: { id: "$jwt.sub" } } } }]) {
+            type ${Post} @authorization(filter: [{ where: { node: { author: { id_EQ: "$jwt.sub" } } } }]) @node {
                 title: String!
                 content: String!
                 author: ${User}! @relationship(type: "AUTHORED", direction: IN)
@@ -74,7 +74,7 @@ describe("https://github.com/neo4j/graphql/issues/3888", () => {
             mutation {
                 ${Post.operations.create}(
                     input: [
-                        { title: "Test1", content: "Test1", author: { connect: { where: { node: { id: "michel" } } } } }
+                        { title: "Test1", content: "Test1", author: { connect: { where: { node: { id_EQ: "michel" } } } } }
                     ]
                 ) {
                     ${Post.plural} {

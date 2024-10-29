@@ -32,13 +32,13 @@ describe("https://github.com/neo4j/graphql/issues/4814", () => {
                 prevs: [Step!]! @declareRelationship
             }
 
-            type AStep implements Step {
+            type AStep implements Step @node {
                 id: ID! @id
                 nexts: [Step!]! @relationship(type: "FOLLOWED_BY", direction: OUT)
                 prevs: [Step!]! @relationship(type: "FOLLOWED_BY", direction: IN)
             }
 
-            type BStep implements Step {
+            type BStep implements Step @node {
                 id: ID! @id
                 nexts: [Step!]! @relationship(type: "FOLLOWED_BY", direction: OUT)
                 prevs: [Step!]! @relationship(type: "FOLLOWED_BY", direction: IN)
@@ -54,7 +54,7 @@ describe("https://github.com/neo4j/graphql/issues/4814", () => {
     test("should use the direction specified in the typeDefs (direction: OUT, connection fields)", async () => {
         const query = /* GraphQL */ `
             query GetNextStep {
-                steps(where: { id: "2" }) {
+                steps(where: { id_EQ: "2" }) {
                     __typename
                     nextsConnection {
                         edges {
@@ -131,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/4814", () => {
     test("should use the direction specified in the typeDefs (direction: IN, connection fields)", async () => {
         const query = /* GraphQL */ `
             query GetNextStep {
-                steps(where: { id: "2" }) {
+                steps(where: { id_EQ: "2" }) {
                     __typename
                     prevsConnection {
                         edges {
@@ -208,7 +208,7 @@ describe("https://github.com/neo4j/graphql/issues/4814", () => {
     test("should use the direction specified in the typeDefs (direction: OUT, relationship fields)", async () => {
         const query = /* GraphQL */ `
             query GetNextStep {
-                steps(where: { id: "2" }) {
+                steps(where: { id_EQ: "2" }) {
                     __typename
                     nexts {
                         id
@@ -279,7 +279,7 @@ describe("https://github.com/neo4j/graphql/issues/4814", () => {
     test("should use the direction specified in the typeDefs (direction: IN, relationship fields)", async () => {
         const query = /* GraphQL */ `
             query GetNextStep {
-                steps(where: { id: "2" }) {
+                steps(where: { id_EQ: "2" }) {
                     __typename
                     prevs {
                         id

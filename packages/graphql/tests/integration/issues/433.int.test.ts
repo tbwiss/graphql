@@ -39,12 +39,12 @@ describe("https://github.com/neo4j/graphql/issues/433", () => {
     test("should recreate issue and return correct data", async () => {
         typeDefs = `
             # Cannot use 'type Node'
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String
                 actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Person} {
+            type ${Person} @node {
                 name: String
             }
         `;
@@ -61,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/433", () => {
 
         const query = `
             query {
-               ${Movie.plural}(where: {title: "${movieTitle}"}) {
+               ${Movie.plural}(where: {title_EQ: "${movieTitle}"}) {
                     title
                     actorsConnection(where: {}) {
                       edges {

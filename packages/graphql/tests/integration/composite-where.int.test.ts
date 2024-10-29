@@ -30,11 +30,11 @@ describe("composite-where", () => {
         Actor = testHelper.createUniqueType("Actor");
         Movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
             }
     
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
@@ -68,16 +68,18 @@ describe("composite-where", () => {
                 mutation($movieId: ID, $actorName1: String, $screenTime: Int) {
                     ${Movie.operations.update}(
                         where: {
-                            id: $movieId
+                            id_EQ: $movieId
                         }
-                        delete: {
+                        update:{
                             actors: {
-                                where: {
-                                    node: {
-                                        name: $actorName1
-                                    }
-                                    edge: {
-                                        screenTime: $screenTime
+                                delete: {
+                                    where: {
+                                        node: {
+                                            name_EQ: $actorName1
+                                        }
+                                        edge: {
+                                            screenTime_EQ: $screenTime
+                                        }
                                     }
                                 }
                             }
@@ -131,16 +133,18 @@ describe("composite-where", () => {
                 mutation($movieId: ID, $actorName1: String, $screenTime: Int) {
                     ${Movie.operations.update}(
                         where: {
-                            id: $movieId
+                            id_EQ: $movieId
                         }
-                        disconnect: {
+                        update: {
                             actors: {
-                                where: {
-                                    node: {
-                                        name: $actorName1
-                                    }
-                                    edge: {
-                                        screenTime: $screenTime
+                                disconnect: {
+                                    where: {
+                                        node: {
+                                            name_EQ: $actorName1
+                                        }
+                                        edge: {
+                                            screenTime_EQ: $screenTime
+                                        }
                                     }
                                 }
                             }

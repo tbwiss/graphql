@@ -19,7 +19,6 @@
 
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import { createJwtHeader } from "../../../../utils/create-jwt-request";
 import type { UniqueType } from "../../../../utils/graphql-types";
 import { TestHelper } from "../../../../utils/tests-helper";
@@ -28,7 +27,7 @@ import { ApolloTestServer } from "../../../setup/apollo-server";
 import { WebSocketTestClient } from "../../../setup/ws-client";
 
 describe("Subscriptions authorization with create events", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let User: UniqueType;
@@ -44,10 +43,10 @@ describe("Subscriptions authorization with create events", () => {
                 roles: [String!]! @jwtClaim(path: "myApplication.roles")
             }
 
-            type ${User}
+            type ${User} @node
                 @subscriptionsAuthorization(
                     filter: [
-                        { events: [CREATED], where: { node: { id: "$jwt.sub" } } }
+                        { events: [CREATED], where: { node: { id_EQ: "$jwt.sub" } } }
                     ]
                 ) {
                 id: ID!
@@ -58,7 +57,7 @@ describe("Subscriptions authorization with create events", () => {
             typeDefs,
             features: {
                 authorization: { key },
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -140,7 +139,7 @@ describe("Subscriptions authorization with create events", () => {
             .send({
                 query: `
                     mutation {
-                        ${User.operations.delete}(where: { id: "${id}" }) {
+                        ${User.operations.delete}(where: { id_EQ: "${id}" }) {
                             nodesDeleted
                         }
                     }

@@ -37,7 +37,7 @@ describe("Duration", () => {
     describe("create", () => {
         test("should create a movie (with a Duration)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     duration: Duration!
                 }
@@ -96,7 +96,7 @@ describe("Duration", () => {
 
         test("should create a movie (with many Durations)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     durations: [Duration!]!
                 }
@@ -167,7 +167,7 @@ describe("Duration", () => {
     describe("update", () => {
         test("should update a movie (with a Duration)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     duration: Duration
                 }
@@ -189,7 +189,7 @@ describe("Duration", () => {
 
             const mutation = /* GraphQL */ `
                     mutation ($id: ID!, $duration: Duration) {
-                        ${Movie.operations.update}(where: { id: $id }, update: { duration: $duration }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { duration: $duration }) {
                             ${Movie.plural} {
                                 id
                                 duration
@@ -231,7 +231,7 @@ describe("Duration", () => {
     describe("filter", () => {
         test("should filter based on duration equality", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     duration: Duration!
                 }
@@ -255,7 +255,7 @@ describe("Duration", () => {
 
             const query = /* GraphQL */ `
                     query ($id: ID!, $duration: Duration!) {
-                        ${Movie.plural}(where: { id: $id, duration: $duration }) {
+                        ${Movie.plural}(where: { id_EQ: $id, duration_EQ: $duration }) {
                             id
                             duration
                         }
@@ -278,7 +278,7 @@ describe("Duration", () => {
             "should filter based on duration comparison, for filter: %s",
             async (filter) => {
                 const typeDefs = `
-                        type ${Movie} {
+                        type ${Movie} @node {
                             id: ID!
                             duration: Duration!
                         }
@@ -333,7 +333,7 @@ describe("Duration", () => {
 
                 const query = /* GraphQL */ `
                         query ($where: ${Movie.name}Where!) {
-                            ${Movie.plural}(where: $where, options: { sort: [{ duration: ASC }] }) {
+                            ${Movie.plural}(where: $where, sort: [{ duration: ASC }]) {
                                 id
                                 duration
                             }

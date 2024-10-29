@@ -31,20 +31,20 @@ describe("https://github.com/neo4j/graphql/issues/4704", () => {
                 actors: [Actor!]! @declareRelationship
             }
 
-            type Movie implements Show {
+            type Movie implements Show @node {
                 title: String!
                 cost: Float
                 runtime: Int
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Series implements Show {
+            type Series implements Show @node {
                 title: String!
                 episodes: Int
                 actors: [Actor!]! @relationship(type: "STARRED_IN", direction: IN, properties: "StarredIn")
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Show!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/4704", () => {
             {
                 actors(
                     where: {
-                        actedInConnection_ALL: { node: { actorsConnection_ALL: { node: { name: "Keanu Reeves" } } } }
+                        actedInConnection_ALL: { node: { actorsConnection_ALL: { node: { name_EQ: "Keanu Reeves" } } } }
                     }
                 ) {
                     actedIn {
@@ -153,7 +153,7 @@ describe("https://github.com/neo4j/graphql/issues/4704", () => {
                 actors(
                     where: {
                         actedInConnection_SINGLE: {
-                            node: { actorsConnection_SINGLE: { node: { name: "Keanu Reeves" } } }
+                            node: { actorsConnection_SINGLE: { node: { name_EQ: "Keanu Reeves" } } }
                         }
                     }
                 ) {
@@ -201,7 +201,7 @@ describe("https://github.com/neo4j/graphql/issues/4704", () => {
             {
                 actors(
                     where: {
-                        actedInConnection_NONE: { node: { actorsConnection_NONE: { node: { name: "Keanu Reeves" } } } }
+                        actedInConnection_NONE: { node: { actorsConnection_NONE: { node: { name_EQ: "Keanu Reeves" } } } }
                     }
                 ) {
                     actedIn {

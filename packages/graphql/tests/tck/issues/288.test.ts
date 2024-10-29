@@ -26,13 +26,13 @@ describe("#288", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type USER {
+            type USER @node {
                 USERID: String
                 COMPANYID: String
                 COMPANY: [COMPANY!]! @relationship(type: "IS_PART_OF", direction: OUT)
             }
 
-            type COMPANY {
+            type COMPANY @node {
                 USERS: [USER!]! @relationship(type: "IS_PART_OF", direction: IN)
             }
         `;
@@ -84,7 +84,7 @@ describe("#288", () => {
     test("Can update a USER and COMPANYID is populated", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { USERID: "userid" }, update: { COMPANYID: "companyid2" }) {
+                updateUsers(where: { USERID_EQ: "userid" }, update: { COMPANYID: "companyid2" }) {
                     users {
                         USERID
                         COMPANYID

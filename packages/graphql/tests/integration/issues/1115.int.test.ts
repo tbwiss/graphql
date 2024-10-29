@@ -35,11 +35,11 @@ describe("https://github.com/neo4j/graphql/issues/1115", () => {
                 roles: [String!]!
             }
 
-            type ${parentType} {
+            type ${parentType} @node {
                 children: [${childType}!]! @relationship(type: "HAS", direction: IN)
             }
 
-            type ${childType} {
+            type ${childType} @node {
                 tcId: String @unique
             }
 
@@ -69,21 +69,23 @@ describe("https://github.com/neo4j/graphql/issues/1115", () => {
         await testHelper.executeCypher(`CREATE (:${parentType})<-[:HAS]-(:${childType} {tcId: "123"})`);
 
         const token = testHelper.createBearerToken("secret", { roles: ["upstream"] });
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
           ${parentType.operations.update}(
-            connectOrCreate: {
+            update: {
               children: [
                 {
-                  where: { node: { tcId: "123" } }
-                  onCreate: { node: { tcId: "123" } }
-                }
-                {
-                  where: { node: { tcId: "456" } }
-                  onCreate: { node: { tcId: "456" } }
-                }
-              ]
-            }
+                  connectOrCreate: {
+                    where: { node: { tcId_EQ: "123" } }
+                    onCreate: { node: { tcId: "123" } }
+                  }}
+                  {
+                    connectOrCreate: {
+                    where: { node: { tcId_EQ: "456" } }
+                    onCreate: { node: { tcId: "456" } }
+                  }}
+                ]
+              }
           ) {
             info {
               nodesCreated

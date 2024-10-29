@@ -25,7 +25,7 @@ import { Neo4jGraphQL } from "../../src";
 describe("Algebraic", () => {
     test("Int fields should be extended with Increment/Decrement operators", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID
                 viewers: Int!
             }
@@ -42,7 +42,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -56,7 +55,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -122,24 +120,19 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
               viewers_IN: [Int!]
               viewers_LT: Int
               viewers_LTE: Int
-              viewers_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -163,9 +156,9 @@ describe("Algebraic", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -180,7 +173,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -196,7 +188,7 @@ describe("Algebraic", () => {
 
     test("BigInt fields should be extended with Increment/Decrement operators", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID
                 viewers: BigInt!
             }
@@ -225,7 +217,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -239,7 +230,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -298,24 +288,19 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              viewers: BigInt
+              viewers: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: BigInt
               viewers_GT: BigInt
               viewers_GTE: BigInt
               viewers_IN: [BigInt!]
               viewers_LT: BigInt
               viewers_LTE: BigInt
-              viewers_NOT: BigInt @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [BigInt!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -339,9 +324,9 @@ describe("Algebraic", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -356,7 +341,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -372,7 +356,7 @@ describe("Algebraic", () => {
 
     test("Float fields should be extended with Add/Subtract/Multiply/Divide operators", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID
                 viewers: Float!
             }
@@ -390,7 +374,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -404,7 +387,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -472,24 +454,19 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              viewers: Float
+              viewers: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: Float
               viewers_GT: Float
               viewers_GTE: Float
               viewers_IN: [Float!]
               viewers_LT: Float
               viewers_LTE: Float
-              viewers_NOT: Float @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [Float!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -513,9 +490,9 @@ describe("Algebraic", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -530,7 +507,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -546,13 +522,13 @@ describe("Algebraic", () => {
 
     test("Operators should be presents in nested updates", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID
                 viewers: Int!
                 directedBy: Director @relationship(type: "DIRECTS", direction: IN)
             }
 
-            type Director {
+            type Director @node {
                 lastName: String!
                 directs: [Movie!]! @relationship(type: "DIRECTS", direction: OUT)
             }
@@ -574,7 +550,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -588,15 +563,14 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
             type Director {
-              directs(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-              directsAggregate(directed: Boolean = true, where: MovieWhere): DirectorMovieDirectsAggregationSelection
-              directsConnection(after: String, directed: Boolean = true, first: Int, sort: [DirectorDirectsConnectionSort!], where: DirectorDirectsConnectionWhere): DirectorDirectsConnection!
+              directs(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              directsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): DirectorMovieDirectsAggregationSelection
+              directsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [DirectorDirectsConnectionSort!], where: DirectorDirectsConnectionWhere): DirectorDirectsConnection!
               lastName: String!
             }
 
@@ -626,7 +600,8 @@ describe("Algebraic", () => {
               AND: [DirectorDirectsAggregateInput!]
               NOT: DirectorDirectsAggregateInput
               OR: [DirectorDirectsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -658,7 +633,6 @@ describe("Algebraic", () => {
               NOT: DirectorDirectsConnectionWhere
               OR: [DirectorDirectsConnectionWhere!]
               node: MovieWhere
-              node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input DirectorDirectsCreateFieldInput {
@@ -684,17 +658,21 @@ describe("Algebraic", () => {
               AND: [DirectorDirectsNodeAggregationWhereInput!]
               NOT: DirectorDirectsNodeAggregationWhereInput
               OR: [DirectorDirectsNodeAggregationWhereInput!]
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
               viewers_AVERAGE_EQUAL: Float
               viewers_AVERAGE_GT: Float
               viewers_AVERAGE_GTE: Float
               viewers_AVERAGE_LT: Float
               viewers_AVERAGE_LTE: Float
-              viewers_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               viewers_MAX_EQUAL: Int
               viewers_MAX_GT: Int
               viewers_MAX_GTE: Int
@@ -758,10 +736,6 @@ describe("Algebraic", () => {
               sort: [DirectorSort!]
             }
 
-            input DirectorRelationInput {
-              directs: [DirectorDirectsCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Directors by. The order in which sorts are applied is not guaranteed when specifying many fields in one DirectorSort object.
             \\"\\"\\"
@@ -778,9 +752,7 @@ describe("Algebraic", () => {
               AND: [DirectorWhere!]
               NOT: DirectorWhere
               OR: [DirectorWhere!]
-              directs: MovieWhere @deprecated(reason: \\"Use \`directs_SOME\` instead.\\")
               directsAggregate: DirectorDirectsAggregateInput
-              directsConnection: DirectorDirectsConnectionWhere @deprecated(reason: \\"Use \`directsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Directors where all of the related DirectorDirectsConnections match this filter
               \\"\\"\\"
@@ -789,7 +761,6 @@ describe("Algebraic", () => {
               Return Directors where none of the related DirectorDirectsConnections match this filter
               \\"\\"\\"
               directsConnection_NONE: DirectorDirectsConnectionWhere
-              directsConnection_NOT: DirectorDirectsConnectionWhere @deprecated(reason: \\"Use \`directsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Directors where one of the related DirectorDirectsConnections match this filter
               \\"\\"\\"
@@ -802,20 +773,15 @@ describe("Algebraic", () => {
               directs_ALL: MovieWhere
               \\"\\"\\"Return Directors where none of the related Movies match this filter\\"\\"\\"
               directs_NONE: MovieWhere
-              directs_NOT: MovieWhere @deprecated(reason: \\"Use \`directs_NONE\` instead.\\")
               \\"\\"\\"Return Directors where one of the related Movies match this filter\\"\\"\\"
               directs_SINGLE: MovieWhere
               \\"\\"\\"Return Directors where some of the related Movies match this filter\\"\\"\\"
               directs_SOME: MovieWhere
-              lastName: String
+              lastName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               lastName_CONTAINS: String
               lastName_ENDS_WITH: String
+              lastName_EQ: String
               lastName_IN: [String!]
-              lastName_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              lastName_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              lastName_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              lastName_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              lastName_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               lastName_STARTS_WITH: String
             }
 
@@ -838,9 +804,9 @@ describe("Algebraic", () => {
             }
 
             type Movie {
-              directedBy(directed: Boolean = true, options: DirectorOptions, where: DirectorWhere): Director
-              directedByAggregate(directed: Boolean = true, where: DirectorWhere): MovieDirectorDirectedByAggregationSelection
-              directedByConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieDirectedByConnectionSort!], where: MovieDirectedByConnectionWhere): MovieDirectedByConnection!
+              directedBy(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: DirectorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DirectorSort!], where: DirectorWhere): Director
+              directedByAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: DirectorWhere): MovieDirectorDirectedByAggregationSelection
+              directedByConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieDirectedByConnectionSort!], where: MovieDirectedByConnectionWhere): MovieDirectedByConnection!
               id: ID
               viewers: Int!
             }
@@ -873,7 +839,8 @@ describe("Algebraic", () => {
               AND: [MovieDirectedByAggregateInput!]
               NOT: MovieDirectedByAggregateInput
               OR: [MovieDirectedByAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -905,7 +872,6 @@ describe("Algebraic", () => {
               NOT: MovieDirectedByConnectionWhere
               OR: [MovieDirectedByConnectionWhere!]
               node: DirectorWhere
-              node_NOT: DirectorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input MovieDirectedByCreateFieldInput {
@@ -931,41 +897,21 @@ describe("Algebraic", () => {
               AND: [MovieDirectedByNodeAggregationWhereInput!]
               NOT: MovieDirectedByNodeAggregationWhereInput
               OR: [MovieDirectedByNodeAggregationWhereInput!]
-              lastName_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               lastName_AVERAGE_LENGTH_EQUAL: Float
               lastName_AVERAGE_LENGTH_GT: Float
               lastName_AVERAGE_LENGTH_GTE: Float
               lastName_AVERAGE_LENGTH_LT: Float
               lastName_AVERAGE_LENGTH_LTE: Float
-              lastName_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              lastName_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              lastName_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              lastName_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               lastName_LONGEST_LENGTH_EQUAL: Int
               lastName_LONGEST_LENGTH_GT: Int
               lastName_LONGEST_LENGTH_GTE: Int
               lastName_LONGEST_LENGTH_LT: Int
               lastName_LONGEST_LENGTH_LTE: Int
-              lastName_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              lastName_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              lastName_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               lastName_SHORTEST_LENGTH_EQUAL: Int
               lastName_SHORTEST_LENGTH_GT: Int
               lastName_SHORTEST_LENGTH_GTE: Int
               lastName_SHORTEST_LENGTH_LT: Int
               lastName_SHORTEST_LENGTH_LTE: Int
-              lastName_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              lastName_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type MovieDirectedByRelationship {
@@ -1013,10 +959,6 @@ describe("Algebraic", () => {
               sort: [MovieSort!]
             }
 
-            input MovieRelationInput {
-              directedBy: MovieDirectedByCreateFieldInput
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -1040,26 +982,19 @@ describe("Algebraic", () => {
               directedBy: DirectorWhere
               directedByAggregate: MovieDirectedByAggregateInput
               directedByConnection: MovieDirectedByConnectionWhere
-              directedByConnection_NOT: MovieDirectedByConnectionWhere
-              directedBy_NOT: DirectorWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
               viewers_IN: [Int!]
               viewers_LT: Int
               viewers_LTE: Int
-              viewers_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -1073,8 +1008,8 @@ describe("Algebraic", () => {
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
               deleteDirectors(delete: DirectorDeleteInput, where: DirectorWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-              updateDirectors(connect: DirectorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: DirectorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: DirectorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: DirectorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: DirectorUpdateInput, where: DirectorWhere): UpdateDirectorsMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateDirectors(update: DirectorUpdateInput, where: DirectorWhere): UpdateDirectorsMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1086,12 +1021,12 @@ describe("Algebraic", () => {
             }
 
             type Query {
-              directors(options: DirectorOptions, where: DirectorWhere): [Director!]!
+              directors(limit: Int, offset: Int, options: DirectorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DirectorSort!], where: DirectorWhere): [Director!]!
               directorsAggregate(where: DirectorWhere): DirectorAggregateSelection!
-              directorsConnection(after: String, first: Int, sort: [DirectorSort], where: DirectorWhere): DirectorsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              directorsConnection(after: String, first: Int, sort: [DirectorSort!], where: DirectorWhere): DirectorsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -1116,7 +1051,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -1136,13 +1070,13 @@ describe("Algebraic", () => {
                 viewers: Int!
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 id: ID
                 viewers: Int!
                 workers: [Person!]! @relationship(type: "WORKED_IN", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 name: String!
                 worksInProduction: [Production!]! @relationship(type: "WORKED_IN", direction: OUT)
             }
@@ -1159,7 +1093,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -1178,7 +1111,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -1198,19 +1130,15 @@ describe("Algebraic", () => {
             type Movie implements Production {
               id: ID
               viewers: Int!
-              workers(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-              workersAggregate(directed: Boolean = true, where: PersonWhere): MoviePersonWorkersAggregationSelection
-              workersConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieWorkersConnectionSort!], where: MovieWorkersConnectionWhere): MovieWorkersConnection!
+              workers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              workersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonWorkersAggregationSelection
+              workersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieWorkersConnectionSort!], where: MovieWorkersConnectionWhere): MovieWorkersConnection!
             }
 
             type MovieAggregateSelection {
               count: Int!
               id: IDAggregateSelection!
               viewers: IntAggregateSelection!
-            }
-
-            input MovieConnectInput {
-              workers: [MovieWorkersConnectFieldInput!]
             }
 
             input MovieCreateInput {
@@ -1221,10 +1149,6 @@ describe("Algebraic", () => {
 
             input MovieDeleteInput {
               workers: [MovieWorkersDeleteFieldInput!]
-            }
-
-            input MovieDisconnectInput {
-              workers: [MovieWorkersDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -1250,10 +1174,6 @@ describe("Algebraic", () => {
               name: StringAggregateSelection!
             }
 
-            input MovieRelationInput {
-              workers: [MovieWorkersCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -1274,27 +1194,20 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
               viewers_IN: [Int!]
               viewers_LT: Int
               viewers_LTE: Int
-              viewers_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              workers: PersonWhere @deprecated(reason: \\"Use \`workers_SOME\` instead.\\")
               workersAggregate: MovieWorkersAggregateInput
-              workersConnection: MovieWorkersConnectionWhere @deprecated(reason: \\"Use \`workersConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Movies where all of the related MovieWorkersConnections match this filter
               \\"\\"\\"
@@ -1303,7 +1216,6 @@ describe("Algebraic", () => {
               Return Movies where none of the related MovieWorkersConnections match this filter
               \\"\\"\\"
               workersConnection_NONE: MovieWorkersConnectionWhere
-              workersConnection_NOT: MovieWorkersConnectionWhere @deprecated(reason: \\"Use \`workersConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Movies where one of the related MovieWorkersConnections match this filter
               \\"\\"\\"
@@ -1316,7 +1228,6 @@ describe("Algebraic", () => {
               workers_ALL: PersonWhere
               \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
               workers_NONE: PersonWhere
-              workers_NOT: PersonWhere @deprecated(reason: \\"Use \`workers_NONE\` instead.\\")
               \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
               workers_SINGLE: PersonWhere
               \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
@@ -1327,7 +1238,8 @@ describe("Algebraic", () => {
               AND: [MovieWorkersAggregateInput!]
               NOT: MovieWorkersAggregateInput
               OR: [MovieWorkersAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1359,7 +1271,6 @@ describe("Algebraic", () => {
               NOT: MovieWorkersConnectionWhere
               OR: [MovieWorkersConnectionWhere!]
               node: PersonWhere
-              node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input MovieWorkersCreateFieldInput {
@@ -1385,41 +1296,21 @@ describe("Algebraic", () => {
               AND: [MovieWorkersNodeAggregationWhereInput!]
               NOT: MovieWorkersNodeAggregationWhereInput
               OR: [MovieWorkersNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type MovieWorkersRelationship {
@@ -1451,8 +1342,8 @@ describe("Algebraic", () => {
               createPeople(input: [PersonCreateInput!]!): CreatePeopleMutationResponse!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deletePeople(delete: PersonDeleteInput, where: PersonWhere): DeleteInfo!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updatePeople(connect: PersonConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: PersonRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: PersonDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: PersonDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: PersonUpdateInput, where: PersonWhere): UpdatePeopleMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updatePeople(update: PersonUpdateInput, where: PersonWhere): UpdatePeopleMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1471,9 +1362,9 @@ describe("Algebraic", () => {
 
             type Person {
               name: String!
-              worksInProduction(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-              worksInProductionAggregate(directed: Boolean = true, where: ProductionWhere): PersonProductionWorksInProductionAggregationSelection
-              worksInProductionConnection(after: String, directed: Boolean = true, first: Int, sort: [PersonWorksInProductionConnectionSort!], where: PersonWorksInProductionConnectionWhere): PersonWorksInProductionConnection!
+              worksInProduction(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              worksInProductionAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): PersonProductionWorksInProductionAggregationSelection
+              worksInProductionConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonWorksInProductionConnectionSort!], where: PersonWorksInProductionConnectionWhere): PersonWorksInProductionConnection!
             }
 
             type PersonAggregateSelection {
@@ -1525,10 +1416,6 @@ describe("Algebraic", () => {
               viewers: IntAggregateSelection!
             }
 
-            input PersonRelationInput {
-              worksInProduction: [PersonWorksInProductionCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort People by. The order in which sorts are applied is not guaranteed when specifying many fields in one PersonSort object.
             \\"\\"\\"
@@ -1545,19 +1432,13 @@ describe("Algebraic", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              worksInProduction: ProductionWhere @deprecated(reason: \\"Use \`worksInProduction_SOME\` instead.\\")
               worksInProductionAggregate: PersonWorksInProductionAggregateInput
-              worksInProductionConnection: PersonWorksInProductionConnectionWhere @deprecated(reason: \\"Use \`worksInProductionConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return People where all of the related PersonWorksInProductionConnections match this filter
               \\"\\"\\"
@@ -1566,7 +1447,6 @@ describe("Algebraic", () => {
               Return People where none of the related PersonWorksInProductionConnections match this filter
               \\"\\"\\"
               worksInProductionConnection_NONE: PersonWorksInProductionConnectionWhere
-              worksInProductionConnection_NOT: PersonWorksInProductionConnectionWhere @deprecated(reason: \\"Use \`worksInProductionConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return People where one of the related PersonWorksInProductionConnections match this filter
               \\"\\"\\"
@@ -1579,7 +1459,6 @@ describe("Algebraic", () => {
               worksInProduction_ALL: ProductionWhere
               \\"\\"\\"Return People where none of the related Productions match this filter\\"\\"\\"
               worksInProduction_NONE: ProductionWhere
-              worksInProduction_NOT: ProductionWhere @deprecated(reason: \\"Use \`worksInProduction_NONE\` instead.\\")
               \\"\\"\\"Return People where one of the related Productions match this filter\\"\\"\\"
               worksInProduction_SINGLE: ProductionWhere
               \\"\\"\\"Return People where some of the related Productions match this filter\\"\\"\\"
@@ -1590,7 +1469,8 @@ describe("Algebraic", () => {
               AND: [PersonWorksInProductionAggregateInput!]
               NOT: PersonWorksInProductionAggregateInput
               OR: [PersonWorksInProductionAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1617,7 +1497,6 @@ describe("Algebraic", () => {
               NOT: PersonWorksInProductionConnectionWhere
               OR: [PersonWorksInProductionConnectionWhere!]
               node: ProductionWhere
-              node_NOT: ProductionWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input PersonWorksInProductionCreateFieldInput {
@@ -1646,11 +1525,6 @@ describe("Algebraic", () => {
               viewers_AVERAGE_GTE: Float
               viewers_AVERAGE_LT: Float
               viewers_AVERAGE_LTE: Float
-              viewers_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              viewers_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               viewers_MAX_EQUAL: Int
               viewers_MAX_GT: Int
               viewers_MAX_GTE: Int
@@ -1718,7 +1592,7 @@ describe("Algebraic", () => {
               \\"\\"\\"
               Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProductionSort]
+              sort: [ProductionSort!]
             }
 
             \\"\\"\\"
@@ -1739,14 +1613,13 @@ describe("Algebraic", () => {
               NOT: ProductionWhere
               OR: [ProductionWhere!]
               typename_IN: [ProductionImplementation!]
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
               viewers_IN: [Int!]
               viewers_LT: Int
               viewers_LTE: Int
-              viewers_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              viewers_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type ProductionsConnection {
@@ -1756,15 +1629,15 @@ describe("Algebraic", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              people(options: PersonOptions, where: PersonWhere): [Person!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-              peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
-              productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+              peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
+              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
+              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -1784,7 +1657,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -1805,12 +1677,12 @@ describe("Algebraic", () => {
 
     test("Should be supported in Relationship properties", async () => {
         const typeDefs = gql`
-            type Person {
+            type Person @node {
                 name: String!
                 actedInMovies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
 
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Person!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
@@ -1848,11 +1720,6 @@ describe("Algebraic", () => {
               pay_AVERAGE_GTE: Float
               pay_AVERAGE_LT: Float
               pay_AVERAGE_LTE: Float
-              pay_EQUAL: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              pay_GT: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              pay_GTE: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              pay_LT: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              pay_LTE: Float @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               pay_MAX_EQUAL: Float
               pay_MAX_GT: Float
               pay_MAX_GTE: Float
@@ -1895,25 +1762,22 @@ describe("Algebraic", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              pay: Float
+              pay: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              pay_EQ: Float
               pay_GT: Float
               pay_GTE: Float
               pay_IN: [Float]
               pay_LT: Float
               pay_LTE: Float
-              pay_NOT: Float @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              pay_NOT_IN: [Float] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              roles: [String!]
+              roles: [String!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              roles_EQ: [String!]
               roles_INCLUDES: String
-              roles_NOT: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              roles_NOT_INCLUDES: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             \\"\\"\\"
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -1932,7 +1796,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -1945,9 +1808,9 @@ describe("Algebraic", () => {
             }
 
             type Movie {
-              actors(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-              actorsAggregate(directed: Boolean = true, where: PersonWhere): MoviePersonActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
               title: String!
             }
 
@@ -1955,7 +1818,8 @@ describe("Algebraic", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1990,9 +1854,7 @@ describe("Algebraic", () => {
               NOT: MovieActorsConnectionWhere
               OR: [MovieActorsConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: PersonWhere
-              node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input MovieActorsCreateFieldInput {
@@ -2019,41 +1881,21 @@ describe("Algebraic", () => {
               AND: [MovieActorsNodeAggregationWhereInput!]
               NOT: MovieActorsNodeAggregationWhereInput
               OR: [MovieActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type MovieActorsRelationship {
@@ -2130,10 +1972,6 @@ describe("Algebraic", () => {
               name: StringAggregateSelection!
             }
 
-            input MovieRelationInput {
-              actors: [MovieActorsCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -2150,9 +1988,7 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: MovieActorsAggregateInput
-              actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Movies where all of the related MovieActorsConnections match this filter
               \\"\\"\\"
@@ -2161,7 +1997,6 @@ describe("Algebraic", () => {
               Return Movies where none of the related MovieActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: MovieActorsConnectionWhere
-              actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Movies where one of the related MovieActorsConnections match this filter
               \\"\\"\\"
@@ -2174,20 +2009,15 @@ describe("Algebraic", () => {
               actors_ALL: PersonWhere
               \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
               actors_NONE: PersonWhere
-              actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
               actors_SINGLE: PersonWhere
               \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
               actors_SOME: PersonWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -2202,8 +2032,8 @@ describe("Algebraic", () => {
               createPeople(input: [PersonCreateInput!]!): CreatePeopleMutationResponse!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deletePeople(delete: PersonDeleteInput, where: PersonWhere): DeleteInfo!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updatePeople(connect: PersonConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: PersonRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: PersonDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: PersonDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: PersonUpdateInput, where: PersonWhere): UpdatePeopleMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updatePeople(update: PersonUpdateInput, where: PersonWhere): UpdatePeopleMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -2221,9 +2051,9 @@ describe("Algebraic", () => {
             }
 
             type Person {
-              actedInMovies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-              actedInMoviesAggregate(directed: Boolean = true, where: MovieWhere): PersonMovieActedInMoviesAggregationSelection
-              actedInMoviesConnection(after: String, directed: Boolean = true, first: Int, sort: [PersonActedInMoviesConnectionSort!], where: PersonActedInMoviesConnectionWhere): PersonActedInMoviesConnection!
+              actedInMovies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              actedInMoviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): PersonMovieActedInMoviesAggregationSelection
+              actedInMoviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonActedInMoviesConnectionSort!], where: PersonActedInMoviesConnectionWhere): PersonActedInMoviesConnection!
               name: String!
             }
 
@@ -2231,7 +2061,8 @@ describe("Algebraic", () => {
               AND: [PersonActedInMoviesAggregateInput!]
               NOT: PersonActedInMoviesAggregateInput
               OR: [PersonActedInMoviesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2266,9 +2097,7 @@ describe("Algebraic", () => {
               NOT: PersonActedInMoviesConnectionWhere
               OR: [PersonActedInMoviesConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: MovieWhere
-              node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input PersonActedInMoviesCreateFieldInput {
@@ -2295,41 +2124,21 @@ describe("Algebraic", () => {
               AND: [PersonActedInMoviesNodeAggregationWhereInput!]
               NOT: PersonActedInMoviesNodeAggregationWhereInput
               OR: [PersonActedInMoviesNodeAggregationWhereInput!]
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type PersonActedInMoviesRelationship {
@@ -2406,10 +2215,6 @@ describe("Algebraic", () => {
               sort: [PersonSort!]
             }
 
-            input PersonRelationInput {
-              actedInMovies: [PersonActedInMoviesCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort People by. The order in which sorts are applied is not guaranteed when specifying many fields in one PersonSort object.
             \\"\\"\\"
@@ -2426,9 +2231,7 @@ describe("Algebraic", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              actedInMovies: MovieWhere @deprecated(reason: \\"Use \`actedInMovies_SOME\` instead.\\")
               actedInMoviesAggregate: PersonActedInMoviesAggregateInput
-              actedInMoviesConnection: PersonActedInMoviesConnectionWhere @deprecated(reason: \\"Use \`actedInMoviesConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return People where all of the related PersonActedInMoviesConnections match this filter
               \\"\\"\\"
@@ -2437,7 +2240,6 @@ describe("Algebraic", () => {
               Return People where none of the related PersonActedInMoviesConnections match this filter
               \\"\\"\\"
               actedInMoviesConnection_NONE: PersonActedInMoviesConnectionWhere
-              actedInMoviesConnection_NOT: PersonActedInMoviesConnectionWhere @deprecated(reason: \\"Use \`actedInMoviesConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return People where one of the related PersonActedInMoviesConnections match this filter
               \\"\\"\\"
@@ -2450,30 +2252,25 @@ describe("Algebraic", () => {
               actedInMovies_ALL: MovieWhere
               \\"\\"\\"Return People where none of the related Movies match this filter\\"\\"\\"
               actedInMovies_NONE: MovieWhere
-              actedInMovies_NOT: MovieWhere @deprecated(reason: \\"Use \`actedInMovies_NONE\` instead.\\")
               \\"\\"\\"Return People where one of the related Movies match this filter\\"\\"\\"
               actedInMovies_SINGLE: MovieWhere
               \\"\\"\\"Return People where some of the related Movies match this filter\\"\\"\\"
               actedInMovies_SOME: MovieWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              people(options: PersonOptions, where: PersonWhere): [Person!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-              peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
+              peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -2493,7 +2290,6 @@ describe("Algebraic", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

@@ -40,12 +40,12 @@ describe("Relationship properties - disconnect", () => {
 
     test("should disconnect a relationship that has properties", async () => {
         const typeDefs = /* GraphQL */ `
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -64,8 +64,8 @@ describe("Relationship properties - disconnect", () => {
         const source = /* GraphQL */ `
             mutation ($movieTitle: String!, $actorName1: String!) {
                 ${Movie.operations.update}(
-                    where: { title: $movieTitle }
-                    disconnect: { actors: { where: { node: { name: $actorName1 } } } }
+                    where: { title_EQ: $movieTitle }
+                    update: { actors: { disconnect: { where: { node: { name_EQ: $actorName1 } } } } }
                 ) {
                     ${Movie.plural} {
                         title
@@ -107,15 +107,15 @@ describe("Relationship properties - disconnect", () => {
 
     test("should disconnect a relationship that has properties (with Union)", async () => {
         const typeDefs = /* GraphQL */ `
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
             }
 
-            type ${Show} {
+            type ${Show} @node {
                 name: String!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [ActedInUnion!]!
                     @relationship(type: "ACTED_IN", properties: "ActedInInterface", direction: OUT)
@@ -136,8 +136,8 @@ describe("Relationship properties - disconnect", () => {
         const source = /* GraphQL */ `
             mutation ($screenTime: Int!, $actorName: String!) {
                 ${Actor.operations.update}(
-                    where: { name: $actorName }
-                    disconnect: { actedIn: { ${Movie}: { where: { edge: { screenTime: $screenTime } } } } }
+                    where: { name_EQ: $actorName }
+                    update: { actedIn: { ${Movie}: { disconnect: { where: { edge: { screenTime_EQ: $screenTime } } } } } }
                 ) {
                     ${Actor.plural} {
                         name

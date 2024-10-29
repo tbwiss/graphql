@@ -35,7 +35,7 @@ describe("interface relationships", () => {
         Series = testHelper.createUniqueType("Series");
 
         const typeDefs = /* GraphQL */ `
-            type ${Episode} {
+            type ${Episode} @node {
                 runtime: Int!
                 series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -45,13 +45,13 @@ describe("interface relationships", () => {
                 actors: [${Actor}!]! @declareRelationship
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: [${Episode}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +61,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -97,7 +97,7 @@ describe("interface relationships", () => {
 
         const query = `
             mutation DeleteActorAndMovie($name: String, $title: String) {
-                ${Actor.operations.delete}(where: { name: $name }, delete: { actedIn: { where: { node: { title: $title } } } }) {
+                ${Actor.operations.delete}(where: { name_EQ: $name }, delete: { actedIn: { where: { node: { title_EQ: $title } } } }) {
                     nodesDeleted
                     relationshipsDeleted
                 }
@@ -160,11 +160,11 @@ describe("interface relationships", () => {
         const query = `
             mutation DeleteActorAndMovie($name1: String, $name2: String, $title: String) {
                 ${Actor.operations.delete}(
-                    where: { name: $name1 }
+                    where: { name_EQ: $name1 }
                     delete: {
                         actedIn: {
-                            where: { node: { title: $title } }
-                            delete: { actors: { where: { node: { name: $name2 } } } }
+                            where: { node: { title_EQ: $title } }
+                            delete: { actors: { where: { node: { name_EQ: $name2 } } } }
                         }
                     }
                 ) {

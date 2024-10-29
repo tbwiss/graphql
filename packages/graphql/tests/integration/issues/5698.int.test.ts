@@ -72,26 +72,6 @@ describe("https://github.com/neo4j/graphql/issues/5698", () => {
         });
     });
 
-    test("should not return non-null many-to-many relationships when passing null", async () => {
-        await testHelper.executeCypher(`
-            CREATE (:${Movie} {title: "The Matrix", released: 1999})<-[:DIRECTED]-(:${Person} {name: "Keanu"})
-        `);
-
-        const query = /* GraphQL */ `
-            query {
-                ${Person.plural}(where: { name: "Keanu", directed: null }) {
-                    name
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-        expect(result.errors).toBeUndefined();
-        expect(result.data).toEqual({
-            [Person.plural]: [],
-        });
-    });
-
     test("should not return nullable 1-1 relationships when passing null", async () => {
         await testHelper.executeCypher(`
             CREATE (:${Movie} {title: "The Matrix", released: 1999})<-[:ALSO_DIRECTED]-(:${Person} {name: "Keanu"})

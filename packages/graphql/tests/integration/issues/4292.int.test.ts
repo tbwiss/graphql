@@ -43,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 roles: [String!]!
             }
 
-            type ${User.name} {
+            type ${User.name} @node {
                 id: ID! @unique
                 email: String! @unique
                 name: String
@@ -54,7 +54,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 roles: [String!]!
             }
 
-            type ${Group.name} {
+            type ${Group.name} @node {
                 id: ID! @id @unique
                 name: String
                 members: [${Person.name}!]! @relationship(type: "MEMBER_OF", direction: IN)
@@ -65,7 +65,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 contributors: [${Contributor.name}!]! @relationship(type: "CONTRIBUTOR_TO", direction: IN)
             }
 
-            type ${Person.name} 
+            type ${Person.name} @node 
                 @authorization(
                     validate: [
                         {
@@ -76,9 +76,9 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                             operations: [DELETE]
                             where: {
                                 OR: [
-                                    { node: { creator: { id: "$jwt.uid" } } }
-                                    { node: { group: { admins_SOME: { user: { id: "$jwt.uid" } } } } }
-                                    { node: { group: { creator: { id: "$jwt.uid" } } } }
+                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
+                                    { node: { group: { admins_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
+                                    { node: { group: { creator: { id_EQ: "$jwt.uid" } } } }
                                 ]
                             }
                         }
@@ -86,10 +86,10 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                             operations: [READ, UPDATE]
                             where: {
                                 OR: [
-                                    { node: { creator: { id: "$jwt.uid" } } }
-                                    { node: { group: { admins_SOME: { user: { id: "$jwt.uid" } } } } }
-                                    { node: { group: { contributors_SOME: { user: { id: "$jwt.uid" } } } } }
-                                    { node: { group: { creator: { id: "$jwt.uid" } } } }
+                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
+                                    { node: { group: { admins_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
+                                    { node: { group: { contributors_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
+                                    { node: { group: { creator: { id_EQ: "$jwt.uid" } } } }
                                 ]
                             }
                         }
@@ -131,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 role: InviteeRole!
             }
 
-            type ${Admin.name} implements Invitee {
+            type ${Admin.name} implements Invitee @node {
                 id: ID! @unique @id
                 group: ${Group.name}! @relationship(type: "ADMIN_OF", direction: OUT)
                 creator: ${User.name}! @relationship(type: "CREATOR_OF", direction: IN)
@@ -142,7 +142,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 role: InviteeRole! @default(value: ADMIN)
             }
 
-            type ${Contributor.name} implements Invitee {
+            type ${Contributor.name} implements Invitee @node {
                 id: ID! @unique @id
                 group: ${Group.name}! @relationship(type: "CONTRIBUTOR_TO", direction: OUT)
                 creator: ${User.name}! @relationship(type: "CREATOR_OF", direction: IN)
@@ -192,7 +192,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
     test("should return groups with valid JWT", async () => {
         const query = /* GraphQL */ `
             query Groups {
-                ${Group.plural}(where: { id: "family_id_1" }) {
+                ${Group.plural}(where: { id_EQ: "family_id_1" }) {
                     id
                     name
                     members {
@@ -233,7 +233,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
     test("should raise Forbidden with invalid JWT", async () => {
         const query = /* GraphQL */ `
             query Groups {
-                ${Group.plural}(where: { id: "family_id_1" }) {
+                ${Group.plural}(where: { id_EQ: "family_id_1" }) {
                     id
                     name
                     members {

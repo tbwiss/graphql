@@ -22,25 +22,19 @@ import type { GraphQLInputObjectType } from "graphql";
 import { lexicographicSortSchema } from "graphql";
 import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
-import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
+import { TestCDCEngine } from "../../utils/builders/TestCDCEngine";
 
 describe("@filterable directive", () => {
-    let plugin: TestSubscriptionsEngine;
-
-    beforeAll(() => {
-        plugin = new TestSubscriptionsEngine();
-    });
-
     describe("on SCALAR", () => {
         test("default arguments should disable aggregation", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String @filterable
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
@@ -48,7 +42,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -103,13 +97,13 @@ describe("@filterable directive", () => {
 
         test("enable value and aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String @filterable(byValue: true, byAggregate: true)
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
@@ -117,7 +111,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -210,13 +204,13 @@ describe("@filterable directive", () => {
 
         test("enable only aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String @filterable(byValue: false, byAggregate: true)
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
@@ -224,7 +218,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -300,13 +294,13 @@ describe("@filterable directive", () => {
     describe("on RELATIONSHIP FIELD", () => {
         test("default arguments should disable aggregation", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                 }
@@ -314,7 +308,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -324,14 +318,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -348,13 +340,13 @@ describe("@filterable directive", () => {
 
         test("enable value and aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Actor!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -364,7 +356,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -374,14 +366,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -398,13 +388,13 @@ describe("@filterable directive", () => {
 
         test("enable only aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Actor!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -414,7 +404,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -448,13 +438,13 @@ describe("@filterable directive", () => {
 
         test("enable only value filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Actor!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -464,7 +454,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -474,14 +464,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -500,7 +488,7 @@ describe("@filterable directive", () => {
     describe("on INTERFACE RELATIONSHIP FIELD, (aggregation are not generated for abstract types)", () => {
         test("default arguments should disable aggregation", async () => {
             const typeDefs = gql`
-                type Actor implements Person {
+                type Actor implements Person @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -510,7 +498,7 @@ describe("@filterable directive", () => {
                     username: String!
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                 }
@@ -518,7 +506,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -528,14 +516,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -552,7 +538,7 @@ describe("@filterable directive", () => {
 
         test("enable value and aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor implements Person {
+                type Actor implements Person @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -562,7 +548,7 @@ describe("@filterable directive", () => {
                     username: String!
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -572,7 +558,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -582,14 +568,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -606,7 +590,7 @@ describe("@filterable directive", () => {
 
         test("enable only value filters", async () => {
             const typeDefs = gql`
-                type Actor implements Person {
+                type Actor implements Person @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -616,7 +600,7 @@ describe("@filterable directive", () => {
                     username: String!
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -626,7 +610,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -636,14 +620,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -660,7 +642,7 @@ describe("@filterable directive", () => {
 
         test("disable value filters", async () => {
             const typeDefs = gql`
-                type Actor implements Person {
+                type Actor implements Person @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -670,7 +652,7 @@ describe("@filterable directive", () => {
                     username: String!
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -680,7 +662,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -716,13 +698,13 @@ describe("@filterable directive", () => {
     describe("on UNION RELATIONSHIP FIELD, (aggregation are no generated for abstract types)", () => {
         test("default arguments should disable aggregation", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Appearance {
+                type Appearance @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -730,7 +712,7 @@ describe("@filterable directive", () => {
 
                 union Person = Actor | Appearance
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                 }
@@ -738,7 +720,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -748,14 +730,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -772,13 +752,13 @@ describe("@filterable directive", () => {
 
         test("enable value and aggregation filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Appearance {
+                type Appearance @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -786,7 +766,7 @@ describe("@filterable directive", () => {
 
                 union Person = Actor | Appearance
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -796,7 +776,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -806,14 +786,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -830,13 +808,13 @@ describe("@filterable directive", () => {
 
         test("enable only value filters", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
 
-                type Appearance {
+                type Appearance @node {
                     username: String!
                     password: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -844,7 +822,7 @@ describe("@filterable directive", () => {
 
                 union Person = Actor | Appearance
 
-                type Movie {
+                type Movie @node {
                     title: String
                     actors: [Person!]!
                         @relationship(type: "ACTED_IN", direction: IN)
@@ -854,7 +832,7 @@ describe("@filterable directive", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
                 features: {
-                    subscriptions: plugin,
+                    subscriptions: new TestCDCEngine(),
                 },
             });
             const schema = await neoSchema.getSchema();
@@ -864,14 +842,12 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const actorsConnection = movieWhereFields["actorsConnection"];
             const actorsConnectionALL = movieWhereFields["actorsConnection_ALL"];
             const actorsConnectionNONE = movieWhereFields["actorsConnection_NONE"];
             const actorsConnectionSINGLE = movieWhereFields["actorsConnection_SINGLE"];
             const actorsConnectionSOME = movieWhereFields["actorsConnection_SOME"];
 
             const actorsConnectionFilters = [
-                actorsConnection,
                 actorsConnectionALL,
                 actorsConnectionNONE,
                 actorsConnectionSINGLE,
@@ -891,13 +867,13 @@ describe("@filterable directive", () => {
         describe("on SCALAR", () => {
             test("default arguments should disable aggregation", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String @filterable
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
@@ -905,7 +881,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -918,9 +894,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -937,10 +913,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -992,7 +964,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -1006,10 +979,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -1027,7 +996,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -1054,10 +1022,6 @@ describe("@filterable directive", () => {
                       node: Movie!
                     }
 
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
-                    }
-
                     input ActorMoviesUpdateConnectionInput {
                       node: MovieUpdateInput
                     }
@@ -1080,46 +1044,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -1132,25 +1056,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -1171,9 +1087,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -1182,7 +1096,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -1195,30 +1108,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -1237,7 +1141,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -1251,7 +1154,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -1265,9 +1167,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -1285,7 +1187,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -1300,10 +1203,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: ActorConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -1321,7 +1220,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -1347,85 +1245,41 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      password_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_AVERAGE_LENGTH_EQUAL: Float
                       password_AVERAGE_LENGTH_GT: Float
                       password_AVERAGE_LENGTH_GTE: Float
                       password_AVERAGE_LENGTH_LT: Float
                       password_AVERAGE_LENGTH_LTE: Float
-                      password_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_LONGEST_LENGTH_EQUAL: Int
                       password_LONGEST_LENGTH_GT: Int
                       password_LONGEST_LENGTH_GTE: Int
                       password_LONGEST_LENGTH_LT: Int
                       password_LONGEST_LENGTH_LTE: Int
-                      password_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_SHORTEST_LENGTH_EQUAL: Int
                       password_SHORTEST_LENGTH_GT: Int
                       password_SHORTEST_LENGTH_GTE: Int
                       password_SHORTEST_LENGTH_LT: Int
                       password_SHORTEST_LENGTH_LTE: Int
-                      password_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Actor!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -1452,10 +1306,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -1501,46 +1351,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -1552,15 +1362,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -1580,9 +1386,7 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                       actorsAggregate: MovieActorsAggregateInput
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -1591,7 +1395,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -1604,20 +1407,15 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -1632,8 +1430,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1645,12 +1443,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -1669,13 +1467,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -1688,7 +1482,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -1704,13 +1497,13 @@ describe("@filterable directive", () => {
 
             test("enable value and aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String @filterable(byValue: true, byAggregate: true)
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
@@ -1718,7 +1511,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -1731,9 +1524,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -1750,10 +1543,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -1805,7 +1594,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -1820,10 +1610,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -1841,7 +1627,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -1867,50 +1652,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -1935,46 +1696,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -1987,25 +1708,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -2026,9 +1739,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -2037,7 +1748,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -2050,30 +1760,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -2092,7 +1793,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -2106,7 +1806,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -2120,9 +1819,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -2140,7 +1839,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -2155,10 +1855,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: ActorConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -2176,7 +1872,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -2202,85 +1897,41 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      password_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_AVERAGE_LENGTH_EQUAL: Float
                       password_AVERAGE_LENGTH_GT: Float
                       password_AVERAGE_LENGTH_GTE: Float
                       password_AVERAGE_LENGTH_LT: Float
                       password_AVERAGE_LENGTH_LTE: Float
-                      password_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_LONGEST_LENGTH_EQUAL: Int
                       password_LONGEST_LENGTH_GT: Int
                       password_LONGEST_LENGTH_GTE: Int
                       password_LONGEST_LENGTH_LT: Int
                       password_LONGEST_LENGTH_LTE: Int
-                      password_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_SHORTEST_LENGTH_EQUAL: Int
                       password_SHORTEST_LENGTH_GT: Int
                       password_SHORTEST_LENGTH_GTE: Int
                       password_SHORTEST_LENGTH_LT: Int
                       password_SHORTEST_LENGTH_LTE: Int
-                      password_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Actor!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -2307,10 +1958,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -2356,46 +2003,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -2407,15 +2014,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -2435,9 +2038,7 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                       actorsAggregate: MovieActorsAggregateInput
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -2446,7 +2047,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -2459,20 +2059,15 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -2487,8 +2082,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -2500,12 +2095,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -2524,13 +2119,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -2543,7 +2134,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -2559,13 +2149,13 @@ describe("@filterable directive", () => {
 
             test("enable only aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String @filterable(byValue: false, byAggregate: true)
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
@@ -2573,7 +2163,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -2586,9 +2176,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -2605,10 +2195,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -2660,7 +2246,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -2675,10 +2262,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -2696,7 +2279,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -2722,41 +2304,21 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
@@ -2786,40 +2348,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -2832,25 +2360,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -2871,9 +2391,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -2882,7 +2400,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -2895,30 +2412,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -2937,7 +2445,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -2951,7 +2458,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -2965,9 +2471,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -2985,7 +2491,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -3000,10 +2507,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: ActorConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -3021,7 +2524,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -3047,85 +2549,41 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      password_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_AVERAGE_LENGTH_EQUAL: Float
                       password_AVERAGE_LENGTH_GT: Float
                       password_AVERAGE_LENGTH_GTE: Float
                       password_AVERAGE_LENGTH_LT: Float
                       password_AVERAGE_LENGTH_LTE: Float
-                      password_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_LONGEST_LENGTH_EQUAL: Int
                       password_LONGEST_LENGTH_GT: Int
                       password_LONGEST_LENGTH_GTE: Int
                       password_LONGEST_LENGTH_LT: Int
                       password_LONGEST_LENGTH_LTE: Int
-                      password_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_SHORTEST_LENGTH_EQUAL: Int
                       password_SHORTEST_LENGTH_GT: Int
                       password_SHORTEST_LENGTH_GTE: Int
                       password_SHORTEST_LENGTH_LT: Int
                       password_SHORTEST_LENGTH_LTE: Int
-                      password_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Actor!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -3152,10 +2610,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -3201,44 +2655,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -3262,9 +2678,7 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                       actorsAggregate: MovieActorsAggregateInput
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -3273,7 +2687,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -3286,7 +2699,6 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
@@ -3304,8 +2716,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -3317,12 +2729,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -3341,13 +2753,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated: MovieCreatedEvent!
                       movieDeleted: MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated: MovieUpdatedEvent!
                     }
 
@@ -3360,7 +2768,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -3378,13 +2785,13 @@ describe("@filterable directive", () => {
         describe("on RELATIONSHIP FIELD", () => {
             test("default arguments should disable aggregation", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                     }
@@ -3392,7 +2799,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -3406,9 +2813,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -3425,10 +2832,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -3480,7 +2883,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -3495,10 +2899,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -3516,7 +2916,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -3542,50 +2941,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -3610,46 +2985,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -3662,25 +2997,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -3701,9 +3028,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -3712,7 +3037,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -3725,30 +3049,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -3767,7 +3082,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -3781,7 +3095,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -3795,9 +3108,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -3820,10 +3133,6 @@ describe("@filterable directive", () => {
                       where: ActorConnectWhere
                     }
 
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
-                    }
-
                     type MovieActorsConnection {
                       edges: [MovieActorsRelationship!]!
                       pageInfo: PageInfo!
@@ -3839,7 +3148,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -3866,10 +3174,6 @@ describe("@filterable directive", () => {
                       node: Actor!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateConnectionInput {
                       node: ActorUpdateInput
                     }
@@ -3894,10 +3198,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -3943,46 +3243,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -3994,15 +3254,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -4022,8 +3278,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -4032,7 +3286,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -4045,20 +3298,15 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -4073,8 +3321,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -4086,12 +3334,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -4110,13 +3358,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -4129,7 +3373,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -4145,13 +3388,13 @@ describe("@filterable directive", () => {
 
             test("enable value and aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Actor!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -4161,7 +3404,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -4174,9 +3417,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -4193,10 +3436,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -4248,7 +3487,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -4263,10 +3503,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -4284,7 +3520,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -4310,50 +3545,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -4378,46 +3589,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -4430,25 +3601,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -4469,9 +3632,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -4480,7 +3641,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -4493,30 +3653,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -4535,7 +3686,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -4549,7 +3699,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -4563,9 +3712,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -4583,7 +3732,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -4598,10 +3748,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: ActorConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -4619,7 +3765,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -4645,85 +3790,41 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      password_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_AVERAGE_LENGTH_EQUAL: Float
                       password_AVERAGE_LENGTH_GT: Float
                       password_AVERAGE_LENGTH_GTE: Float
                       password_AVERAGE_LENGTH_LT: Float
                       password_AVERAGE_LENGTH_LTE: Float
-                      password_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_LONGEST_LENGTH_EQUAL: Int
                       password_LONGEST_LENGTH_GT: Int
                       password_LONGEST_LENGTH_GTE: Int
                       password_LONGEST_LENGTH_LT: Int
                       password_LONGEST_LENGTH_LTE: Int
-                      password_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_SHORTEST_LENGTH_EQUAL: Int
                       password_SHORTEST_LENGTH_GT: Int
                       password_SHORTEST_LENGTH_GTE: Int
                       password_SHORTEST_LENGTH_LT: Int
                       password_SHORTEST_LENGTH_LTE: Int
-                      password_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Actor!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -4750,10 +3851,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -4799,46 +3896,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -4850,15 +3907,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -4878,9 +3931,7 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                       actorsAggregate: MovieActorsAggregateInput
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -4889,7 +3940,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -4902,20 +3952,15 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -4930,8 +3975,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -4943,12 +3988,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -4967,13 +4012,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -4986,7 +4027,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -5002,13 +4042,13 @@ describe("@filterable directive", () => {
 
             test("enable only aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Actor!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -5018,7 +4058,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -5031,9 +4071,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -5050,10 +4090,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -5105,7 +4141,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -5120,10 +4157,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -5141,7 +4174,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -5167,50 +4199,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -5235,46 +4243,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -5287,25 +4255,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -5326,9 +4286,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -5337,7 +4295,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -5350,30 +4307,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -5392,7 +4340,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -5406,7 +4353,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -5420,9 +4366,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -5440,7 +4386,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -5455,10 +4402,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: ActorConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -5476,7 +4419,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -5502,85 +4444,41 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      password_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_AVERAGE_LENGTH_EQUAL: Float
                       password_AVERAGE_LENGTH_GT: Float
                       password_AVERAGE_LENGTH_GTE: Float
                       password_AVERAGE_LENGTH_LT: Float
                       password_AVERAGE_LENGTH_LTE: Float
-                      password_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_LONGEST_LENGTH_EQUAL: Int
                       password_LONGEST_LENGTH_GT: Int
                       password_LONGEST_LENGTH_GTE: Int
                       password_LONGEST_LENGTH_LT: Int
                       password_LONGEST_LENGTH_LTE: Int
-                      password_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      password_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       password_SHORTEST_LENGTH_EQUAL: Int
                       password_SHORTEST_LENGTH_GT: Int
                       password_SHORTEST_LENGTH_GTE: Int
                       password_SHORTEST_LENGTH_LT: Int
                       password_SHORTEST_LENGTH_LTE: Int
-                      password_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      password_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Actor!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -5607,10 +4505,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -5656,46 +4550,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -5707,15 +4561,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -5736,15 +4586,11 @@ describe("@filterable directive", () => {
                       NOT: MovieWhere
                       OR: [MovieWhere!]
                       actorsAggregate: MovieActorsAggregateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -5759,8 +4605,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -5772,12 +4618,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -5796,13 +4642,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -5815,7 +4657,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -5831,13 +4672,13 @@ describe("@filterable directive", () => {
 
             test("enable only value filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Actor!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -5847,7 +4688,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -5860,9 +4701,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -5879,10 +4720,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -5934,7 +4771,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -5949,10 +4787,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -5970,7 +4804,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -5996,50 +4829,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -6064,46 +4873,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -6116,25 +4885,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -6155,9 +4916,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -6166,7 +4925,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -6179,30 +4937,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -6221,7 +4970,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -6235,7 +4983,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -6249,9 +4996,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -6274,10 +5021,6 @@ describe("@filterable directive", () => {
                       where: ActorConnectWhere
                     }
 
-                    type MovieActorsConnectedRelationship {
-                      node: ActorEventPayload!
-                    }
-
                     type MovieActorsConnection {
                       edges: [MovieActorsRelationship!]!
                       pageInfo: PageInfo!
@@ -6293,7 +5036,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -6320,10 +5062,6 @@ describe("@filterable directive", () => {
                       node: Actor!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: ActorSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateConnectionInput {
                       node: ActorUpdateInput
                     }
@@ -6348,10 +5086,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -6397,46 +5131,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -6448,15 +5142,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -6476,8 +5166,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -6486,7 +5174,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -6499,20 +5186,15 @@ describe("@filterable directive", () => {
                       actors_ALL: ActorWhere
                       \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                       actors_NONE: ActorWhere
-                      actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -6527,8 +5209,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -6540,12 +5222,12 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -6564,13 +5246,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -6583,7 +5261,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -6601,7 +5278,7 @@ describe("@filterable directive", () => {
         describe("on INTERFACE RELATIONSHIP FIELD, (aggregation does not exists on abstract types)", () => {
             test("default arguments should disable aggregation", async () => {
                 const typeDefs = gql`
-                    type Actor implements Person {
+                    type Actor implements Person @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -6611,7 +5288,7 @@ describe("@filterable directive", () => {
                         username: String!
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                     }
@@ -6619,7 +5296,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -6633,9 +5310,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -6644,14 +5321,6 @@ describe("@filterable directive", () => {
                       count: Int!
                       password: StringAggregateSelection!
                       username: StringAggregateSelection!
-                    }
-
-                    input ActorConnectInput {
-                      movies: [ActorMoviesConnectFieldInput!]
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -6676,16 +5345,12 @@ describe("@filterable directive", () => {
                       timestamp: Float!
                     }
 
-                    input ActorDisconnectInput {
-                      movies: [ActorMoviesDisconnectFieldInput!]
-                    }
-
                     type ActorEdge {
                       cursor: String!
                       node: Actor!
                     }
 
-                    type ActorEventPayload implements PersonEventPayload {
+                    type ActorEventPayload {
                       password: String!
                       username: String!
                     }
@@ -6703,7 +5368,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -6718,10 +5384,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -6739,7 +5401,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -6765,50 +5426,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -6833,46 +5470,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -6885,25 +5482,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -6924,9 +5513,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -6935,7 +5522,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -6948,30 +5534,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -6990,7 +5567,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -7004,7 +5580,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -7018,18 +5593,14 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true, where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
                     input MovieActorsConnectFieldInput {
                       where: PersonConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -7047,7 +5618,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: PersonWhere
-                      node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -7070,10 +5640,6 @@ describe("@filterable directive", () => {
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Person!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: PersonSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -7100,10 +5666,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -7158,46 +5720,6 @@ describe("@filterable directive", () => {
                       username: StringAggregateSelection!
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -7209,15 +5731,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -7237,8 +5755,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -7247,7 +5763,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -7260,20 +5775,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -7288,8 +5798,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -7328,10 +5838,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    interface PersonEventPayload {
-                      username: String!
-                    }
-
                     enum PersonImplementation {
                       Actor
                     }
@@ -7342,7 +5848,7 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
                       \\"\\"\\"
-                      sort: [PersonSort]
+                      sort: [PersonSort!]
                     }
 
                     \\"\\"\\"
@@ -7350,23 +5856,6 @@ describe("@filterable directive", () => {
                     \\"\\"\\"
                     input PersonSort {
                       username: SortDirection
-                    }
-
-                    input PersonSubscriptionWhere {
-                      AND: [PersonSubscriptionWhere!]
-                      NOT: PersonSubscriptionWhere
-                      OR: [PersonSubscriptionWhere!]
-                      typename_IN: [PersonImplementation!]
-                      username: String
-                      username_CONTAINS: String
-                      username_ENDS_WITH: String
-                      username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_STARTS_WITH: String
                     }
 
                     input PersonUpdateInput {
@@ -7378,28 +5867,24 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: PersonOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-                      peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
+                      peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -7418,13 +5903,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -7437,7 +5918,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -7453,7 +5933,7 @@ describe("@filterable directive", () => {
 
             test("enable value and aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor implements Person {
+                    type Actor implements Person @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -7463,7 +5943,7 @@ describe("@filterable directive", () => {
                         username: String!
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -7473,7 +5953,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -7487,9 +5967,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -7498,14 +5978,6 @@ describe("@filterable directive", () => {
                       count: Int!
                       password: StringAggregateSelection!
                       username: StringAggregateSelection!
-                    }
-
-                    input ActorConnectInput {
-                      movies: [ActorMoviesConnectFieldInput!]
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -7530,16 +6002,12 @@ describe("@filterable directive", () => {
                       timestamp: Float!
                     }
 
-                    input ActorDisconnectInput {
-                      movies: [ActorMoviesDisconnectFieldInput!]
-                    }
-
                     type ActorEdge {
                       cursor: String!
                       node: Actor!
                     }
 
-                    type ActorEventPayload implements PersonEventPayload {
+                    type ActorEventPayload {
                       password: String!
                       username: String!
                     }
@@ -7557,7 +6025,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -7572,10 +6041,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -7593,7 +6058,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -7619,50 +6083,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -7687,46 +6127,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -7739,25 +6139,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -7778,9 +6170,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -7789,7 +6179,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -7802,30 +6191,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -7844,7 +6224,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -7858,7 +6237,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -7872,9 +6250,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true, where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -7882,7 +6260,8 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -7892,10 +6271,6 @@ describe("@filterable directive", () => {
 
                     input MovieActorsConnectFieldInput {
                       where: PersonConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -7913,7 +6288,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: PersonWhere
-                      node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -7937,50 +6311,26 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsNodeAggregationWhereInput!]
                       NOT: MovieActorsNodeAggregationWhereInput
                       OR: [MovieActorsNodeAggregationWhereInput!]
-                      username_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_AVERAGE_LENGTH_EQUAL: Float
                       username_AVERAGE_LENGTH_GT: Float
                       username_AVERAGE_LENGTH_GTE: Float
                       username_AVERAGE_LENGTH_LT: Float
                       username_AVERAGE_LENGTH_LTE: Float
-                      username_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_LONGEST_LENGTH_EQUAL: Int
                       username_LONGEST_LENGTH_GT: Int
                       username_LONGEST_LENGTH_GTE: Int
                       username_LONGEST_LENGTH_LT: Int
                       username_LONGEST_LENGTH_LTE: Int
-                      username_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      username_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       username_SHORTEST_LENGTH_EQUAL: Int
                       username_SHORTEST_LENGTH_GT: Int
                       username_SHORTEST_LENGTH_GTE: Int
                       username_SHORTEST_LENGTH_LT: Int
                       username_SHORTEST_LENGTH_LTE: Int
-                      username_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      username_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type MovieActorsRelationship {
                       cursor: String!
                       node: Person!
-                    }
-
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: PersonSubscriptionWhere
                     }
 
                     input MovieActorsUpdateConnectionInput {
@@ -8007,10 +6357,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -8065,46 +6411,6 @@ describe("@filterable directive", () => {
                       username: StringAggregateSelection!
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -8116,15 +6422,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -8144,9 +6446,7 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                       actorsAggregate: MovieActorsAggregateInput
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -8155,7 +6455,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -8168,20 +6467,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -8196,8 +6490,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -8236,10 +6530,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    interface PersonEventPayload {
-                      username: String!
-                    }
-
                     enum PersonImplementation {
                       Actor
                     }
@@ -8250,7 +6540,7 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
                       \\"\\"\\"
-                      sort: [PersonSort]
+                      sort: [PersonSort!]
                     }
 
                     \\"\\"\\"
@@ -8258,23 +6548,6 @@ describe("@filterable directive", () => {
                     \\"\\"\\"
                     input PersonSort {
                       username: SortDirection
-                    }
-
-                    input PersonSubscriptionWhere {
-                      AND: [PersonSubscriptionWhere!]
-                      NOT: PersonSubscriptionWhere
-                      OR: [PersonSubscriptionWhere!]
-                      typename_IN: [PersonImplementation!]
-                      username: String
-                      username_CONTAINS: String
-                      username_ENDS_WITH: String
-                      username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_STARTS_WITH: String
                     }
 
                     input PersonUpdateInput {
@@ -8286,28 +6559,24 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: PersonOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-                      peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
+                      peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -8326,13 +6595,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -8345,7 +6610,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -8361,7 +6625,7 @@ describe("@filterable directive", () => {
 
             test("enable only value filters", async () => {
                 const typeDefs = gql`
-                    type Actor implements Person {
+                    type Actor implements Person @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -8371,7 +6635,7 @@ describe("@filterable directive", () => {
                         username: String!
                     }
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -8381,7 +6645,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -8395,9 +6659,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -8406,14 +6670,6 @@ describe("@filterable directive", () => {
                       count: Int!
                       password: StringAggregateSelection!
                       username: StringAggregateSelection!
-                    }
-
-                    input ActorConnectInput {
-                      movies: [ActorMoviesConnectFieldInput!]
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -8438,16 +6694,12 @@ describe("@filterable directive", () => {
                       timestamp: Float!
                     }
 
-                    input ActorDisconnectInput {
-                      movies: [ActorMoviesDisconnectFieldInput!]
-                    }
-
                     type ActorEdge {
                       cursor: String!
                       node: Actor!
                     }
 
-                    type ActorEventPayload implements PersonEventPayload {
+                    type ActorEventPayload {
                       password: String!
                       username: String!
                     }
@@ -8465,7 +6717,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -8480,10 +6733,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -8501,7 +6750,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -8527,50 +6775,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -8595,46 +6819,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -8647,25 +6831,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -8686,9 +6862,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -8697,7 +6871,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -8710,30 +6883,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -8752,7 +6916,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -8766,7 +6929,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -8780,18 +6942,14 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true, where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
                     input MovieActorsConnectFieldInput {
                       where: PersonConnectWhere
-                    }
-
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
                     }
 
                     type MovieActorsConnection {
@@ -8809,7 +6967,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsConnectionWhere
                       OR: [MovieActorsConnectionWhere!]
                       node: PersonWhere
-                      node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsCreateFieldInput {
@@ -8834,10 +6991,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      node: PersonSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateConnectionInput {
                       node: PersonUpdateInput
                     }
@@ -8862,10 +7015,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -8920,46 +7069,6 @@ describe("@filterable directive", () => {
                       username: StringAggregateSelection!
                     }
 
-                    input MovieRelationInput {
-                      actors: [MovieActorsCreateFieldInput!]
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -8971,15 +7080,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -8999,8 +7104,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -9009,7 +7112,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -9022,20 +7124,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -9050,8 +7147,8 @@ describe("@filterable directive", () => {
                       createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -9090,10 +7187,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    interface PersonEventPayload {
-                      username: String!
-                    }
-
                     enum PersonImplementation {
                       Actor
                     }
@@ -9104,7 +7197,7 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
                       \\"\\"\\"
-                      sort: [PersonSort]
+                      sort: [PersonSort!]
                     }
 
                     \\"\\"\\"
@@ -9112,23 +7205,6 @@ describe("@filterable directive", () => {
                     \\"\\"\\"
                     input PersonSort {
                       username: SortDirection
-                    }
-
-                    input PersonSubscriptionWhere {
-                      AND: [PersonSubscriptionWhere!]
-                      NOT: PersonSubscriptionWhere
-                      OR: [PersonSubscriptionWhere!]
-                      typename_IN: [PersonImplementation!]
-                      username: String
-                      username_CONTAINS: String
-                      username_ENDS_WITH: String
-                      username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_STARTS_WITH: String
                     }
 
                     input PersonUpdateInput {
@@ -9140,28 +7216,24 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: PersonOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-                      peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
+                      peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -9180,13 +7252,9 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -9199,7 +7267,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -9217,13 +7284,13 @@ describe("@filterable directive", () => {
         describe("on UNION RELATIONSHIP FIELD, (aggregation does not exists on abstract types)", () => {
             test("default arguments should disable aggregation", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Appearance {
+                    type Appearance @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -9231,7 +7298,7 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN) @filterable
                     }
@@ -9239,7 +7306,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -9253,9 +7320,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -9272,10 +7339,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -9327,7 +7390,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -9342,10 +7406,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -9363,7 +7423,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -9389,50 +7448,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -9457,46 +7492,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -9509,25 +7504,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -9548,9 +7535,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -9559,7 +7544,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -9572,30 +7556,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -9606,9 +7581,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -9625,10 +7600,6 @@ describe("@filterable directive", () => {
 
                     input AppearanceConnectWhere {
                       node: AppearanceWhere!
-                    }
-
-                    type AppearanceConnectedRelationships {
-                      movies: AppearanceMoviesConnectedRelationship
                     }
 
                     input AppearanceCreateInput {
@@ -9680,7 +7651,8 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -9695,10 +7667,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type AppearanceMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type AppearanceMoviesConnection {
@@ -9716,7 +7684,6 @@ describe("@filterable directive", () => {
                       NOT: AppearanceMoviesConnectionWhere
                       OR: [AppearanceMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input AppearanceMoviesCreateFieldInput {
@@ -9742,50 +7709,26 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesNodeAggregationWhereInput!]
                       NOT: AppearanceMoviesNodeAggregationWhereInput
                       OR: [AppearanceMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type AppearanceMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input AppearanceMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input AppearanceMoviesUpdateConnectionInput {
@@ -9810,46 +7753,6 @@ describe("@filterable directive", () => {
                       sort: [AppearanceSort!]
                     }
 
-                    input AppearanceRelationInput {
-                      movies: [AppearanceMoviesCreateFieldInput!]
-                    }
-
-                    type AppearanceRelationshipCreatedEvent {
-                      appearance: AppearanceEventPayload!
-                      createdRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipCreatedSubscriptionWhere {
-                      AND: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipCreatedSubscriptionWhere
-                      OR: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      createdRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    type AppearanceRelationshipDeletedEvent {
-                      appearance: AppearanceEventPayload!
-                      deletedRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipDeletedSubscriptionWhere {
-                      AND: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipDeletedSubscriptionWhere
-                      OR: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      deletedRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    input AppearanceRelationshipsSubscriptionWhere {
-                      movies: AppearanceMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -9862,25 +7765,17 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -9901,9 +7796,7 @@ describe("@filterable directive", () => {
                       AND: [AppearanceWhere!]
                       NOT: AppearanceWhere
                       OR: [AppearanceWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: AppearanceMoviesAggregateInput
-                      moviesConnection: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where all of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -9912,7 +7805,6 @@ describe("@filterable directive", () => {
                       Return Appearances where none of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: AppearanceMoviesConnectionWhere
-                      moviesConnection_NOT: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where one of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -9925,30 +7817,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Appearances where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Appearances where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -9972,7 +7855,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -9986,7 +7868,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -10000,8 +7881,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: QueryOptions, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -10015,7 +7896,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsActorConnectionWhere
                       OR: [MovieActorsActorConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsActorCreateFieldInput {
@@ -10035,10 +7915,6 @@ describe("@filterable directive", () => {
                     input MovieActorsActorFieldInput {
                       connect: [MovieActorsActorConnectFieldInput!]
                       create: [MovieActorsActorCreateFieldInput!]
-                    }
-
-                    input MovieActorsActorSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsActorUpdateConnectionInput {
@@ -10064,7 +7940,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsAppearanceConnectionWhere
                       OR: [MovieActorsAppearanceConnectionWhere!]
                       node: AppearanceWhere
-                      node_NOT: AppearanceWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsAppearanceCreateFieldInput {
@@ -10086,10 +7961,6 @@ describe("@filterable directive", () => {
                       create: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
-                    input MovieActorsAppearanceSubscriptionWhere {
-                      node: AppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsAppearanceUpdateConnectionInput {
                       node: AppearanceUpdateInput
                     }
@@ -10108,10 +7979,6 @@ describe("@filterable directive", () => {
                       Appearance: [MovieActorsAppearanceConnectFieldInput!]
                     }
 
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
-                    }
-
                     type MovieActorsConnection {
                       edges: [MovieActorsRelationship!]!
                       pageInfo: PageInfo!
@@ -10121,11 +7988,6 @@ describe("@filterable directive", () => {
                     input MovieActorsConnectionWhere {
                       Actor: MovieActorsActorConnectionWhere
                       Appearance: MovieActorsAppearanceConnectionWhere
-                    }
-
-                    input MovieActorsCreateFieldInput {
-                      Actor: [MovieActorsActorCreateFieldInput!]
-                      Appearance: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
                     input MovieActorsCreateInput {
@@ -10148,11 +8010,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      Actor: MovieActorsActorSubscriptionWhere
-                      Appearance: MovieActorsAppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateInput {
                       Actor: [MovieActorsActorUpdateFieldInput!]
                       Appearance: [MovieActorsAppearanceUpdateFieldInput!]
@@ -10169,10 +8026,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -10218,46 +8071,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: MovieActorsCreateFieldInput
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -10269,15 +8082,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -10297,8 +8106,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -10307,7 +8114,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -10320,20 +8126,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -10350,9 +8151,9 @@ describe("@filterable directive", () => {
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteAppearances(delete: AppearanceDeleteInput, where: AppearanceWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateAppearances(connect: AppearanceConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: AppearanceRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: AppearanceDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: AppearanceDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateAppearances(update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -10365,24 +8166,22 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    union PersonEventPayload = ActorEventPayload | AppearanceEventPayload
-
                     input PersonWhere {
                       Actor: ActorWhere
                       Appearance: AppearanceWhere
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      appearances(options: AppearanceOptions, where: AppearanceWhere): [Appearance!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
-                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort], where: AppearanceWhere): AppearancesConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: QueryOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
@@ -10407,18 +8206,12 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       appearanceCreated(where: AppearanceSubscriptionWhere): AppearanceCreatedEvent!
                       appearanceDeleted(where: AppearanceSubscriptionWhere): AppearanceDeletedEvent!
-                      appearanceRelationshipCreated(where: AppearanceRelationshipCreatedSubscriptionWhere): AppearanceRelationshipCreatedEvent!
-                      appearanceRelationshipDeleted(where: AppearanceRelationshipDeletedSubscriptionWhere): AppearanceRelationshipDeletedEvent!
                       appearanceUpdated(where: AppearanceSubscriptionWhere): AppearanceUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -10436,7 +8229,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -10452,13 +8244,13 @@ describe("@filterable directive", () => {
 
             test("enable value and aggregation filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Appearance {
+                    type Appearance @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -10466,7 +8258,7 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -10476,7 +8268,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -10490,9 +8282,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -10509,10 +8301,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -10564,7 +8352,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -10579,10 +8368,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -10600,7 +8385,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -10626,50 +8410,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -10694,46 +8454,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -10746,25 +8466,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -10785,9 +8497,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -10796,7 +8506,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -10809,30 +8518,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -10843,9 +8543,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -10862,10 +8562,6 @@ describe("@filterable directive", () => {
 
                     input AppearanceConnectWhere {
                       node: AppearanceWhere!
-                    }
-
-                    type AppearanceConnectedRelationships {
-                      movies: AppearanceMoviesConnectedRelationship
                     }
 
                     input AppearanceCreateInput {
@@ -10917,7 +8613,8 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -10932,10 +8629,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type AppearanceMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type AppearanceMoviesConnection {
@@ -10953,7 +8646,6 @@ describe("@filterable directive", () => {
                       NOT: AppearanceMoviesConnectionWhere
                       OR: [AppearanceMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input AppearanceMoviesCreateFieldInput {
@@ -10979,50 +8671,26 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesNodeAggregationWhereInput!]
                       NOT: AppearanceMoviesNodeAggregationWhereInput
                       OR: [AppearanceMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type AppearanceMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input AppearanceMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input AppearanceMoviesUpdateConnectionInput {
@@ -11047,46 +8715,6 @@ describe("@filterable directive", () => {
                       sort: [AppearanceSort!]
                     }
 
-                    input AppearanceRelationInput {
-                      movies: [AppearanceMoviesCreateFieldInput!]
-                    }
-
-                    type AppearanceRelationshipCreatedEvent {
-                      appearance: AppearanceEventPayload!
-                      createdRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipCreatedSubscriptionWhere {
-                      AND: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipCreatedSubscriptionWhere
-                      OR: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      createdRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    type AppearanceRelationshipDeletedEvent {
-                      appearance: AppearanceEventPayload!
-                      deletedRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipDeletedSubscriptionWhere {
-                      AND: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipDeletedSubscriptionWhere
-                      OR: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      deletedRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    input AppearanceRelationshipsSubscriptionWhere {
-                      movies: AppearanceMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -11099,25 +8727,17 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -11138,9 +8758,7 @@ describe("@filterable directive", () => {
                       AND: [AppearanceWhere!]
                       NOT: AppearanceWhere
                       OR: [AppearanceWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: AppearanceMoviesAggregateInput
-                      moviesConnection: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where all of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -11149,7 +8767,6 @@ describe("@filterable directive", () => {
                       Return Appearances where none of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: AppearanceMoviesConnectionWhere
-                      moviesConnection_NOT: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where one of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -11162,30 +8779,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Appearances where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Appearances where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -11209,7 +8817,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -11223,7 +8830,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -11237,8 +8843,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: QueryOptions, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -11252,7 +8858,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsActorConnectionWhere
                       OR: [MovieActorsActorConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsActorCreateFieldInput {
@@ -11272,10 +8877,6 @@ describe("@filterable directive", () => {
                     input MovieActorsActorFieldInput {
                       connect: [MovieActorsActorConnectFieldInput!]
                       create: [MovieActorsActorCreateFieldInput!]
-                    }
-
-                    input MovieActorsActorSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsActorUpdateConnectionInput {
@@ -11301,7 +8902,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsAppearanceConnectionWhere
                       OR: [MovieActorsAppearanceConnectionWhere!]
                       node: AppearanceWhere
-                      node_NOT: AppearanceWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsAppearanceCreateFieldInput {
@@ -11323,10 +8923,6 @@ describe("@filterable directive", () => {
                       create: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
-                    input MovieActorsAppearanceSubscriptionWhere {
-                      node: AppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsAppearanceUpdateConnectionInput {
                       node: AppearanceUpdateInput
                     }
@@ -11345,10 +8941,6 @@ describe("@filterable directive", () => {
                       Appearance: [MovieActorsAppearanceConnectFieldInput!]
                     }
 
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
-                    }
-
                     type MovieActorsConnection {
                       edges: [MovieActorsRelationship!]!
                       pageInfo: PageInfo!
@@ -11358,11 +8950,6 @@ describe("@filterable directive", () => {
                     input MovieActorsConnectionWhere {
                       Actor: MovieActorsActorConnectionWhere
                       Appearance: MovieActorsAppearanceConnectionWhere
-                    }
-
-                    input MovieActorsCreateFieldInput {
-                      Actor: [MovieActorsActorCreateFieldInput!]
-                      Appearance: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
                     input MovieActorsCreateInput {
@@ -11385,11 +8972,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      Actor: MovieActorsActorSubscriptionWhere
-                      Appearance: MovieActorsAppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateInput {
                       Actor: [MovieActorsActorUpdateFieldInput!]
                       Appearance: [MovieActorsAppearanceUpdateFieldInput!]
@@ -11406,10 +8988,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -11455,46 +9033,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: MovieActorsCreateFieldInput
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -11506,15 +9044,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -11534,8 +9068,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -11544,7 +9076,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -11557,20 +9088,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -11587,9 +9113,9 @@ describe("@filterable directive", () => {
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteAppearances(delete: AppearanceDeleteInput, where: AppearanceWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateAppearances(connect: AppearanceConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: AppearanceRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: AppearanceDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: AppearanceDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateAppearances(update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -11602,24 +9128,22 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    union PersonEventPayload = ActorEventPayload | AppearanceEventPayload
-
                     input PersonWhere {
                       Actor: ActorWhere
                       Appearance: AppearanceWhere
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      appearances(options: AppearanceOptions, where: AppearanceWhere): [Appearance!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
-                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort], where: AppearanceWhere): AppearancesConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: QueryOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
@@ -11644,18 +9168,12 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       appearanceCreated(where: AppearanceSubscriptionWhere): AppearanceCreatedEvent!
                       appearanceDeleted(where: AppearanceSubscriptionWhere): AppearanceDeletedEvent!
-                      appearanceRelationshipCreated(where: AppearanceRelationshipCreatedSubscriptionWhere): AppearanceRelationshipCreatedEvent!
-                      appearanceRelationshipDeleted(where: AppearanceRelationshipDeletedSubscriptionWhere): AppearanceRelationshipDeletedEvent!
                       appearanceUpdated(where: AppearanceSubscriptionWhere): AppearanceUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -11673,7 +9191,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!
@@ -11689,13 +9206,13 @@ describe("@filterable directive", () => {
 
             test("enable only value filters", async () => {
                 const typeDefs = gql`
-                    type Actor {
+                    type Actor @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type Appearance {
+                    type Appearance @node {
                         username: String!
                         password: String!
                         movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -11703,7 +9220,7 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    type Movie {
+                    type Movie @node {
                         title: String
                         actors: [Person!]!
                             @relationship(type: "ACTED_IN", direction: IN)
@@ -11713,7 +9230,7 @@ describe("@filterable directive", () => {
                 const neoSchema = new Neo4jGraphQL({
                     typeDefs,
                     features: {
-                        subscriptions: plugin,
+                        subscriptions: new TestCDCEngine(),
                     },
                 });
                 const schema = await neoSchema.getSchema();
@@ -11727,9 +9244,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -11746,10 +9263,6 @@ describe("@filterable directive", () => {
 
                     input ActorConnectWhere {
                       node: ActorWhere!
-                    }
-
-                    type ActorConnectedRelationships {
-                      movies: ActorMoviesConnectedRelationship
                     }
 
                     input ActorCreateInput {
@@ -11801,7 +9314,8 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -11816,10 +9330,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type ActorMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type ActorMoviesConnection {
@@ -11837,7 +9347,6 @@ describe("@filterable directive", () => {
                       NOT: ActorMoviesConnectionWhere
                       OR: [ActorMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input ActorMoviesCreateFieldInput {
@@ -11863,50 +9372,26 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesNodeAggregationWhereInput!]
                       NOT: ActorMoviesNodeAggregationWhereInput
                       OR: [ActorMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type ActorMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input ActorMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input ActorMoviesUpdateConnectionInput {
@@ -11931,46 +9416,6 @@ describe("@filterable directive", () => {
                       sort: [ActorSort!]
                     }
 
-                    input ActorRelationInput {
-                      movies: [ActorMoviesCreateFieldInput!]
-                    }
-
-                    type ActorRelationshipCreatedEvent {
-                      actor: ActorEventPayload!
-                      createdRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipCreatedSubscriptionWhere {
-                      AND: [ActorRelationshipCreatedSubscriptionWhere!]
-                      NOT: ActorRelationshipCreatedSubscriptionWhere
-                      OR: [ActorRelationshipCreatedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      createdRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    type ActorRelationshipDeletedEvent {
-                      actor: ActorEventPayload!
-                      deletedRelationship: ActorConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input ActorRelationshipDeletedSubscriptionWhere {
-                      AND: [ActorRelationshipDeletedSubscriptionWhere!]
-                      NOT: ActorRelationshipDeletedSubscriptionWhere
-                      OR: [ActorRelationshipDeletedSubscriptionWhere!]
-                      actor: ActorSubscriptionWhere
-                      deletedRelationship: ActorRelationshipsSubscriptionWhere
-                    }
-
-                    input ActorRelationshipsSubscriptionWhere {
-                      movies: ActorMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -11983,25 +9428,17 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -12022,9 +9459,7 @@ describe("@filterable directive", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: ActorMoviesAggregateInput
-                      moviesConnection: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Actors where all of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -12033,7 +9468,6 @@ describe("@filterable directive", () => {
                       Return Actors where none of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: ActorMoviesConnectionWhere
-                      moviesConnection_NOT: ActorMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Actors where one of the related ActorMoviesConnections match this filter
                       \\"\\"\\"
@@ -12046,30 +9480,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -12080,9 +9505,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true, where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -12099,10 +9524,6 @@ describe("@filterable directive", () => {
 
                     input AppearanceConnectWhere {
                       node: AppearanceWhere!
-                    }
-
-                    type AppearanceConnectedRelationships {
-                      movies: AppearanceMoviesConnectedRelationship
                     }
 
                     input AppearanceCreateInput {
@@ -12154,7 +9575,8 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int
+                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                      count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
                       count_LT: Int
@@ -12169,10 +9591,6 @@ describe("@filterable directive", () => {
                       \\"\\"\\"
                       overwrite: Boolean! = true
                       where: MovieConnectWhere
-                    }
-
-                    type AppearanceMoviesConnectedRelationship {
-                      node: MovieEventPayload!
                     }
 
                     type AppearanceMoviesConnection {
@@ -12190,7 +9608,6 @@ describe("@filterable directive", () => {
                       NOT: AppearanceMoviesConnectionWhere
                       OR: [AppearanceMoviesConnectionWhere!]
                       node: MovieWhere
-                      node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input AppearanceMoviesCreateFieldInput {
@@ -12216,50 +9633,26 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesNodeAggregationWhereInput!]
                       NOT: AppearanceMoviesNodeAggregationWhereInput
                       OR: [AppearanceMoviesNodeAggregationWhereInput!]
-                      title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_AVERAGE_LENGTH_EQUAL: Float
                       title_AVERAGE_LENGTH_GT: Float
                       title_AVERAGE_LENGTH_GTE: Float
                       title_AVERAGE_LENGTH_LT: Float
                       title_AVERAGE_LENGTH_LTE: Float
-                      title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_LONGEST_LENGTH_EQUAL: Int
                       title_LONGEST_LENGTH_GT: Int
                       title_LONGEST_LENGTH_GTE: Int
                       title_LONGEST_LENGTH_LT: Int
                       title_LONGEST_LENGTH_LTE: Int
-                      title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                      title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                       title_SHORTEST_LENGTH_EQUAL: Int
                       title_SHORTEST_LENGTH_GT: Int
                       title_SHORTEST_LENGTH_GTE: Int
                       title_SHORTEST_LENGTH_LT: Int
                       title_SHORTEST_LENGTH_LTE: Int
-                      title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                      title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                     }
 
                     type AppearanceMoviesRelationship {
                       cursor: String!
                       node: Movie!
-                    }
-
-                    input AppearanceMoviesRelationshipSubscriptionWhere {
-                      node: MovieSubscriptionWhere
                     }
 
                     input AppearanceMoviesUpdateConnectionInput {
@@ -12284,46 +9677,6 @@ describe("@filterable directive", () => {
                       sort: [AppearanceSort!]
                     }
 
-                    input AppearanceRelationInput {
-                      movies: [AppearanceMoviesCreateFieldInput!]
-                    }
-
-                    type AppearanceRelationshipCreatedEvent {
-                      appearance: AppearanceEventPayload!
-                      createdRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipCreatedSubscriptionWhere {
-                      AND: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipCreatedSubscriptionWhere
-                      OR: [AppearanceRelationshipCreatedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      createdRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    type AppearanceRelationshipDeletedEvent {
-                      appearance: AppearanceEventPayload!
-                      deletedRelationship: AppearanceConnectedRelationships!
-                      event: EventType!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input AppearanceRelationshipDeletedSubscriptionWhere {
-                      AND: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      NOT: AppearanceRelationshipDeletedSubscriptionWhere
-                      OR: [AppearanceRelationshipDeletedSubscriptionWhere!]
-                      appearance: AppearanceSubscriptionWhere
-                      deletedRelationship: AppearanceRelationshipsSubscriptionWhere
-                    }
-
-                    input AppearanceRelationshipsSubscriptionWhere {
-                      movies: AppearanceMoviesRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -12336,25 +9689,17 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -12375,9 +9720,7 @@ describe("@filterable directive", () => {
                       AND: [AppearanceWhere!]
                       NOT: AppearanceWhere
                       OR: [AppearanceWhere!]
-                      movies: MovieWhere @deprecated(reason: \\"Use \`movies_SOME\` instead.\\")
                       moviesAggregate: AppearanceMoviesAggregateInput
-                      moviesConnection: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where all of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -12386,7 +9729,6 @@ describe("@filterable directive", () => {
                       Return Appearances where none of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
                       moviesConnection_NONE: AppearanceMoviesConnectionWhere
-                      moviesConnection_NOT: AppearanceMoviesConnectionWhere @deprecated(reason: \\"Use \`moviesConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Appearances where one of the related AppearanceMoviesConnections match this filter
                       \\"\\"\\"
@@ -12399,30 +9741,21 @@ describe("@filterable directive", () => {
                       movies_ALL: MovieWhere
                       \\"\\"\\"Return Appearances where none of the related Movies match this filter\\"\\"\\"
                       movies_NONE: MovieWhere
-                      movies_NOT: MovieWhere @deprecated(reason: \\"Use \`movies_NONE\` instead.\\")
                       \\"\\"\\"Return Appearances where one of the related Movies match this filter\\"\\"\\"
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String
+                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
+                      password_EQ: String
                       password_IN: [String!]
-                      password_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      password_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       password_STARTS_WITH: String
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
+                      username_EQ: String
                       username_IN: [String!]
-                      username_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      username_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       username_STARTS_WITH: String
                     }
 
@@ -12446,7 +9779,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created during a create mutation
                     \\"\\"\\"
                     type CreateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       relationshipsCreated: Int!
                     }
@@ -12460,7 +9792,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships deleted during a delete mutation
                     \\"\\"\\"
                     type DeleteInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesDeleted: Int!
                       relationshipsDeleted: Int!
                     }
@@ -12474,8 +9805,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true, options: QueryOptions, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -12489,7 +9820,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsActorConnectionWhere
                       OR: [MovieActorsActorConnectionWhere!]
                       node: ActorWhere
-                      node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsActorCreateFieldInput {
@@ -12509,10 +9839,6 @@ describe("@filterable directive", () => {
                     input MovieActorsActorFieldInput {
                       connect: [MovieActorsActorConnectFieldInput!]
                       create: [MovieActorsActorCreateFieldInput!]
-                    }
-
-                    input MovieActorsActorSubscriptionWhere {
-                      node: ActorSubscriptionWhere
                     }
 
                     input MovieActorsActorUpdateConnectionInput {
@@ -12538,7 +9864,6 @@ describe("@filterable directive", () => {
                       NOT: MovieActorsAppearanceConnectionWhere
                       OR: [MovieActorsAppearanceConnectionWhere!]
                       node: AppearanceWhere
-                      node_NOT: AppearanceWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                     }
 
                     input MovieActorsAppearanceCreateFieldInput {
@@ -12560,10 +9885,6 @@ describe("@filterable directive", () => {
                       create: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
-                    input MovieActorsAppearanceSubscriptionWhere {
-                      node: AppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsAppearanceUpdateConnectionInput {
                       node: AppearanceUpdateInput
                     }
@@ -12582,10 +9903,6 @@ describe("@filterable directive", () => {
                       Appearance: [MovieActorsAppearanceConnectFieldInput!]
                     }
 
-                    type MovieActorsConnectedRelationship {
-                      node: PersonEventPayload!
-                    }
-
                     type MovieActorsConnection {
                       edges: [MovieActorsRelationship!]!
                       pageInfo: PageInfo!
@@ -12595,11 +9912,6 @@ describe("@filterable directive", () => {
                     input MovieActorsConnectionWhere {
                       Actor: MovieActorsActorConnectionWhere
                       Appearance: MovieActorsAppearanceConnectionWhere
-                    }
-
-                    input MovieActorsCreateFieldInput {
-                      Actor: [MovieActorsActorCreateFieldInput!]
-                      Appearance: [MovieActorsAppearanceCreateFieldInput!]
                     }
 
                     input MovieActorsCreateInput {
@@ -12622,11 +9934,6 @@ describe("@filterable directive", () => {
                       node: Person!
                     }
 
-                    input MovieActorsRelationshipSubscriptionWhere {
-                      Actor: MovieActorsActorSubscriptionWhere
-                      Appearance: MovieActorsAppearanceSubscriptionWhere
-                    }
-
                     input MovieActorsUpdateInput {
                       Actor: [MovieActorsActorUpdateFieldInput!]
                       Appearance: [MovieActorsAppearanceUpdateFieldInput!]
@@ -12643,10 +9950,6 @@ describe("@filterable directive", () => {
 
                     input MovieConnectWhere {
                       node: MovieWhere!
-                    }
-
-                    type MovieConnectedRelationships {
-                      actors: MovieActorsConnectedRelationship
                     }
 
                     input MovieCreateInput {
@@ -12692,46 +9995,6 @@ describe("@filterable directive", () => {
                       sort: [MovieSort!]
                     }
 
-                    input MovieRelationInput {
-                      actors: MovieActorsCreateFieldInput
-                    }
-
-                    type MovieRelationshipCreatedEvent {
-                      createdRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipCreatedSubscriptionWhere {
-                      AND: [MovieRelationshipCreatedSubscriptionWhere!]
-                      NOT: MovieRelationshipCreatedSubscriptionWhere
-                      OR: [MovieRelationshipCreatedSubscriptionWhere!]
-                      createdRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    type MovieRelationshipDeletedEvent {
-                      deletedRelationship: MovieConnectedRelationships!
-                      event: EventType!
-                      movie: MovieEventPayload!
-                      relationshipFieldName: String!
-                      timestamp: Float!
-                    }
-
-                    input MovieRelationshipDeletedSubscriptionWhere {
-                      AND: [MovieRelationshipDeletedSubscriptionWhere!]
-                      NOT: MovieRelationshipDeletedSubscriptionWhere
-                      OR: [MovieRelationshipDeletedSubscriptionWhere!]
-                      deletedRelationship: MovieRelationshipsSubscriptionWhere
-                      movie: MovieSubscriptionWhere
-                    }
-
-                    input MovieRelationshipsSubscriptionWhere {
-                      actors: MovieActorsRelationshipSubscriptionWhere
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -12743,15 +10006,11 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -12771,8 +10030,6 @@ describe("@filterable directive", () => {
                       AND: [MovieWhere!]
                       NOT: MovieWhere
                       OR: [MovieWhere!]
-                      actors: PersonWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
-                      actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
                       \\"\\"\\"
                       Return Movies where all of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -12781,7 +10038,6 @@ describe("@filterable directive", () => {
                       Return Movies where none of the related MovieActorsConnections match this filter
                       \\"\\"\\"
                       actorsConnection_NONE: MovieActorsConnectionWhere
-                      actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
                       \\"\\"\\"
                       Return Movies where one of the related MovieActorsConnections match this filter
                       \\"\\"\\"
@@ -12794,20 +10050,15 @@ describe("@filterable directive", () => {
                       actors_ALL: PersonWhere
                       \\"\\"\\"Return Movies where none of the related People match this filter\\"\\"\\"
                       actors_NONE: PersonWhere
-                      actors_NOT: PersonWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                       \\"\\"\\"Return Movies where one of the related People match this filter\\"\\"\\"
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
+                      title_EQ: String
                       title_IN: [String]
-                      title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                      title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                       title_STARTS_WITH: String
                     }
 
@@ -12824,9 +10075,9 @@ describe("@filterable directive", () => {
                       deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                       deleteAppearances(delete: AppearanceDeleteInput, where: AppearanceWhere): DeleteInfo!
                       deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-                      updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                      updateAppearances(connect: AppearanceConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: AppearanceRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: AppearanceDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: AppearanceDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
-                      updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                      updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                      updateAppearances(update: AppearanceUpdateInput, where: AppearanceWhere): UpdateAppearancesMutationResponse!
+                      updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                     }
 
                     \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -12839,24 +10090,22 @@ describe("@filterable directive", () => {
 
                     union Person = Actor | Appearance
 
-                    union PersonEventPayload = ActorEventPayload | AppearanceEventPayload
-
                     input PersonWhere {
                       Actor: ActorWhere
                       Appearance: AppearanceWhere
                     }
 
                     type Query {
-                      actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                      actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                      appearances(options: AppearanceOptions, where: AppearanceWhere): [Appearance!]!
+                      actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
-                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort], where: AppearanceWhere): AppearancesConnection!
-                      movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                      appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
+                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                      moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                      people(options: QueryOptions, where: PersonWhere): [Person!]!
+                      moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
@@ -12881,18 +10130,12 @@ describe("@filterable directive", () => {
                     type Subscription {
                       actorCreated(where: ActorSubscriptionWhere): ActorCreatedEvent!
                       actorDeleted(where: ActorSubscriptionWhere): ActorDeletedEvent!
-                      actorRelationshipCreated(where: ActorRelationshipCreatedSubscriptionWhere): ActorRelationshipCreatedEvent!
-                      actorRelationshipDeleted(where: ActorRelationshipDeletedSubscriptionWhere): ActorRelationshipDeletedEvent!
                       actorUpdated(where: ActorSubscriptionWhere): ActorUpdatedEvent!
                       appearanceCreated(where: AppearanceSubscriptionWhere): AppearanceCreatedEvent!
                       appearanceDeleted(where: AppearanceSubscriptionWhere): AppearanceDeletedEvent!
-                      appearanceRelationshipCreated(where: AppearanceRelationshipCreatedSubscriptionWhere): AppearanceRelationshipCreatedEvent!
-                      appearanceRelationshipDeleted(where: AppearanceRelationshipDeletedSubscriptionWhere): AppearanceRelationshipDeletedEvent!
                       appearanceUpdated(where: AppearanceSubscriptionWhere): AppearanceUpdatedEvent!
                       movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
                       movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-                      movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-                      movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
                       movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
                     }
 
@@ -12910,7 +10153,6 @@ describe("@filterable directive", () => {
                     Information about the number of nodes and relationships created and deleted during an update mutation
                     \\"\\"\\"
                     type UpdateInfo {
-                      bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                       nodesCreated: Int!
                       nodesDeleted: Int!
                       relationshipsCreated: Int!

@@ -43,11 +43,11 @@ describe("auth/object-path", () => {
                 nestedSub: String! @jwtClaim(path: "nested.object.path.sub")
             }
 
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type ${User} @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { id: "$jwt.nestedSub" } } }])
+            extend type ${User} @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { id_EQ: "$jwt.nestedSub" } } }])
         `;
 
         const userId = generate({
@@ -56,7 +56,7 @@ describe("auth/object-path", () => {
 
         const query = `
             {
-                ${User.plural}(where: {id: "${userId}"}) {
+                ${User.plural}(where: {id_EQ: "${userId}"}) {
                     id
                 }
             }
@@ -95,16 +95,16 @@ describe("auth/object-path", () => {
 
     test("should use $context value plucking on auth", async () => {
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
-            type ${Post} {
+            type ${Post} @node {
                 id: ID
                 creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
             }
 
-            extend type ${Post} @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { creator: { id: "$context.userId" } } } }])
+            extend type ${Post} @node @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { creator: { id_EQ: "$context.userId" } } } }])
         `;
 
         const userId = generate({
@@ -117,7 +117,7 @@ describe("auth/object-path", () => {
 
         const query = `
             {
-                ${Post.plural}(where: {id: "${postId}"}) {
+                ${Post.plural}(where: {id_EQ: "${postId}"}) {
                     id
                 }
             }
@@ -154,7 +154,7 @@ describe("auth/object-path", () => {
                 roles: [String!]! @jwtClaim(path: "https://github\\\\.com/claims.https://github\\\\.com/claims/roles")
             }
 
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
@@ -167,7 +167,7 @@ describe("auth/object-path", () => {
 
         const query = `
             {
-                ${User.plural}(where: {id: "${userId}"}) {
+                ${User.plural}(where: {id_EQ: "${userId}"}) {
                     id
                 }
             }
@@ -204,7 +204,7 @@ describe("auth/object-path", () => {
                 roles: [String!]! 
             }
 
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
@@ -217,7 +217,7 @@ describe("auth/object-path", () => {
 
         const query = `
             {
-                ${User.plural}(where: {id: "${userId}"}) {
+                ${User.plural}(where: {id_EQ: "${userId}"}) {
                     id
                 }
             }

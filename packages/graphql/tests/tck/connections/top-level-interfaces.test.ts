@@ -31,20 +31,20 @@ describe("Top level interface connections", () => {
                 actors: [Actor!]! @declareRelationship
             }
 
-            type Movie implements Show {
+            type Movie implements Show @node {
                 title: String!
                 cost: Float
                 runtime: Int
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Series implements Show {
+            type Series implements Show @node {
                 title: String!
                 episodes: Int
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Show!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -62,7 +62,7 @@ describe("Top level interface connections", () => {
     test("Top level connection", async () => {
         const query = /* GraphQL */ `
             query {
-                showsConnection(where: { title: "The Matrix" }) {
+                showsConnection(where: { title_EQ: "The Matrix" }) {
                     edges {
                         node {
                             title
@@ -104,7 +104,7 @@ describe("Top level interface connections", () => {
     test("Top level connection with limit", async () => {
         const query = /* GraphQL */ `
             query {
-                showsConnection(where: { title: "The Matrix" }, first: 2) {
+                showsConnection(where: { title_EQ: "The Matrix" }, first: 2) {
                     edges {
                         node {
                             title

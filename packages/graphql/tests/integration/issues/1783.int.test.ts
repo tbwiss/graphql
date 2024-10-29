@@ -33,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
         testMasterData = testHelper.createUniqueType("MasterData");
 
         const typeDefs = `
-            type ${testSeries} {
+            type ${testSeries} @node {
                 id: ID! @unique
                 current: Boolean!
                 architecture: [${testMasterData}!]!
@@ -41,7 +41,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
                 nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }
     
-            type ${testNameDetails} @mutation(operations: []) @query(read: false, aggregate: false) {
+            type ${testNameDetails} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                 fullName: String!
             }
     
@@ -49,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
                 current: Boolean!
             }
     
-            type ${testMasterData} {
+            type ${testMasterData} @node {
                 id: ID! @unique
                 current: Boolean!
                 nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
@@ -109,10 +109,10 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 nameDetailsConnection: {
                     edge: {
-                        current: true,
+                        current_EQ: true,
                     },
                     node: {
                         fullName_CONTAINS: "1",
@@ -120,22 +120,22 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
                 },
                 architectureConnection_SINGLE: {
                     edge: {
-                        current: true,
+                        current_EQ: true,
                     },
                     node: {
                         nameDetailsConnection: {
                             edge: {
-                                current: true,
+                                current_EQ: true,
                             },
                             node: {
-                                fullName: "MHA",
+                                fullName_EQ: "MHA",
                             },
                         },
                     },
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 

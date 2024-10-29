@@ -24,10 +24,12 @@ import type { Directive } from "graphql-compose";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import type { JWTVerifyOptions, RemoteJWKSetOptions } from "jose";
 import type { Integer } from "neo4j-driver";
+import type { Neo4jGraphQLSubscriptionsCDCEngine } from "../classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
 import type { RelationshipNestedOperationsOption, RelationshipQueryDirectionOption } from "../constants";
 import type { Neo4jGraphQLSchemaModel } from "../schema-model/Neo4jGraphQLSchemaModel";
 import type { DefaultAnnotationValue } from "../schema-model/annotation/DefaultAnnotation";
 import type { VectorField } from "../schema-model/annotation/VectorAnnotation";
+import type { RelationshipDirection } from "../schema-model/relationship/Relationship";
 import type { JwtPayload } from "./jwt-payload";
 import type { Neo4jGraphQLContext } from "./neo4j-graphql-context";
 
@@ -134,7 +136,7 @@ export interface BaseField {
  * Representation of the `@relationship` directive and its meta.
  */
 export interface RelationField extends BaseField {
-    direction: "OUT" | "IN";
+    direction: RelationshipDirection;
     typeUnescaped: string;
     type: string;
     connectionPrefix?: string;
@@ -249,9 +251,7 @@ export interface GraphQLWhereArg {
 
 export interface ConnectionWhereArg {
     node?: GraphQLWhereArg;
-    node_NOT?: GraphQLWhereArg;
     edge?: GraphQLWhereArg;
-    edge_NOT?: GraphQLWhereArg;
     AND?: ConnectionWhereArg[];
     OR?: ConnectionWhereArg[];
     NOT?: ConnectionWhereArg;
@@ -349,39 +349,9 @@ export type NodeSubscriptionsEvent =
           id: string;
           timestamp: number;
       };
-export type RelationshipSubscriptionsEvent =
-    | {
-          event: "create_relationship";
-          relationshipName: string;
-          properties: {
-              from: Record<string, any>;
-              to: Record<string, any>;
-              relationship: Record<string, any>;
-          };
-          id_from: string;
-          id_to: string;
-          fromTypename: string;
-          toTypename: string;
-          id: string;
-          timestamp: number;
-      }
-    | {
-          event: "delete_relationship";
-          relationshipName: string;
-          properties: {
-              from: Record<string, any>;
-              to: Record<string, any>;
-              relationship: Record<string, any>;
-          };
-          id_from: string;
-          id_to: string;
-          fromTypename: string;
-          toTypename: string;
-          id: string;
-          timestamp: number;
-      };
+
 /** Serialized subscription event */
-export type SubscriptionsEvent = NodeSubscriptionsEvent | RelationshipSubscriptionsEvent;
+export type SubscriptionsEvent = NodeSubscriptionsEvent;
 
 export type SubscriptionEngineContext = {
     schemaModel: Neo4jGraphQLSchemaModel;
@@ -472,28 +442,22 @@ export type Neo4jFeaturesSettings = {
     filters?: Neo4jFiltersSettings;
     populatedBy?: Neo4jPopulatedBySettings;
     authorization?: Neo4jAuthorizationSettings;
-    subscriptions?: Neo4jGraphQLSubscriptionsEngine | boolean;
+    subscriptions?: boolean | Neo4jGraphQLSubscriptionsCDCEngine;
     /** If set to `true`, removes `@neo4j/graphql` fields that are marked as deprecated to reduce schema size.
      *
      * NOTE: this will not remove user defined deprecated fields
      **/
     excludeDeprecatedFields?: {
-        bookmark?: boolean;
-        negationFilters?: boolean;
-        arrayFilters?: boolean;
-        stringAggregation?: boolean;
-        aggregationFilters?: boolean;
-        nestedUpdateOperationsFields?: boolean;
+        implicitEqualFilters?: boolean;
+        deprecatedOptionsArgument?: boolean;
+        directedArgument?: boolean;
     };
     vector?: Neo4jVectorSettings;
 };
 
 /** Parsed features used in context */
-export type ContextFeatures = {
-    filters?: Neo4jFiltersSettings;
-    populatedBy?: Neo4jPopulatedBySettings;
-    authorization?: Neo4jAuthorizationSettings;
-    subscriptions?: Neo4jGraphQLSubscriptionsEngine;
+export type ContextFeatures = Neo4jFeaturesSettings & {
+    subscriptionsEngine?: Neo4jGraphQLSubscriptionsEngine;
 };
 
 export type PredicateReturn = {

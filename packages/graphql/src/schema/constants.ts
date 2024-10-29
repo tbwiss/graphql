@@ -19,58 +19,23 @@
 
 import { DEPRECATED } from "../constants";
 
-export const DEPRECATE_NOT = {
+export const DEPRECATE_IMPLICIT_EQUAL_FILTERS = {
     name: DEPRECATED,
     args: {
-        reason: "Negation filters will be deprecated, use the NOT operator to achieve the same behavior",
+        reason: "Please use the explicit _EQ version",
     },
 };
 
-export const DEPRECATE_IMPLICIT_LENGTH_AGGREGATION_FILTERS = {
+export const DEPRECATE_OPTIONS_ARGUMENT = {
     name: DEPRECATED,
     args: {
-        reason: "Please use the explicit _LENGTH version for string aggregation.",
+        reason: "Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.",
     },
 };
 
-export const DEPRECATE_INVALID_AGGREGATION_FILTERS = {
+export const DEPRECATE_DIRECTED_ARGUMENT = {
     name: DEPRECATED,
     args: {
-        reason: "Aggregation filters that are not relying on an aggregating function will be deprecated.",
-    },
-};
-
-export const DEPRECATE_UPDATE_CREATE_INPUT_FIELD = {
-    name: DEPRECATED,
-    args: {
-        reason: "Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument",
-    },
-};
-
-export const DEPRECATE_UPDATE_DELETE_INPUT_FIELD = {
-    name: DEPRECATED,
-    args: {
-        reason: "Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument",
-    },
-};
-
-export const DEPRECATE_UPDATE_CONNECT_INPUT_FIELD = {
-    name: DEPRECATED,
-    args: {
-        reason: "Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument",
-    },
-};
-
-export const DEPRECATE_UPDATE_DISCONNECT_INPUT_FIELD = {
-    name: DEPRECATED,
-    args: {
-        reason: "Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument",
-    },
-};
-
-export const DEPRECATE_UPDATE_CONNECT_OR_CREATE_INPUT_FIELD = {
-    name: DEPRECATED,
-    args: {
-        reason: "Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument",
+        reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
     },
 };

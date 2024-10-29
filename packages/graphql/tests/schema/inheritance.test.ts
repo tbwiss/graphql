@@ -34,7 +34,7 @@ describe("inheritance", () => {
                 friends: [Person!]! @declareRelationship @customDirectiveField
             }
 
-            type Actor implements Person @customDirectiveObj {
+            type Actor implements Person @customDirectiveObj @node {
                 name: String
                 friends: [Person!]! @relationship(type: "FRIENDS_WITH", direction: OUT, properties: "FriendsWith")
             }
@@ -59,19 +59,15 @@ describe("inheritance", () => {
             directive @customDirectiveObj on OBJECT
 
             type Actor implements Person @customDirectiveObj {
-              friends(directed: Boolean = true, options: PersonOptions, where: PersonWhere): [Person!]!
-              friendsAggregate(directed: Boolean = true, where: PersonWhere): ActorPersonFriendsAggregationSelection
-              friendsConnection(after: String, directed: Boolean = true, first: Int, sort: [PersonFriendsConnectionSort!], where: PersonFriendsConnectionWhere): PersonFriendsConnection!
+              friends(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              friendsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): ActorPersonFriendsAggregationSelection
+              friendsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonFriendsConnectionSort!], where: PersonFriendsConnectionWhere): PersonFriendsConnection!
               name: String
             }
 
             type ActorAggregateSelection {
               count: Int!
               name: StringAggregateSelection!
-            }
-
-            input ActorConnectInput {
-              friends: [ActorFriendsConnectFieldInput!]
             }
 
             input ActorCreateInput {
@@ -83,10 +79,6 @@ describe("inheritance", () => {
               friends: [ActorFriendsDeleteFieldInput!]
             }
 
-            input ActorDisconnectInput {
-              friends: [ActorFriendsDisconnectFieldInput!]
-            }
-
             type ActorEdge {
               cursor: String!
               node: Actor!
@@ -96,7 +88,8 @@ describe("inheritance", () => {
               AND: [ActorFriendsAggregateInput!]
               NOT: ActorFriendsAggregateInput
               OR: [ActorFriendsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -135,41 +128,21 @@ describe("inheritance", () => {
               AND: [ActorFriendsNodeAggregationWhereInput!]
               NOT: ActorFriendsNodeAggregationWhereInput
               OR: [ActorFriendsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input ActorFriendsUpdateConnectionInput {
@@ -209,10 +182,6 @@ describe("inheritance", () => {
               name: StringAggregateSelection!
             }
 
-            input ActorRelationInput {
-              friends: [ActorFriendsCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -229,9 +198,7 @@ describe("inheritance", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              friends: PersonWhere @deprecated(reason: \\"Use \`friends_SOME\` instead.\\")
               friendsAggregate: ActorFriendsAggregateInput
-              friendsConnection: PersonFriendsConnectionWhere @deprecated(reason: \\"Use \`friendsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related PersonFriendsConnections match this filter
               \\"\\"\\"
@@ -240,7 +207,6 @@ describe("inheritance", () => {
               Return Actors where none of the related PersonFriendsConnections match this filter
               \\"\\"\\"
               friendsConnection_NONE: PersonFriendsConnectionWhere
-              friendsConnection_NOT: PersonFriendsConnectionWhere @deprecated(reason: \\"Use \`friendsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related PersonFriendsConnections match this filter
               \\"\\"\\"
@@ -253,20 +219,15 @@ describe("inheritance", () => {
               friends_ALL: PersonWhere
               \\"\\"\\"Return Actors where none of the related People match this filter\\"\\"\\"
               friends_NONE: PersonWhere
-              friends_NOT: PersonWhere @deprecated(reason: \\"Use \`friends_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related People match this filter\\"\\"\\"
               friends_SINGLE: PersonWhere
               \\"\\"\\"Return Actors where some of the related People match this filter\\"\\"\\"
               friends_SOME: PersonWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -285,7 +246,6 @@ describe("inheritance", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -294,7 +254,6 @@ describe("inheritance", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -316,11 +275,6 @@ describe("inheritance", () => {
               since_AVERAGE_GTE: Float
               since_AVERAGE_LT: Float
               since_AVERAGE_LTE: Float
-              since_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               since_MAX_EQUAL: Int
               since_MAX_GT: Int
               since_MAX_GTE: Int
@@ -356,14 +310,13 @@ describe("inheritance", () => {
               AND: [FriendsWithWhere!]
               NOT: FriendsWithWhere
               OR: [FriendsWithWhere!]
-              since: Int
+              since: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              since_EQ: Int
               since_GT: Int
               since_GTE: Int
               since_IN: [Int]
               since_LT: Int
               since_LTE: Int
-              since_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              since_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type IntAggregateSelection {
@@ -376,7 +329,7 @@ describe("inheritance", () => {
             type Mutation {
               createActors(input: [ActorCreateInput!]!): CreateActorsMutationResponse!
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -394,7 +347,7 @@ describe("inheritance", () => {
             }
 
             interface Person @customDirectiveInter {
-              friends(options: PersonOptions, where: PersonWhere): [Person!]! @customDirectiveField
+              friends(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]! @customDirectiveField
               friendsConnection(after: String, first: Int, sort: [PersonFriendsConnectionSort!], where: PersonFriendsConnectionWhere): PersonFriendsConnection!
               name: String @customDirectiveField
             }
@@ -433,7 +386,8 @@ describe("inheritance", () => {
               AND: [PersonFriendsAggregateInput!]
               NOT: PersonFriendsAggregateInput
               OR: [PersonFriendsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -464,9 +418,7 @@ describe("inheritance", () => {
               NOT: PersonFriendsConnectionWhere
               OR: [PersonFriendsConnectionWhere!]
               edge: PersonFriendsEdgeWhere
-              edge_NOT: PersonFriendsEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: PersonWhere
-              node_NOT: PersonWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input PersonFriendsCreateFieldInput {
@@ -528,41 +480,21 @@ describe("inheritance", () => {
               AND: [PersonFriendsNodeAggregationWhereInput!]
               NOT: PersonFriendsNodeAggregationWhereInput
               OR: [PersonFriendsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type PersonFriendsRelationship {
@@ -597,7 +529,7 @@ describe("inheritance", () => {
               \\"\\"\\"
               Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [PersonSort]
+              sort: [PersonSort!]
             }
 
             \\"\\"\\"
@@ -616,9 +548,7 @@ describe("inheritance", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              friends: PersonWhere @deprecated(reason: \\"Use \`friends_SOME\` instead.\\")
               friendsAggregate: PersonFriendsAggregateInput
-              friendsConnection: PersonFriendsConnectionWhere @deprecated(reason: \\"Use \`friendsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return People where all of the related PersonFriendsConnections match this filter
               \\"\\"\\"
@@ -627,7 +557,6 @@ describe("inheritance", () => {
               Return People where none of the related PersonFriendsConnections match this filter
               \\"\\"\\"
               friendsConnection_NONE: PersonFriendsConnectionWhere
-              friendsConnection_NOT: PersonFriendsConnectionWhere @deprecated(reason: \\"Use \`friendsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return People where one of the related PersonFriendsConnections match this filter
               \\"\\"\\"
@@ -640,31 +569,26 @@ describe("inheritance", () => {
               friends_ALL: PersonWhere
               \\"\\"\\"Return People where none of the related People match this filter\\"\\"\\"
               friends_NONE: PersonWhere
-              friends_NOT: PersonWhere @deprecated(reason: \\"Use \`friends_NONE\` instead.\\")
               \\"\\"\\"Return People where one of the related People match this filter\\"\\"\\"
               friends_SINGLE: PersonWhere
               \\"\\"\\"Return People where some of the related People match this filter\\"\\"\\"
               friends_SOME: PersonWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
               typename_IN: [PersonImplementation!]
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              people(options: PersonOptions, where: PersonWhere): [Person!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
-              peopleConnection(after: String, first: Int, sort: [PersonSort], where: PersonWhere): PeopleConnection!
+              peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -689,7 +613,6 @@ describe("inheritance", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

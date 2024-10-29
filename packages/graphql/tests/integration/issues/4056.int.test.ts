@@ -23,7 +23,7 @@ import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/4056", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
 
     let User: UniqueType;
     let Tenant: UniqueType;
@@ -52,9 +52,10 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
             roles: [String]
           }
           type ${User}
+            @node
             @authorization(
                 validate: [
-                    { where: { node: { userId: "$jwt.id" } }, operations: [READ] }
+                    { where: { node: { userId_EQ: "$jwt.id" } }, operations: [READ] }
                     { where: { jwt: { roles_INCLUDES: "overlord" } } }
                 ]
             ) {
@@ -64,9 +65,10 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
           
           
           type ${Tenant}
+            @node
             @authorization(
                 validate: [
-                    { where: { node: { admins: { userId: "$jwt.id" } } } }
+                    { where: { node: { admins_SOME: { userId_EQ: "$jwt.id" } } } }
                     { where: { jwt: { roles_INCLUDES: "overlord" } } }
                 ]
             ) {
@@ -76,7 +78,7 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
           }
           
           
-          type ${Settings} {
+          type ${Settings} @node {
             id: ID! @id
             tenant: ${Tenant}! @relationship(type: "HAS_SETTINGS", direction: IN)
             openingDays: [${OpeningDay}!]! @relationship(type: "VALID_OPENING_DAYS", direction: OUT)
@@ -85,9 +87,10 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
           }
           
           type ${OpeningDay}
+            @node
             @authorization(
                 validate: [
-                {  where: { node: {settings: { tenant: { admins: { userId: "$jwt.id" } } } } } }
+                {  where: { node: {settings: { tenant: { admins_SOME: { userId_EQ: "$jwt.id" } } } } } }
                 { where: { jwt: { roles_INCLUDES: "overlord" } } }
             ]
             ) {
@@ -154,7 +157,7 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
                 connect: {
                     where: {
                         node: {
-                            id: settingsId,
+                            id_EQ: settingsId,
                         },
                     },
                 },
@@ -227,7 +230,7 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
         const neo4jGraphql = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: true,
+                subscriptions: await testHelper.getSubscriptionEngine(),
                 populatedBy: {
                     callbacks: {
                         getUserIDFromContext: (_parent, _args, context) => {

@@ -26,13 +26,13 @@ describe("Root Connection Query tests", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 id: ID
                 title: String
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -46,7 +46,7 @@ describe("Root Connection Query tests", () => {
     test("Simple selection, Movie by title", async () => {
         const query = /* GraphQL */ `
             {
-                moviesConnection(where: { title: "River Runs Through It, A" }) {
+                moviesConnection(where: { title_EQ: "River Runs Through It, A" }) {
                     totalCount
                     edges {
                         node {

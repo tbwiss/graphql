@@ -38,14 +38,14 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                 relatedTo: [Product!]!
             }
 
-            type ${Series} implements Product {
+            type ${Series} implements Product @node {
                 productTitle: String!
                 relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
 
                 seasons: [${Season}!]!
             }
 
-            type ${Season} implements Product {
+            type ${Season} implements Product @node {
                 productTitle: String!
                 relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
 
@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                 episodes: [${ProgrammeItem}!]!
             }
 
-            type ${ProgrammeItem} implements Product {
+            type ${ProgrammeItem} implements Product @node {
                 productTitle: String!
                 relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
 
@@ -83,9 +83,6 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                         productTitle: "TestFilm1"
                     }
                 ]) {
-                    info {
-                        bookmark
-                    }
                     ${ProgrammeItem.plural} {
                         productTitle
                         episodeNumber
@@ -97,12 +94,15 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
         const updateProgrammeItems = /* GraphQL */ `
             mutation {
                 ${ProgrammeItem.operations.update}(
-                    where: { productTitle: "TestFilm1" }
-                    connect: { relatedTo: { where: { node: { productTitle: "TestEpisode1" } } } }
-                ) {
-                    info {
-                        bookmark
+                    where: { productTitle_EQ: "TestFilm1" }
+                    update: {
+                        relatedTo: {
+                            connect: {
+                                 where: { node: { productTitle_EQ: "TestEpisode1" } } 
+                            }
+                        }
                     }
+                ) {
                     ${ProgrammeItem.plural} {
                         productTitle
                         episodeNumber

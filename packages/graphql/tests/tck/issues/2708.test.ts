@@ -24,18 +24,18 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     let neoSchema: Neo4jGraphQL;
 
     const typeDefs = /* GraphQL */ `
-        type Movie {
+        type Movie @node {
             title: String
             genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "InGenre")
         }
 
-        type Genre {
+        type Genre @node {
             name: String
             movies: [Movie!]! @relationship(type: "IN_GENRE", direction: IN, properties: "InGenre")
             series: [Series!]! @relationship(type: "IN_GENRE", direction: IN, properties: "InGenre")
         }
 
-        type Series {
+        type Series @node {
             name: String!
             genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "InGenre")
         }
@@ -54,7 +54,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate count equal", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { count: 2 } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { count_EQ: 2 } } }) {
                     title
                 }
             }
@@ -94,7 +94,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate count_LT", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { count_LT: 3 } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { count_LT: 3 } } }) {
                     title
                 }
             }
@@ -134,7 +134,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate count_GT", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { count_GT: 2 } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { count_GT: 2 } } }) {
                     title
                 }
             }
@@ -174,7 +174,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate node property SHORTEST", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { node: { title_SHORTEST_EQUAL: 1 } } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { node: { title_SHORTEST_LENGTH_EQUAL: 1 } } } }) {
                     title
                 }
             }
@@ -214,7 +214,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate node property AVERAGE", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { node: { title_AVERAGE_EQUAL: 1 } } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { node: { title_AVERAGE_LENGTH_EQUAL: 1 } } } }) {
                     title
                 }
             }
@@ -251,7 +251,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate edge property MAX_LT", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { edge: { intValue_MAX_LT: 1 } } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { edge: { intValue_MAX_LT: 1 } } } }) {
                     title
                 }
             }
@@ -291,7 +291,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where moviesAggregate edge property MIN_EQUAL", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { edge: { intValue_MIN_EQUAL: 1 } } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { edge: { intValue_MIN_EQUAL: 1 } } } }) {
                     title
                 }
             }
@@ -331,7 +331,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where genres_SOME", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres_SOME: { moviesAggregate: { count: 2 } } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { count_EQ: 2 } } }) {
                     title
                 }
             }
@@ -371,7 +371,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where genres_NONE", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres_NONE: { moviesAggregate: { count: 2 } } }) {
+                movies(where: { genres_NONE: { moviesAggregate: { count_EQ: 2 } } }) {
                     title
                 }
             }
@@ -411,7 +411,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where genres_ALL", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres_ALL: { moviesAggregate: { count: 2 } } }) {
+                movies(where: { genres_ALL: { moviesAggregate: { count_EQ: 2 } } }) {
                     title
                 }
             }
@@ -467,7 +467,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find where genres_SINGLE", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres_SINGLE: { moviesAggregate: { count: 2 } } }) {
+                movies(where: { genres_SINGLE: { moviesAggregate: { count_EQ: 2 } } }) {
                     title
                 }
             }
@@ -504,50 +504,10 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
         `);
     });
 
-    test("should find where genres_NOT", async () => {
-        const query = /* GraphQL */ `
-            {
-                movies(where: { genres_NOT: { moviesAggregate: { count: 2 } } }) {
-                    title
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:Movie)
-            CALL {
-                WITH this
-                MATCH (this)-[:IN_GENRE]->(this0:Genre)
-                CALL {
-                    WITH this0
-                    MATCH (this0)<-[this1:IN_GENRE]-(this2:Movie)
-                    RETURN count(this2) = $param0 AS var3
-                }
-                WITH *
-                WHERE var3 = true
-                RETURN count(this0) > 0 AS var4
-            }
-            WITH *
-            WHERE var4 = false
-            RETURN this { .title } AS this"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": {
-                    \\"low\\": 2,
-                    \\"high\\": 0
-                }
-            }"
-        `);
-    });
-
     test("should not find genres_ALL where NONE true", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres_ALL: { moviesAggregate: { count: 0 } } }) {
+                movies(where: { genres_ALL: { moviesAggregate: { count_EQ: 0 } } }) {
                     title
                 }
             }
@@ -605,10 +565,10 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
             {
                 movies(
                     where: {
-                        genres: {
+                        genres_SOME: {
                             AND: [
-                                { moviesAggregate: { count: 2 } }
-                                { seriesAggregate: { node: { name_SHORTEST_EQUAL: 1 } } }
+                                { moviesAggregate: { count_EQ: 2 } }
+                                { seriesAggregate: { node: { name_SHORTEST_LENGTH_EQUAL: 1 } } }
                             ]
                         }
                     }
@@ -663,10 +623,10 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
             {
                 movies(
                     where: {
-                        genres: {
+                        genres_SOME: {
                             OR: [
-                                { moviesAggregate: { count: 3 } }
-                                { seriesAggregate: { node: { name_SHORTEST_EQUAL: 1 } } }
+                                { moviesAggregate: { count_EQ: 3 } }
+                                { seriesAggregate: { node: { name_SHORTEST_LENGTH_EQUAL: 1 } } }
                             ]
                         }
                     }
@@ -721,7 +681,10 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
             {
                 movies(
                     where: {
-                        genres: { moviesAggregate: { count: 2 }, seriesAggregate: { node: { name_SHORTEST_EQUAL: 1 } } }
+                        genres_SOME: {
+                            moviesAggregate: { count_EQ: 2 }
+                            seriesAggregate: { node: { name_SHORTEST_LENGTH_EQUAL: 1 } }
+                        }
                     }
                 ) {
                     title
@@ -772,7 +735,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
     test("should find genres with aggregation at the same level", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genres: { moviesAggregate: { count: 3 } }, genresAggregate: { count: 1 } }) {
+                movies(where: { genres_SOME: { moviesAggregate: { count_EQ: 3 } }, genresAggregate: { count_EQ: 1 } }) {
                     title
                 }
             }
@@ -823,7 +786,7 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
             {
                 movies(
                     where: {
-                        genres_ALL: { OR: [{ moviesAggregate: { count: 0 } }, { seriesAggregate: { count: 1 } }] }
+                        genres_ALL: { OR: [{ moviesAggregate: { count_EQ: 0 } }, { seriesAggregate: { count_EQ: 1 } }] }
                     }
                 ) {
                     title
@@ -902,8 +865,8 @@ describe("https://github.com/neo4j/graphql/issues/2708", () => {
                 movies(
                     where: {
                         genres_ALL: {
-                            OR: [{ moviesAggregate: { count: 0 } }, { name: "Thriller" }]
-                            seriesAggregate: { count: 1 }
+                            OR: [{ moviesAggregate: { count_EQ: 0 } }, { name_EQ: "Thriller" }]
+                            seriesAggregate: { count_EQ: 1 }
                         }
                     }
                 ) {

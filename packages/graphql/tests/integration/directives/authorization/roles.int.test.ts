@@ -62,7 +62,7 @@ describe("auth/roles", () => {
                     when: [BEFORE],
                     operations: [READ],
                     where: { jwt: { roles_INCLUDES: "admin" } }
-                }]) {
+                }]) @node {
                     id: ID
                     name: String
                 }
@@ -98,7 +98,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser}  {
+                type ${typeUser}  @node {
                     id: ID
                     password: String @authorization(validate: [{
                         when: [BEFORE],
@@ -138,14 +138,14 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeHistory} {
+                type ${typeHistory} @node {
                     url: String @authorization(validate: [{
                         when: [BEFORE],
                         operations: [READ],
                         where: { jwt: { roles_INCLUDES: "super-admin" } }
                     }])
                 }
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     password: String
@@ -264,7 +264,7 @@ describe("auth/roles", () => {
                     when: [AFTER],
                     operations: [CREATE],
                     where: { jwt: { roles_INCLUDES: "admin" } }
-                }]) {
+                }]) @node {
                     id: ID
                     name: String
                 }
@@ -302,7 +302,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     password: String @authorization(validate: [{
                         when: [AFTER],
@@ -344,7 +344,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     password: String @authorization(validate: [{
                         when: [AFTER],
@@ -392,7 +392,7 @@ describe("auth/roles", () => {
                     when: [BEFORE],
                     operations: [UPDATE],
                     where: { jwt: { roles_INCLUDES: "admin" } }
-                }]) {
+                }]) @node{
                     id: ID
                     name: String
                 }
@@ -430,7 +430,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     password: String @authorization(validate: [{
                         when: [BEFORE],
@@ -474,12 +474,12 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typePost} {
+                type ${typePost} @node {
                     id: String
                     content: String
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     password: String
@@ -510,7 +510,7 @@ describe("auth/roles", () => {
 
             const query = `
                 mutation {
-                    ${typeUser.operations.update}(update: { id: "${userId}" }, connect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${typeUser.operations.update}(update: { id: "${userId}", posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${typeUser.plural} {
                             id
                         }
@@ -545,20 +545,20 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeComment} {
+                type ${typeComment} @node {
                     id: String
                     content: String
                     post: ${typePost}! @relationship(type: "HAS_COMMENT", direction: IN)
                 }
 
-                type ${typePost} {
+                type ${typePost} @node {
                     id: String
                     content: String
                     creator: ${typeUser}! @relationship(type: "HAS_POST", direction: IN)
                     comments: [${typeComment}!]! @relationship(type: "HAS_COMMENT", direction: OUT)
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     posts: [${typePost}!]! @relationship(type: "HAS_POST", direction: OUT)
@@ -587,12 +587,12 @@ describe("auth/roles", () => {
             const query = `
                 mutation {
                     ${typeComment.operations.update}(
-                        where: { id: "${commentId}" }
+                        where: { id_EQ: "${commentId}" }
                         update: {
                             post: {
                                 update: {
                                     node: {
-                                        creator: { connect: { where: { node: { id: "${userId}" } } } }
+                                        creator: { connect: { where: { node: { id_EQ: "${userId}" } } } }
                                     }
                                 }
                             }
@@ -634,12 +634,12 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typePost} {
+                type ${typePost} @node {
                     id: String
                     content: String
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     password: String
@@ -670,7 +670,7 @@ describe("auth/roles", () => {
 
             const query = `
                 mutation {
-                    ${typeUser.operations.update}(update: { id: "${userId}" }, disconnect: { posts: { where: { node: { id: "${postId}" } } } }) {
+                    ${typeUser.operations.update}(update: { id: "${userId}", posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${typeUser.plural} {
                             id
                         }
@@ -705,20 +705,20 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeComment} {
+                type ${typeComment} @node {
                     id: String
                     content: String
                     post: ${typePost}! @relationship(type: "HAS_COMMENT", direction: IN)
                 }
 
-                type ${typePost} {
+                type ${typePost} @node {
                     id: String
                     content: String
                     creator: ${typeUser}! @relationship(type: "HAS_POST", direction: IN)
                     comments: [${typeComment}!]! @relationship(type: "HAS_COMMENT", direction: OUT)
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     posts: [${typePost}!]! @relationship(type: "HAS_POST", direction: OUT)
@@ -747,12 +747,12 @@ describe("auth/roles", () => {
             const query = `
                 mutation {
                     ${typeComment.operations.update}(
-                        where: { id: "${commentId}" }
+                        where: { id_EQ: "${commentId}" }
                         update: {
                             post: {
                                 update: {
                                     node: {
-                                        creator: { disconnect: { where: { node: { id: "${userId}" } } } }
+                                        creator: { disconnect: { where: { node: { id_EQ: "${userId}" } } } }
                                     }
                                 }
                             }
@@ -793,7 +793,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} @authorization(validate: [{
+                type ${typeUser} @node @authorization(validate: [{
                     when: [BEFORE],
                     operations: [DELETE],
                     where: { jwt: { roles_INCLUDES: "admin" } }
@@ -833,13 +833,13 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                     posts: [${typePost}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${typePost} @authorization(validate: [{
+                type ${typePost} @node @authorization(validate: [{
                     when: [BEFORE],
                     operations: [DELETE],
                     where: { jwt: { roles_INCLUDES: "admin" } }
@@ -859,7 +859,7 @@ describe("auth/roles", () => {
 
             const query = `
                 mutation {
-                    ${typeUser.operations.delete}(where: {id: "${userId}"}, delete:{posts: {where:{node: { id: "${postId}"}}}}) {
+                    ${typeUser.operations.delete}(where: {id_EQ: "${userId}"}, delete:{posts: {where:{node: { id_EQ: "${postId}"}}}}) {
                         nodesDeleted
                     }
                 }
@@ -894,7 +894,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} @mutation(operations: []) @query(read: false, aggregate: false) {
+                type ${typeUser} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
                 }
@@ -934,7 +934,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     name: String
                 }
@@ -974,11 +974,11 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${typeHistory} {
+                type ${typeHistory} @node {
                     url: String
                 }
 
-                type ${typeUser} {
+                type ${typeUser} @node {
                     id: ID
                     history: [${typeHistory}]
                         @cypher(statement: "MATCH (this)-[:HAS_HISTORY]->(h:${typeHistory}) RETURN h AS h", columnName: "h")
@@ -1026,7 +1026,7 @@ describe("auth/roles", () => {
                     roles: [String!]!
                 }
 
-                type ${type.name} {
+                type ${type.name} @node {
                     id: ID
                     name: String
                     password: String
@@ -1036,7 +1036,7 @@ describe("auth/roles", () => {
                     @authorization(
                         filter: [
                             {
-                                where: { node: { id: "$jwt.id" }, jwt: { roles_INCLUDES: "user" } }
+                                where: { node: { id_EQ: "$jwt.id" }, jwt: { roles_INCLUDES: "user" } }
                             }, 
                             {
                                 where: { jwt: { roles_INCLUDES: "admin" } }
@@ -1108,7 +1108,7 @@ describe("auth/roles", () => {
                     roles: [String!]! @jwtClaim(path: "https://auth0\\\\.mysite\\\\.com/claims.https://auth0\\\\.mysite\\\\.com/claims/roles")
                 }
 
-                type ${type.name} {
+                type ${type.name} @node {
                     id: ID
                     name: String
                     password: String

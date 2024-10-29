@@ -31,7 +31,7 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
         projectType = testHelper.createUniqueType("Project");
 
         const typeDefs = `
-            type ${employeeType} {
+            type ${employeeType} @node {
                 employeeId: ID! @unique
                 firstName: String! @settable(onCreate: false, onUpdate: false)
                 lastName: String @settable(onCreate: false, onUpdate: false)
@@ -43,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
                 allocation: Float
             }
         
-            type ${projectType} {
+            type ${projectType} @node {
                 projectId: ID! @unique
                 name: String! @settable(onCreate: false, onUpdate: false)
                 description: String
@@ -103,42 +103,6 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
         const query = `
             {
                 ${employeeType.plural}(where: { projectsAggregate: { edge: { allocation_SUM_LTE: 55 } } }) {
-                    employeeId
-                    firstName
-                    lastName
-                    projectsAggregate {
-                        count
-                        edge {
-                            allocation {
-                                max
-                                min
-                                average
-                                sum
-                            }
-                        }
-                    }
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-
-        expect(result.errors).toBeFalsy();
-        expect(result?.data?.[employeeType.plural]).toEqual([
-            {
-                employeeId: "3332",
-                firstName: "Emp2",
-                lastName: "EmpLast2",
-                projectsAggregate: { count: 2, edge: { allocation: { average: 25, max: 30, min: 20, sum: 50 } } },
-            },
-        ]);
-    });
-
-    test("should return the correct elements based on a relationship aggregation LTE filter", async () => {
-        // INFO: The behaviour/implementation of the LTE aggregation was not changed. This is just for comparison.
-        const query = `
-            {
-                ${employeeType.plural}(where: { projectsAggregate: { edge: { allocation_LTE: 30 } } }) {
                     employeeId
                     firstName
                     lastName

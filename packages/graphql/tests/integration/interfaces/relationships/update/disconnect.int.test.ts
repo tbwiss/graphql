@@ -35,7 +35,7 @@ describe("interface relationships", () => {
         Series = testHelper.createUniqueType("Series");
 
         const typeDefs = /* GraphQL */ `
-            type ${Episode} {
+            type ${Episode} @node {
                 runtime: Int!
                 series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -45,13 +45,13 @@ describe("interface relationships", () => {
                 actors: [${Actor}!]! @declareRelationship
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: [${Episode}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +61,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -97,7 +97,7 @@ describe("interface relationships", () => {
 
         const query = `
             mutation DisconnectMovie($name: String, $title: String) {
-                ${Actor.operations.update}(where: { name: $name }, disconnect: { actedIn: { where: { node: { title: $title } } } }) {
+                ${Actor.operations.update}(where: { name_EQ: $name }, update: { actedIn: { disconnect: { where: { node: { title_EQ: $title } } } } }) {
                     ${Actor.plural} {
                         name
                         actedIn {
@@ -175,11 +175,13 @@ describe("interface relationships", () => {
         const query = `
             mutation DisconnectMovie($name1: String, $name2: String, $title: String) {
                 ${Actor.operations.update}(
-                    where: { name: $name1 }
-                    disconnect: {
+                    where: { name_EQ: $name1 }
+                    update: {
                         actedIn: {
-                            where: { node: { title: $title } }
-                            disconnect: { actors: { where: { node: { name: $name2 } } } }
+                            disconnect: {
+                                where: { node: { title_EQ: $title } }
+                                disconnect: { actors: { where: { node: { name_EQ: $name2 } } } }
+                            }
                         }
                     }
                 ) {

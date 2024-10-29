@@ -35,7 +35,7 @@ describe("interface relationships", () => {
         Series = testHelper.createUniqueType("Series");
 
         const typeDefs = /* GraphQL */ `
-            type ${Episode} {
+            type ${Episode} @node {
                 runtime: Int!
                 series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -45,13 +45,13 @@ describe("interface relationships", () => {
                 actors: [${Actor}!]! @declareRelationship
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: [${Episode}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +61,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -98,8 +98,8 @@ describe("interface relationships", () => {
         const query = `
             mutation ConnectMovie($name: String, $title: String, $screenTime: Int!) {
                 ${Actor.operations.update}(
-                    where: { name: $name }
-                    connect: { actedIn: { edge: { screenTime: $screenTime }, where: { node: { title: $title } } } }
+                    where: { name_EQ: $name }
+                    update: { actedIn: { connect: { edge: { screenTime: $screenTime }, where: { node: { title_EQ: $title } } } } }
                 ) {
                     ${Actor.plural} {
                         name
@@ -175,13 +175,15 @@ describe("interface relationships", () => {
         const query = `
             mutation ConnectMovie($name1: String, $name2: String, $title: String, $screenTime: Int!) {
                 ${Actor.operations.update}(
-                    where: { name: $name1 }
-                    connect: {
+                    where: { name_EQ: $name1 }
+                    update: {
                         actedIn: {
-                            edge: { screenTime: $screenTime }
-                            where: { node: { title: $title } }
                             connect: {
-                                actors: { edge: { ActedIn: { screenTime: $screenTime } }, where: { node: { name: $name2 } } }
+                                edge: { screenTime: $screenTime }
+                                where: { node: { title_EQ: $title } }
+                                connect: {
+                                    actors: { edge: { ActedIn: { screenTime: $screenTime } }, where: { node: { name_EQ: $name2 } } }
+                                }
                             }
                         }
                     }

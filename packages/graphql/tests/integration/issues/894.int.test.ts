@@ -30,13 +30,13 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
         testOrganization = testHelper.createUniqueType("Organization");
 
         const typeDefs = `
-        type ${testUser.name} {
+        type ${testUser.name} @node {
             id: ID! @id @unique @alias(property: "_id")
             name: String!
             activeOrganization: ${testOrganization.name} @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
         }
 
-        type ${testOrganization.name} {
+        type ${testOrganization.name} @node {
             id: ID! @id @unique @alias(property: "_id")
             name: String!
         }
@@ -83,10 +83,15 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
         const swapSidesQuery = /* GraphQL*/ `
                 mutation {
                     ${testUser.operations.update}(
-                        where: { name: "Luke Skywalker" }
-                        connect: { activeOrganization: { where: { node: { id: "${orgId}" } } } }
-                        disconnect: { activeOrganization: { where: { node: { id_NOT: "${orgId}" } } } }
-                    ) {
+                        where: { name_EQ: "Luke Skywalker" }
+                        update: {
+                            activeOrganization: {
+                                connect: { where: { node: { id_EQ: "${orgId}" } } } 
+                                disconnect: { where: { node: { NOT: { id_EQ: "${orgId}" } } } } 
+                                
+                            }
+                        }
+                        ) {
                         ${testUser.plural} {
                             id
                         }

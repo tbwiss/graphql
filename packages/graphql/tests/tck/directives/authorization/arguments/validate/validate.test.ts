@@ -28,12 +28,12 @@ describe("Cypher Auth Allow", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Post {
+            type Post @node {
                 id: ID
                 creator: User! @relationship(type: "HAS_POST", direction: IN)
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
@@ -44,7 +44,7 @@ describe("Cypher Auth Allow", () => {
                     validate: {
                         when: AFTER
                         operations: [CREATE, UPDATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP]
-                        where: { node: { id: "$jwt.sub" } }
+                        where: { node: { id_EQ: "$jwt.sub" } }
                     }
                 )
 
@@ -54,7 +54,7 @@ describe("Cypher Auth Allow", () => {
                         {
                             when: AFTER
                             operations: [CREATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP]
-                            where: { node: { creator: { id: "$jwt.sub" } } }
+                            where: { node: { creator: { id_EQ: "$jwt.sub" } } }
                         }
                     ]
                 )
@@ -235,7 +235,7 @@ describe("Cypher Auth Allow", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id: "id-01" }, update: { id: "not bound" }) {
+                updateUsers(where: { id_EQ: "id-01" }, update: { id: "not bound" }) {
                     users {
                         id
                     }
@@ -277,10 +277,10 @@ describe("Cypher Auth Allow", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateUsers(
-                    where: { id: "id-01" }
+                    where: { id_EQ: "id-01" }
                     update: {
                         posts: {
-                            where: { node: { id: "post-id" } }
+                            where: { node: { id_EQ: "post-id" } }
                             update: { node: { creator: { update: { node: { id: "not bound" } } } } }
                         }
                     }
@@ -348,7 +348,7 @@ describe("Cypher Auth Allow", () => {
                                 {
                                     \\"where\\": {
                                         \\"node\\": {
-                                            \\"id\\": \\"post-id\\"
+                                            \\"id_EQ\\": \\"post-id\\"
                                         }
                                     },
                                     \\"update\\": {
@@ -375,7 +375,10 @@ describe("Cypher Auth Allow", () => {
     test("Connect Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(where: { id: "post-id" }, connect: { creator: { where: { node: { id: "user-id" } } } }) {
+                updatePosts(
+                    where: { id_EQ: "post-id" }
+                    update: { creator: { connect: { where: { node: { id_EQ: "user-id" } } } } }
+                ) {
                     posts {
                         id
                     }
@@ -394,27 +397,26 @@ describe("Cypher Auth Allow", () => {
             WITH *
             CALL {
             	WITH this
-            	OPTIONAL MATCH (this_connect_creator0_node:User)
-            	WHERE this_connect_creator0_node.id = $this_connect_creator0_node_param0
+            	OPTIONAL MATCH (this_creator0_connect0_node:User)
+            	WHERE this_creator0_connect0_node.id = $this_creator0_connect0_node_param0
             	CALL {
             		WITH *
-            		WITH collect(this_connect_creator0_node) as connectedNodes, collect(this) as parentNodes
+            		WITH collect(this_creator0_connect0_node) as connectedNodes, collect(this) as parentNodes
             		CALL {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_creator0_node
-            			MERGE (this)<-[:HAS_POST]-(this_connect_creator0_node)
+            			UNWIND connectedNodes as this_creator0_connect0_node
+            			MERGE (this)<-[:HAS_POST]-(this_creator0_connect0_node)
             		}
             	}
-            WITH this, this_connect_creator0_node
+            WITH this, this_creator0_connect0_node
             WITH *
             OPTIONAL MATCH (this)<-[:HAS_POST]-(authorization__after_this0:User)
             WITH *, count(authorization__after_this0) AS creatorCount
             WITH *
-            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_connect_creator0_node.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            	RETURN count(*) AS connect_this_connect_creator_User0
+            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_creator0_connect0_node.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            	RETURN count(*) AS connect_this_creator0_connect_User0
             }
-            WITH *
             WITH *
             CALL {
             	WITH this
@@ -429,7 +431,7 @@ describe("Cypher Auth Allow", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"post-id\\",
-                \\"this_connect_creator0_node_param0\\": \\"user-id\\",
+                \\"this_creator0_connect0_node_param0\\": \\"user-id\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -445,7 +447,10 @@ describe("Cypher Auth Allow", () => {
     test("Disconnect Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(where: { id: "post-id" }, disconnect: { creator: { where: { node: { id: "user-id" } } } }) {
+                updatePosts(
+                    where: { id_EQ: "post-id" }
+                    update: { creator: { disconnect: { where: { node: { id_EQ: "user-id" } } } } }
+                ) {
                     posts {
                         id
                     }
@@ -464,22 +469,21 @@ describe("Cypher Auth Allow", () => {
             WITH this
             CALL {
             WITH this
-            OPTIONAL MATCH (this)<-[this_disconnect_creator0_rel:HAS_POST]-(this_disconnect_creator0:User)
-            WHERE this_disconnect_creator0.id = $updatePosts_args_disconnect_creator_where_User_this_disconnect_creator0param0
+            OPTIONAL MATCH (this)<-[this_creator0_disconnect0_rel:HAS_POST]-(this_creator0_disconnect0:User)
+            WHERE this_creator0_disconnect0.id = $updatePosts_args_update_creator_disconnect_where_User_this_creator0_disconnect0param0
             CALL {
-            	WITH this_disconnect_creator0, this_disconnect_creator0_rel, this
-            	WITH collect(this_disconnect_creator0) as this_disconnect_creator0, this_disconnect_creator0_rel, this
-            	UNWIND this_disconnect_creator0 as x
-            	DELETE this_disconnect_creator0_rel
+            	WITH this_creator0_disconnect0, this_creator0_disconnect0_rel, this
+            	WITH collect(this_creator0_disconnect0) as this_creator0_disconnect0, this_creator0_disconnect0_rel, this
+            	UNWIND this_creator0_disconnect0 as x
+            	DELETE this_creator0_disconnect0_rel
             }
             WITH *
             OPTIONAL MATCH (this)<-[:HAS_POST]-(authorization__after_this0:User)
             WITH *, count(authorization__after_this0) AS creatorCount
             WITH *
-            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_disconnect_creator0.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            RETURN count(*) AS disconnect_this_disconnect_creator_User
+            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_creator0_disconnect0.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            RETURN count(*) AS disconnect_this_creator0_disconnect_User
             }
-            WITH *
             WITH *
             CALL {
             	WITH this
@@ -494,7 +498,7 @@ describe("Cypher Auth Allow", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"post-id\\",
-                \\"updatePosts_args_disconnect_creator_where_User_this_disconnect_creator0param0\\": \\"user-id\\",
+                \\"updatePosts_args_update_creator_disconnect_where_User_this_creator0_disconnect0param0\\": \\"user-id\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -504,11 +508,13 @@ describe("Cypher Auth Allow", () => {
                 },
                 \\"updatePosts\\": {
                     \\"args\\": {
-                        \\"disconnect\\": {
+                        \\"update\\": {
                             \\"creator\\": {
-                                \\"where\\": {
-                                    \\"node\\": {
-                                        \\"id\\": \\"user-id\\"
+                                \\"disconnect\\": {
+                                    \\"where\\": {
+                                        \\"node\\": {
+                                            \\"id_EQ\\": \\"user-id\\"
+                                        }
                                     }
                                 }
                             }

@@ -31,14 +31,14 @@ describe("Single relationship (1-*) filtering", () => {
         Movie = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-        type ${Person} {
+        type ${Person} @node {
             name: String!
             actedIn: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             directedMovies: [${Movie}!]! @relationship(type: "DIRECTED", direction: OUT)
             producedMovies: [${Movie}!]! @relationship(type: "PRODUCED", direction: OUT)
         }
 
-        type ${Movie} {
+        type ${Movie} @node {
             title: String!
             actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: OUT)
             director: ${Person}! @relationship(type: "DIRECTED", direction: IN)
@@ -62,7 +62,7 @@ describe("Single relationship (1-*) filtering", () => {
     test("Filter on required and optional relationships", async () => {
         const query = `
             query {
-                ${Movie.plural}(where: { OR: [{ director: { name: "Jon Wu" } }, { producer: { name: "Jon Wu" } }] }) {
+                ${Movie.plural}(where: { OR: [{ director: { name_EQ: "Jon Wu" } }, { producer: { name_EQ: "Jon Wu" } }] }) {
                     title
                 }
             }
@@ -92,7 +92,7 @@ describe("Single relationship (1-*) filtering", () => {
         const query = `
             query {
                 ${Person.plural}(
-                    where: { actedIn: { OR: [{ director: { name: "Jon Wu" } }, { producer: { name: "Jon Wu" } }] } }
+                    where: { actedIn_SOME: { OR: [{ director: { name_EQ: "Jon Wu" } }, { producer: { name_EQ: "Jon Wu" } }] } }
                 ) {
                     name
                 }
@@ -135,7 +135,7 @@ describe("Single relationship (1-*) filtering", () => {
     it("Filter on optional relationships without results", async () => {
         const query = `
             query {
-                ${Movie.plural}(where: { producer: { name: "Uw Noj" } } ) {
+                ${Movie.plural}(where: { producer: { name_EQ: "Uw Noj" } } ) {
                     title
                 }
             }

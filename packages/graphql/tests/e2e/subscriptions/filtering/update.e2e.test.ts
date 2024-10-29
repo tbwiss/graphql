@@ -17,12 +17,8 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import type { Neo4jGraphQLSubscriptionsEngine } from "../../../../src";
-import { Neo4jGraphQLSubscriptionsCDCEngine } from "../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import { delay } from "../../../../src/utils/utils";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
@@ -30,35 +26,18 @@ import type { TestGraphQLServer } from "../../setup/apollo-server";
 import { ApolloTestServer } from "../../setup/apollo-server";
 import { WebSocketTestClient } from "../../setup/ws-client";
 
-describe.each([
-    {
-        name: "Neo4jGraphQLSubscriptionsDefaultEngine",
-        engine: (_driver: Driver, _db: string) => new Neo4jGraphQLSubscriptionsDefaultEngine(),
-    },
-    {
-        name: "Neo4jGraphQLSubscriptionsCDCEngine",
-        engine: (driver: Driver, db: string) =>
-            new Neo4jGraphQLSubscriptionsCDCEngine({
-                driver,
-                pollTime: 100,
-                queryConfig: {
-                    database: db,
-                },
-            }),
-    },
-])("$name - Update Subscriptions", ({ engine }) => {
-    const testHelper = new TestHelper();
+describe("Update Subscriptions", () => {
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
     let typeActor: UniqueType;
-    let subscriptionEngine: Neo4jGraphQLSubscriptionsEngine;
 
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         typeActor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-         type ${typeMovie} {
+         type ${typeMovie} @node {
             id: ID
             title: String
             releasedIn: Int
@@ -68,17 +47,15 @@ describe.each([
             similarTitles: [String]
          }
 
-         type ${typeActor} {
+         type ${typeActor} @node {
              name: String
          }
          `;
 
-        const driver = await testHelper.getDriver();
-        subscriptionEngine = engine(driver, testHelper.database);
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
         // eslint-disable-next-line @typescript-eslint/require-await
@@ -95,97 +72,14 @@ describe.each([
 
     afterEach(async () => {
         await wsClient.close();
-        subscriptionEngine.close();
         await server.close();
         await testHelper.close();
-    });
-
-    test("update subscription with where filter _NOT 1 result", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title_NOT: "movie5" }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        title
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ title: "movie5" });
-        await createMovie({ title: "movie6" });
-
-        await updateMovie("title", "movie5", "movie7");
-        await updateMovie("title", "movie6", "movie8");
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { title: "movie8" },
-                },
-            },
-        ]);
-    });
-    test("update subscription with where filter _NOT multiple results", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title_NOT: "movie2" }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        title
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ title: "movie5" });
-        await createMovie({ title: "movie6" });
-
-        await updateMovie("title", "movie5", "movie7");
-        await updateMovie("title", "movie6", "movie8");
-
-        await wsClient.waitForEvents(2);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toIncludeSameMembers([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { title: "movie7" },
-                },
-            },
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { title: "movie8" },
-                },
-            },
-        ]);
-    });
-    test("update subscription with where filter _NOT empty result", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title_NOT: "movie5" }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        title
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ title: "movie5" });
-
-        await updateMovie("title", "movie5", "movie7");
-
-        // forcing a delay to ensure events do not exist
-        await delay(2);
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([]);
     });
 
     test("create subscription with where OR", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title: "movie1"}, {title: "movie2"}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title_EQ: "movie1"}, {title_EQ: "movie2"}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -219,7 +113,7 @@ describe.each([
     test("create subscription with where AND match 1", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { AND: [{ title: "movie2"}, {releasedIn: 2000}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { AND: [{ title_EQ: "movie2"}, {releasedIn_EQ: 2000}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -247,7 +141,7 @@ describe.each([
     test("create subscription with where OR match 1", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title: "movie2", releasedIn: 2020}, {releasedIn: 2000}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title_EQ: "movie2", releasedIn_EQ: 2020}, {releasedIn_EQ: 2000}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -275,7 +169,7 @@ describe.each([
     test("create subscription with where OR match 2", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title: "movie2", releasedIn: 2000}, {title: "movie1", releasedIn: 2020}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title_EQ: "movie2", releasedIn_EQ: 2000}, {title_EQ: "movie1", releasedIn_EQ: 2020}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -308,7 +202,7 @@ describe.each([
     test("create subscription with where property + OR match 1", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title: "movie3", OR: [{ releasedIn: 2001}, {title: "movie2", releasedIn: 2020}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { title_EQ: "movie3", OR: [{ releasedIn_EQ: 2001}, {title_EQ: "movie2", releasedIn_EQ: 2020}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -338,7 +232,7 @@ describe.each([
     test("create subscription with where property + OR match nothing", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title: "movie2", OR: [{ releasedIn: 2001}, {title: "movie2", releasedIn: 2020}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { title_EQ: "movie2", OR: [{ releasedIn_EQ: 2001}, {title_EQ: "movie2", releasedIn_EQ: 2020}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -362,7 +256,7 @@ describe.each([
     test("create subscription with where property + OR with filters match 1", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ title_NOT_STARTS_WITH: "movie", releasedIn: 2001}, {title: "movie4", releasedIn: 1000}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ NOT: { title_STARTS_WITH: "movie" }, releasedIn_EQ: 2001}, {title_EQ: "movie4", releasedIn_EQ: 1000}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -396,7 +290,7 @@ describe.each([
     test("create subscription with where property + OR with filters match 2", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ title_STARTS_WITH: "moviee", releasedIn: 2001}, {title: "amovie"}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ title_STARTS_WITH: "moviee", releasedIn_EQ: 2001}, {title_EQ: "amovie"}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -439,7 +333,7 @@ describe.each([
     test("create subscription with where property + OR with filters match none", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ title_STARTS_WITH: "moviee", releasedIn: 2001}, {title: "amovie", releasedIn_GT: 2020}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_GTE: 2000, OR: [{ title_STARTS_WITH: "moviee", releasedIn_EQ: 2001}, {title_EQ: "amovie", releasedIn_GT: 2020}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -467,7 +361,7 @@ describe.each([
     test("create subscription with where OR single element match", async () => {
         await wsClient.subscribe(`
         subscription {
-            ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title: "movie1"}] }) {
+            ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title_EQ: "movie1"}] }) {
                 ${typeMovie.operations.subscribe.payload.updated} {
                     title
                 }
@@ -495,7 +389,7 @@ describe.each([
     test("create subscription with where OR single element no match", async () => {
         await wsClient.subscribe(`
         subscription {
-            ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title: "movie1"}] }) {
+            ${typeMovie.operations.subscribe.updated}(where: { OR: [{ title_EQ: "movie1"}] }) {
                 ${typeMovie.operations.subscribe.payload.updated} {
                     title
                 }
@@ -519,10 +413,10 @@ describe.each([
         subscription {
             ${typeMovie.operations.subscribe.updated}(where: {
                 OR: [
-                    { title: "movie1" },
+                    { title_EQ: "movie1" },
                     { AND: [
-                        { title: "movie2" },
-                        { title: "movie3" }
+                        { title_EQ: "movie2" },
+                        { title_EQ: "movie3" }
                     ]}
                 ]
             }) {
@@ -555,10 +449,10 @@ describe.each([
         subscription {
             ${typeMovie.operations.subscribe.updated}(where: {
                 OR: [
-                    { title: "movie1" },
+                    { title_EQ: "movie1" },
                     { AND: [
-                        { title: "movie2" },
-                        { releasedIn: 2000 }
+                        { title_EQ: "movie2" },
+                        { releasedIn_EQ: 2000 }
                     ]}
                 ]
             }) {
@@ -598,9 +492,9 @@ describe.each([
         subscription {
             ${typeMovie.operations.subscribe.updated}(where: {
                 OR: [
-                    { title: "movie1" },
+                    { title_EQ: "movie1" },
                     { AND: [
-                        { title: "movie2" },
+                        { title_EQ: "movie2" },
                         { releasedIn_GTE: 2000 }
                     ]}
                 ]
@@ -817,175 +711,6 @@ describe.each([
         ]);
     });
 
-    test("subscription with NOT_IN on String", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title_NOT_IN: ["abcd", "sth"] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        title
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ title: "abcd" });
-        await createMovie({ title: "some_movie" });
-
-        await updateMovie("title", "abcd", "abc");
-        await updateMovie("title", "some_movie", "sth");
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { title: "sth" },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_IN on ID as String", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { id_NOT_IN: ["id1", "id111"] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        id
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ id: "id11" });
-        await createMovie({ id: "id1" });
-
-        await updateMovie("id", "id11", "id33");
-        await updateMovie("id", "id1", "id3");
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { id: "id33" },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_IN on ID as Int", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { id_NOT_IN: [420, 42] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        id
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ id: 4 });
-        await createMovie({ id: 42 });
-
-        await updateMovie("id", 4, 41);
-        await updateMovie("id", 42, 421);
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { id: "41" },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_IN on Int", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { releasedIn_NOT_IN: [2020, 2000] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        releasedIn
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ releasedIn: 2001 });
-        await createMovie({ releasedIn: 2000 });
-
-        await updateMovie("releasedIn", 2001, 2000);
-        await updateMovie("releasedIn", 2000, 2021);
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { releasedIn: 2000 },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_IN on Float", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { averageRating_NOT_IN: [4.20, 9.2] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        averageRating
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ averageRating: 4.21 });
-        await createMovie({ averageRating: 9.2 });
-
-        await updateMovie("averageRating", 4.21, 4.2);
-        await updateMovie("averageRating", 9.2, 9);
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { averageRating: 4.2 },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_IN on BigInt", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { fileSize_NOT_IN: ["922372036854775608"] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        fileSize
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ fileSize: "922372036854775608" });
-        await createMovie({ fileSize: "100" });
-
-        await updateMovie("fileSize", "922372036854775608", "922372036854775607");
-        await updateMovie("fileSize", "100", "101");
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.updated]: {
-                    [typeMovie.operations.subscribe.payload.updated]: { fileSize: "101" },
-                },
-            },
-        ]);
-    });
-
     test("subscription with IN on Boolean should error", async () => {
         const onReturnError = jest.fn();
         await wsClient.subscribe(
@@ -1010,83 +735,12 @@ describe.each([
         expect(onReturnError).toHaveBeenCalled();
         expect(wsClient.events).toEqual([]);
     });
-    test("subscription with NOT_IN on Boolean should error", async () => {
-        const onReturnError = jest.fn();
-        await wsClient.subscribe(
-            `
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { isFavorite_NOT_IN: [true] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        isFavorite
-                    }
-                }
-            }
-        `,
-            onReturnError
-        );
 
-        await createMovie({ title: "some_movie_wrong3", isFavorite: true });
-        await createMovie({ title: "some_movie_wrong4", isFavorite: true });
-
-        await updateMovie("title", "some_movie_wrong3", "some_movie_wrong33");
-        await updateMovie("title", "some_movie_wrong4", "some_movie_wrong44");
-
-        expect(onReturnError).toHaveBeenCalled();
-        expect(wsClient.events).toEqual([]);
-    });
-    test("subscription with IN on Array should error", async () => {
-        const onReturnError = jest.fn();
-        await wsClient.subscribe(
-            `
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { similarTitles_IN: ["fight club"] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        similarTitles
-                    }
-                }
-            }
-        `,
-            onReturnError
-        );
-
-        await createMovie({ title: "some_movie_wrong5", similarTitles: ["fight club"] });
-        await createMovie({ title: "some_movie_wrong6" });
-
-        await updateMovie("title", "some_movie_wrong5", "some_movie_wrong55");
-        await updateMovie("title", "some_movie_wrong6", "some_movie_wrong66");
-
-        expect(onReturnError).toHaveBeenCalled();
-        expect(wsClient.events).toEqual([]);
-    });
-    test("subscription with NOT_IN on Array should error", async () => {
-        const onReturnError = jest.fn();
-        await wsClient.subscribe(
-            `
-            subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { similarTitles_NOT_IN: ["blue"] }) {
-                    ${typeMovie.operations.subscribe.payload.updated} {
-                        similarTitles
-                    }
-                }
-            }
-        `,
-            onReturnError
-        );
-
-        await createMovie({ title: "some_movie_wrong7", similarTitles: ["blue bus"] });
-        await createMovie({ title: "some_movie_wrong8" });
-
-        await updateMovie("title", "some_movie_wrong7", "some_movie_wrong77");
-        await updateMovie("title", "some_movie_wrong8", "some_movie_wrong88");
-
-        expect(onReturnError).toHaveBeenCalled();
-        expect(wsClient.events).toEqual([]);
-    });
     // NOT operator tests
     test("update subscription with where filter NOT 1 result", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { NOT: { title: "movie5" } }) {
+                ${typeMovie.operations.subscribe.updated}(where: { NOT: { title_EQ: "movie5" } }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -1114,7 +768,7 @@ describe.each([
     test("update subscription with where filter NOT multiple results", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { NOT: { title: "movie2" } }) {
+                ${typeMovie.operations.subscribe.updated}(where: { NOT: { title_EQ: "movie2" } }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -1147,7 +801,7 @@ describe.each([
     test("create subscription with where property + OR match nothing, NOT", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title: "movie2", OR: [{ releasedIn: 2001}, {title: "movie2", releasedIn: 2020}] }) {
+                ${typeMovie.operations.subscribe.updated}(where: { title_EQ: "movie2", OR: [{ releasedIn_EQ: 2001}, {title_EQ: "movie2", releasedIn_EQ: 2020}] }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -1225,7 +879,7 @@ describe.each([
             .send({
                 query: `
                         mutation {
-                            ${typeMovie.operations.update}(where: { ${fieldName}: ${makeTypedFieldValue(
+                            ${typeMovie.operations.update}(where: { ${fieldName}_EQ: ${makeTypedFieldValue(
                     oldValue
                 )} }, update: { ${fieldName}: ${makeTypedFieldValue(newValue)} }) {
                                 ${typeMovie.plural} {

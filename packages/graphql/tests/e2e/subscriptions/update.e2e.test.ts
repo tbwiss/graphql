@@ -17,62 +17,38 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import type { Neo4jGraphQLSubscriptionsEngine } from "../../../src";
-import { Neo4jGraphQLSubscriptionsCDCEngine } from "../../../src/classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 import type { TestGraphQLServer } from "../setup/apollo-server";
 import { ApolloTestServer } from "../setup/apollo-server";
 import { WebSocketTestClient } from "../setup/ws-client";
 
-describe.each([
-    {
-        name: "Neo4jGraphQLSubscriptionsDefaultEngine",
-        engine: (_driver: Driver, _db: string) => new Neo4jGraphQLSubscriptionsDefaultEngine(),
-    },
-    {
-        name: "Neo4jGraphQLSubscriptionsCDCEngine",
-        engine: (driver: Driver, db: string) =>
-            new Neo4jGraphQLSubscriptionsCDCEngine({
-                driver,
-                pollTime: 100,
-                queryConfig: {
-                    database: db,
-                },
-            }),
-    },
-])("$name Delete Subscription", ({ engine }) => {
+describe("Delete Subscription", () => {
     const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
     let typeActor: UniqueType;
-    let subscriptionEngine: Neo4jGraphQLSubscriptionsEngine;
 
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         typeActor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-         type ${typeMovie} {
+         type ${typeMovie} @node {
             title: String
             actors: [${typeActor}]
          }
-         type ${typeActor} @subscription(events: []) {
+         type ${typeActor} @subscription(events: []) @node {
             name: String
          }
          `;
 
-        const driver = await testHelper.getDriver();
-        subscriptionEngine = engine(driver, testHelper.database);
-
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: subscriptionEngine,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
         // eslint-disable-next-line @typescript-eslint/require-await
@@ -89,7 +65,6 @@ describe.each([
 
     afterEach(async () => {
         await wsClient.close();
-        subscriptionEngine.close();
         await server.close();
         await testHelper.close();
     });
@@ -141,7 +116,7 @@ describe.each([
     test("update subscription with where", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title: "movie5" }) {
+                ${typeMovie.operations.subscribe.updated}(where: { title_EQ: "movie5" }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -202,7 +177,7 @@ describe.each([
         await wsClient.subscribe(
             `
             subscription {
-                ${typeActor.operations.subscribe.updated}(where: { name: "Keanu" }) {
+                ${typeActor.operations.subscribe.updated}(where: { name_EQ: "Keanu" }) {
                     ${typeActor.operations.subscribe.payload.updated} {
                         name
                     }
@@ -257,7 +232,7 @@ describe.each([
             .send({
                 query: `
                         mutation {
-                            ${typeMovie.operations.update}(where: { title: "${oldTitle}" }, update: { title: "${newTitle}" }) {
+                            ${typeMovie.operations.update}(where: { title_EQ: "${oldTitle}" }, update: { title: "${newTitle}" }) {
                                 ${typeMovie.plural} {
                                     title
                                 }
@@ -274,7 +249,7 @@ describe.each([
             .send({
                 query: `
                         mutation {
-                            ${typeActor.operations.update}(where: { name: "${oldName}" }, update: { name: "${newName}" }) {
+                            ${typeActor.operations.update}(where: { name_EQ: "${oldName}" }, update: { name: "${newName}" }) {
                                 ${typeActor.plural} {
                                     name
                                 }

@@ -79,7 +79,7 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -88,7 +88,7 @@ describe("multi-database", () => {
 
         const query = `
             query {
-                ${Movie.plural}(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
@@ -108,7 +108,7 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -117,7 +117,7 @@ describe("multi-database", () => {
 
         const query = `
             query {
-                ${Movie.plural}(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
@@ -138,7 +138,7 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -147,7 +147,7 @@ describe("multi-database", () => {
 
         const query = `
             query {
-                ${Movie.plural}(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
@@ -171,7 +171,7 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -179,7 +179,7 @@ describe("multi-database", () => {
 
         const query = `
             query {
-                ${Movie.plural}(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }

@@ -33,16 +33,16 @@ describe("https://github.com/neo4j/graphql/issues/4477", () => {
         Collection = testHelper.createUniqueType("Collection");
 
         const typeDefs = /* GraphQL */ `
-            type ${Brand} {
+            type ${Brand} @node {
                 services: [${Service}!]! @relationship(type: "HAS_SERVICE", direction: OUT)
                 name: String!
             }
 
-            type ${Collection} {
+            type ${Collection} @node {
                 services: [${Service}!]! @relationship(type: "HAS_SERVICE", direction: OUT)
             }
 
-            type ${Service} {
+            type ${Service} @node {
                 collection: ${Collection} @relationship(type: "HAS_SERVICE", direction: IN)
             }
         `;
@@ -83,7 +83,7 @@ describe("https://github.com/neo4j/graphql/issues/4477", () => {
             query {
                 ${Brand.plural} {
                     name
-                    services(where: { collectionAggregate: { count: 1 } }) {
+                    services(where: { collectionAggregate: { count_EQ: 1 } }) {
                         collectionAggregate {
                             count
                         }

@@ -26,12 +26,12 @@ describe("Relationship Properties Cypher", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -50,7 +50,7 @@ describe("Relationship Properties Cypher", () => {
     test("Projecting node and relationship properties with no arguments", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { title: "Forrest Gump" }) {
+                movies(where: { title_EQ: "Forrest Gump" }) {
                     title
                     actorsConnection {
                         edges {
@@ -97,9 +97,9 @@ describe("Relationship Properties Cypher", () => {
     test("Projecting node and relationship properties with where argument", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { title: "Forrest Gump" }) {
+                movies(where: { title_EQ: "Forrest Gump" }) {
                     title
-                    actorsConnection(where: { node: { name: "Tom Hanks" } }) {
+                    actorsConnection(where: { node: { name_EQ: "Tom Hanks" } }) {
                         edges {
                             properties {
                                 screenTime
@@ -146,7 +146,7 @@ describe("Relationship Properties Cypher", () => {
     test("Projecting node and relationship properties with sort argument", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { title: "Forrest Gump" }) {
+                movies(where: { title_EQ: "Forrest Gump" }) {
                     title
                     actorsConnection(sort: { edge: { screenTime: DESC } }) {
                         edges {
@@ -280,7 +280,7 @@ describe("Relationship Properties Cypher", () => {
     test("Projecting twice nested node and relationship properties with no arguments", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { title: "Forrest Gump" }) {
+                movies(where: { title_EQ: "Forrest Gump" }) {
                     title
                     actorsConnection {
                         edges {
@@ -350,7 +350,7 @@ describe("Relationship Properties Cypher", () => {
     test("Projecting thrice nested node and relationship properties with no arguments", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { title: "Forrest Gump" }) {
+                movies(where: { title_EQ: "Forrest Gump" }) {
                     title
                     actorsConnection {
                         edges {

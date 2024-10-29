@@ -110,7 +110,7 @@ describe("cypher directive filtering - Auth", () => {
                         """
                         columnName: "s"
                     )
-                    @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }])
+                    @authorization(filter: [{ where: { node: { custom_field_EQ: "$jwt.custom_value" } } }])
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 

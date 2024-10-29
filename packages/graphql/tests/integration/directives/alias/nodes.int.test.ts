@@ -31,7 +31,7 @@ describe("@alias directive", () => {
         typeDirector = testHelper.createUniqueType("Director");
 
         const typeDefs = `
-            type ${typeDirector} {
+            type ${typeDirector} @node {
                 name: String
                 nameAgain: String @alias(property: "name")
                 movies: [${typeMovie}!]! @relationship(direction: OUT, type: "DIRECTED", properties: "Directed")
@@ -42,7 +42,7 @@ describe("@alias directive", () => {
                 movieYear: Int @alias(property: "year")
             }
 
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 title: String
                 titleAgain: String @alias(property: "title")
                 directors: [${typeDirector}!]! @relationship(direction: IN, type: "DIRECTED", properties: "Directed")
@@ -657,7 +657,7 @@ describe("@alias directive", () => {
     test("Update mutation (with create) with alias referring to existing field, include both fields as inputs", async () => {
         const userMutation = `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Timmy"}, create: { movies: [{ node: { title: "Movie", titleAgain: "El Movie" }, edge: { year: 1989 } }] }) {
+                ${typeDirector.operations.update}(where: {name_CONTAINS: "Timmy"}, update: { movies: { create: [{ node: { title: "Movie", titleAgain: "El Movie" }, edge: { year: 1989 } }] } }) {
                     ${typeDirector.plural} {
                         name
                         nameAgain

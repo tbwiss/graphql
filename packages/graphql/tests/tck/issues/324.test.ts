@@ -26,23 +26,23 @@ describe("#324", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Person {
+            type Person @node {
                 identifier: ID!
                 car: Car! @relationship(type: "CAR", direction: OUT)
             }
 
-            type Car {
+            type Car @node {
                 identifier: ID!
                 manufacturer: Manufacturer! @relationship(type: "MANUFACTURER", direction: OUT)
             }
 
-            type Manufacturer {
+            type Manufacturer @node {
                 identifier: ID!
                 logo: Logo! @relationship(type: "LOGO", direction: OUT)
                 name: String
             }
 
-            type Logo {
+            type Logo @node {
                 identifier: ID!
                 name: String
             }
@@ -66,7 +66,7 @@ describe("#324", () => {
 
         const result = await translateQuery(neoSchema, query, {
             variableValues: {
-                where: { identifier: "Someone" },
+                where: { identifier_EQ: "Someone" },
                 update: {
                     car: {
                         update: {
@@ -75,7 +75,7 @@ describe("#324", () => {
                                     update: {
                                         node: {
                                             name: "Manufacturer",
-                                            logo: { connect: { where: { node: { identifier: "Opel Logo" } } } },
+                                            logo: { connect: { where: { node: { identifier_EQ: "Opel Logo" } } } },
                                         },
                                     },
                                 },

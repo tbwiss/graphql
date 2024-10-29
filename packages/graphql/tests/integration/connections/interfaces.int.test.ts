@@ -53,12 +53,12 @@ describe("Connections -> Interfaces", () => {
             title: String!
         }
 
-        type ${typeMovie.name} implements Production {
+        type ${typeMovie.name} implements Production @node {
             title: String!
             runtime: Int!
         }
 
-        type ${typeSeries.name} implements Production {
+        type ${typeSeries.name} implements Production @node {
             title: String!
             episodes: Int!
         }
@@ -67,7 +67,7 @@ describe("Connections -> Interfaces", () => {
             screenTime: Int!
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
             name: String!
             actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
         }
@@ -104,7 +104,7 @@ describe("Connections -> Interfaces", () => {
 
         const query = `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
                     actedInConnection {
                         edges {
@@ -173,9 +173,9 @@ describe("Connections -> Interfaces", () => {
 
         const query = `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
-                    actedInConnection(where: { node: { title: "Game of Thrones" } }) {
+                    actedInConnection(where: { node: { title_EQ: "Game of Thrones" } }) {
                         edges {
                             properties {
                                 screenTime
@@ -228,7 +228,7 @@ describe("Connections -> Interfaces", () => {
 
         const query = `
             query Actors($name: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
                     actedInConnection(sort: [{ edge: { screenTime: DESC } }]) {
                         edges {
@@ -297,7 +297,7 @@ describe("Connections -> Interfaces", () => {
 
         const query = `
             query Actors($name: String, $after: String) {
-                ${typeActor.plural}(where: { name: $name }) {
+                ${typeActor.plural}(where: { name_EQ: $name }) {
                     name
                     actedInConnection(first: 2, after: $after, sort: { edge: { screenTime: DESC } }) {
                         pageInfo {
@@ -400,9 +400,9 @@ describe("Connections -> Interfaces", () => {
 
         const query = `
         query Actors($name: String, $title: String) {
-            ${typeActor.plural}(where: { name: $name }) {
+            ${typeActor.plural}(where: { name_EQ: $name }) {
                 name
-                actedInConnection(where: { node: { title: $title } }) {
+                actedInConnection(where: { node: { title_EQ: $title } }) {
                     edges {
                         properties {
                             screenTime

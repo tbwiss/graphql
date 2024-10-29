@@ -39,17 +39,17 @@ describe("Union filtering", () => {
         typeDefs = /* GraphQL */ `
             union Production = ${Movie} | ${Series}
 
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
             
-            type ${Series} {
+            type ${Series} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -94,7 +94,7 @@ describe("Union filtering", () => {
     test("allow for filtering on top-level union relationships", async () => {
         const query = /* GraphQL */ `
             query {
-                productions(where: { ${Movie}: { title: "The Office" }, ${Series}: { title: "The Office 2" } }) {
+                productions(where: { ${Movie}: { title_EQ: "The Office" }, ${Series}: { title_EQ: "The Office 2" } }) {
                     ... on ${Movie} {
                         title
                     }
@@ -150,7 +150,7 @@ describe("Union filtering", () => {
         const query = /* GraphQL */ `
             mutation updateName($name: String!) {
                 ${Actor.operations.update}(
-                    where: { actedIn_SOME: { ${Movie}: { title: "The Office" } }},
+                    where: { actedIn_SOME: { ${Movie}: { title_EQ: "The Office" } }},
                     update: { name: $name }
                 ) {
                     ${Actor.plural} {

@@ -38,7 +38,7 @@ describe("Comments", () => {
             """
             A type describing a movie.
             """
-            type Movie {
+            type Movie @node {
                 id: ID
                 "The number of actors who acted in the movie."
                 actorCount: Int
@@ -58,15 +58,6 @@ describe("Comments", () => {
         `;
         const neoSchema = new Neo4jGraphQL({
             typeDefs,
-            features: {
-                excludeDeprecatedFields: {
-                    bookmark: true,
-                    negationFilters: true,
-                    arrayFilters: true,
-                    stringAggregation: true,
-                    aggregationFilters: true,
-                },
-            },
         });
         const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
@@ -204,28 +195,34 @@ describe("Comments", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actorCount: Int
+              actorCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              actorCount_EQ: Int
               actorCount_GT: Int
               actorCount_GTE: Int
               actorCount_IN: [Int]
               actorCount_LT: Int
               actorCount_LTE: Int
-              averageRating: Float
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float]
               averageRating_LT: Float
               averageRating_LTE: Float
-              customScalar: CustomScalar
+              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              customScalar_EQ: CustomScalar
               customScalar_IN: [CustomScalar]
-              genre: Genre
+              genre: Genre @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              genre_EQ: Genre
               genre_IN: [Genre]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              isActive: Boolean
+              isActive: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              isActive_EQ: Boolean
             }
 
             type MoviesConnection {
@@ -249,9 +246,9 @@ describe("Comments", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -282,11 +279,11 @@ describe("Comments", () => {
     describe("Relationship", () => {
         test("Simple", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     name: String
                 }
 
-                type Movie {
+                type Movie @node {
                     id: ID
                     "Actors in Movie"
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -294,15 +291,6 @@ describe("Comments", () => {
             `;
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
-                features: {
-                    excludeDeprecatedFields: {
-                        bookmark: true,
-                        negationFilters: true,
-                        arrayFilters: true,
-                        stringAggregation: true,
-                        aggregationFilters: true,
-                    },
-                },
             });
             const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
@@ -358,9 +346,10 @@ describe("Comments", () => {
                   AND: [ActorWhere!]
                   NOT: ActorWhere
                   OR: [ActorWhere!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
+                  name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
                 }
@@ -404,9 +393,9 @@ describe("Comments", () => {
 
                 type Movie {
                   \\"\\"\\"Actors in Movie\\"\\"\\"
-                  actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -423,7 +412,8 @@ describe("Comments", () => {
                   AND: [MovieActorsAggregateInput!]
                   NOT: MovieActorsAggregateInput
                   OR: [MovieActorsAggregateInput!]
-                  count: Int
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
                   count_LT: Int
@@ -517,10 +507,6 @@ describe("Comments", () => {
                   id: IDAggregateSelection!
                 }
 
-                input MovieConnectInput {
-                  actors: [MovieActorsConnectFieldInput!]
-                }
-
                 input MovieCreateInput {
                   actors: MovieActorsFieldInput
                   id: ID
@@ -528,10 +514,6 @@ describe("Comments", () => {
 
                 input MovieDeleteInput {
                   actors: [MovieActorsDeleteFieldInput!]
-                }
-
-                input MovieDisconnectInput {
-                  actors: [MovieActorsDisconnectFieldInput!]
                 }
 
                 type MovieEdge {
@@ -546,10 +528,6 @@ describe("Comments", () => {
                   Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
                   \\"\\"\\"
                   sort: [MovieSort!]
-                }
-
-                input MovieRelationInput {
-                  actors: [MovieActorsCreateFieldInput!]
                 }
 
                 \\"\\"\\"
@@ -593,9 +571,10 @@ describe("Comments", () => {
                   actors_SINGLE: ActorWhere
                   \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                   actors_SOME: ActorWhere
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
                   id_STARTS_WITH: ID
                 }
@@ -612,7 +591,7 @@ describe("Comments", () => {
                   deleteActors(where: ActorWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                  updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -624,12 +603,12 @@ describe("Comments", () => {
                 }
 
                 type Query {
-                  actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                  actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                   actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                  actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
                 \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -673,12 +652,12 @@ describe("Comments", () => {
                     title: String!
                 }
 
-                type Movie implements Production {
+                type Movie implements Production @node {
                     title: String!
                     runtime: Int!
                 }
 
-                type Series implements Production {
+                type Series implements Production @node {
                     title: String!
                     episodes: Int!
                 }
@@ -687,7 +666,7 @@ describe("Comments", () => {
                     screenTime: Int!
                 }
 
-                type Actor {
+                type Actor @node {
                     name: String!
                     "Acted in Production"
                     actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -695,15 +674,6 @@ describe("Comments", () => {
             `;
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
-                features: {
-                    excludeDeprecatedFields: {
-                        bookmark: true,
-                        negationFilters: true,
-                        arrayFilters: true,
-                        stringAggregation: true,
-                        aggregationFilters: true,
-                    },
-                },
             });
             const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
@@ -765,7 +735,8 @@ describe("Comments", () => {
                   AND: [ActedInWhere!]
                   NOT: ActedInWhere
                   OR: [ActedInWhere!]
-                  screenTime: Int
+                  screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  screenTime_EQ: Int
                   screenTime_GT: Int
                   screenTime_GTE: Int
                   screenTime_IN: [Int!]
@@ -775,9 +746,9 @@ describe("Comments", () => {
 
                 type Actor {
                   \\"\\"\\"Acted in Production\\"\\"\\"
-                  actedIn(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true, where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -785,7 +756,8 @@ describe("Comments", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
                   count_LT: Int
@@ -882,10 +854,6 @@ describe("Comments", () => {
                   name: StringAggregateSelection!
                 }
 
-                input ActorConnectInput {
-                  actedIn: [ActorActedInConnectFieldInput!]
-                }
-
                 input ActorCreateInput {
                   actedIn: ActorActedInFieldInput
                   name: String!
@@ -893,10 +861,6 @@ describe("Comments", () => {
 
                 input ActorDeleteInput {
                   actedIn: [ActorActedInDeleteFieldInput!]
-                }
-
-                input ActorDisconnectInput {
-                  actedIn: [ActorActedInDisconnectFieldInput!]
                 }
 
                 type ActorEdge {
@@ -925,10 +889,6 @@ describe("Comments", () => {
 
                 type ActorProductionActedInNodeAggregateSelection {
                   title: StringAggregateSelection!
-                }
-
-                input ActorRelationInput {
-                  actedIn: [ActorActedInCreateFieldInput!]
                 }
 
                 \\"\\"\\"
@@ -972,9 +932,10 @@ describe("Comments", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
+                  name_EQ: String
                   name_IN: [String!]
                   name_STARTS_WITH: String
                 }
@@ -1072,15 +1033,17 @@ describe("Comments", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  runtime: Int
+                  runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  runtime_EQ: Int
                   runtime_GT: Int
                   runtime_GTE: Int
                   runtime_IN: [Int!]
                   runtime_LT: Int
                   runtime_LTE: Int
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
                 }
@@ -1098,7 +1061,7 @@ describe("Comments", () => {
                   deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                   deleteMovies(where: MovieWhere): DeleteInfo!
                   deleteSeries(where: SeriesWhere): DeleteInfo!
-                  updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                  updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
                   updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                   updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
                 }
@@ -1145,7 +1108,7 @@ describe("Comments", () => {
                   \\"\\"\\"
                   Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
                   \\"\\"\\"
-                  sort: [ProductionSort]
+                  sort: [ProductionSort!]
                 }
 
                 \\"\\"\\"
@@ -1163,9 +1126,10 @@ describe("Comments", () => {
                   AND: [ProductionWhere!]
                   NOT: ProductionWhere
                   OR: [ProductionWhere!]
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
                   typename_IN: [ProductionImplementation!]
@@ -1178,18 +1142,18 @@ describe("Comments", () => {
                 }
 
                 type Query {
-                  actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                  actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                   actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                  actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                  productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                  productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
                   productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-                  productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
-                  series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+                  productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+                  series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
                   seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-                  seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+                  seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
                 }
 
                 type Series implements Production {
@@ -1247,15 +1211,17 @@ describe("Comments", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  episodes: Int
+                  episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  episodes_EQ: Int
                   episodes_GT: Int
                   episodes_GTE: Int
                   episodes_IN: [Int!]
                   episodes_LT: Int
                   episodes_LTE: Int
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
                 }
@@ -1304,11 +1270,11 @@ describe("Comments", () => {
             const typeDefs = gql`
                 union Search = Movie | Genre
 
-                type Genre {
+                type Genre @node {
                     id: ID
                 }
 
-                type Movie {
+                type Movie @node {
                     id: ID
                     search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
                     searchNoDirective: Search
@@ -1316,15 +1282,6 @@ describe("Comments", () => {
             `;
             const neoSchema = new Neo4jGraphQL({
                 typeDefs,
-                features: {
-                    excludeDeprecatedFields: {
-                        bookmark: true,
-                        negationFilters: true,
-                        arrayFilters: true,
-                        stringAggregation: true,
-                        aggregationFilters: true,
-                    },
-                },
             });
             const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
@@ -1406,9 +1363,10 @@ describe("Comments", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
                   id_STARTS_WITH: ID
                 }
@@ -1426,8 +1384,8 @@ describe("Comments", () => {
 
                 type Movie {
                   id: ID
-                  search(directed: Boolean = true, options: QueryOptions, where: SearchWhere): [Search!]!
-                  searchConnection(after: String, directed: Boolean = true, first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
+                  search(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
+                  searchConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
                   searchNoDirective: Search
                 }
 
@@ -1471,10 +1429,6 @@ describe("Comments", () => {
                   sort: [MovieSort!]
                 }
 
-                input MovieRelationInput {
-                  search: MovieSearchCreateFieldInput
-                }
-
                 input MovieSearchConnectInput {
                   Genre: [MovieSearchGenreConnectFieldInput!]
                   Movie: [MovieSearchMovieConnectFieldInput!]
@@ -1489,11 +1443,6 @@ describe("Comments", () => {
                 input MovieSearchConnectionWhere {
                   Genre: MovieSearchGenreConnectionWhere
                   Movie: MovieSearchMovieConnectionWhere
-                }
-
-                input MovieSearchCreateFieldInput {
-                  Genre: [MovieSearchGenreCreateFieldInput!]
-                  Movie: [MovieSearchMovieCreateFieldInput!]
                 }
 
                 input MovieSearchCreateInput {
@@ -1622,9 +1571,10 @@ describe("Comments", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
                   id_STARTS_WITH: ID
                   \\"\\"\\"
@@ -1665,7 +1615,7 @@ describe("Comments", () => {
                   deleteGenres(where: GenreWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-                  updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1677,13 +1627,13 @@ describe("Comments", () => {
                 }
 
                 type Query {
-                  genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+                  genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
                   genresAggregate(where: GenreWhere): GenreAggregateSelection!
-                  genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                  searches(options: QueryOptions, where: SearchWhere): [Search!]!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                  searches(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
                 }
 
                 \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"

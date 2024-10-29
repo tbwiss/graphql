@@ -36,7 +36,7 @@ describe("BigInt", () => {
     describe("create", () => {
         test("should create an object with a BigInt specified inline in the mutation", async () => {
             const typeDefs = `
-                type ${File} {
+                type ${File} @node {
                   name: String!
                   size: BigInt!
                 }
@@ -81,7 +81,7 @@ describe("BigInt", () => {
     describe("read", () => {
         test("should successfully query an node with a BigInt property", async () => {
             const typeDefs = `
-                type ${File} {
+                type ${File} @node {
                   name: String!
                   size: BigInt!
                 }
@@ -95,7 +95,7 @@ describe("BigInt", () => {
 
             const query = `
                 query {
-                    ${File.plural}(where: { name: "${name}" }) {
+                    ${File.plural}(where: { name_EQ: "${name}" }) {
                         name
                         size
                     }
@@ -124,7 +124,7 @@ describe("BigInt", () => {
 
         test("should successfully query an node with a BigInt property using in where", async () => {
             const typeDefs = `
-                type ${File} {
+                type ${File} @node {
                   name: String!
                   size: BigInt!
                 }
@@ -138,7 +138,7 @@ describe("BigInt", () => {
 
             const query = `
                 query {
-                    ${File.plural}(where: { size: 8323372036854775807 }) {
+                    ${File.plural}(where: { size_EQ: 8323372036854775807 }) {
                         name
                         size
                     }
@@ -173,7 +173,7 @@ describe("BigInt", () => {
             });
 
             const typeDefs = `
-                type ${File} {
+                type ${File} @node {
                   name: String!
                   size: BigInt! @cypher(statement: """
                       RETURN 9223372036854775807 as result
@@ -185,7 +185,7 @@ describe("BigInt", () => {
 
             const query = `
                 query {
-                    ${File.plural}(where: { name: "${name}" }) {
+                    ${File.plural}(where: { name_EQ: "${name}" }) {
                         name
                         size
                     }

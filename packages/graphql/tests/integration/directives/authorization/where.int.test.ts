@@ -40,11 +40,11 @@ describe("auth/where", () => {
     describe("read", () => {
         test("should add $jwt.id to where and return user", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -85,17 +85,17 @@ describe("auth/where", () => {
 
         test("should add $jwt.id to where on a relationship", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -150,17 +150,17 @@ describe("auth/where", () => {
 
         test("should add $jwt.id to where on a relationship(using connection)", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -179,7 +179,7 @@ describe("auth/where", () => {
 
             const query = `
                 {
-                    ${User.plural}(where: { id: "${userId}" }) {
+                    ${User.plural}(where: { id_EQ: "${userId}" }) {
                         postsConnection {
                             edges {
                                 node {
@@ -230,18 +230,18 @@ describe("auth/where", () => {
                 const typeDefs = `
                     union Content = ${Post}
 
-                    type ${User} {
+                    type ${User} @node {
                         id: ID
                         content: [Content!]! @relationship(type: "HAS_CONTENT", direction: OUT)
                     }
 
-                    type ${Post} {
+                    type ${Post} @node {
                         id: ID
                         creator: ${User}! @relationship(type: "HAS_CONTENT", direction: IN)
                     }
 
-                    extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
-                    extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id: "$jwt.sub" } } }])
+                    extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                    extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const userId = generate({
@@ -301,18 +301,18 @@ describe("auth/where", () => {
             const typeDefs = `
                 union Content = ${Post}
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     content: [Content!]! @relationship(type: "HAS_CONTENT", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_CONTENT", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
-                extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -378,11 +378,11 @@ describe("auth/where", () => {
     describe("update", () => {
         test("should add $jwt.id to where", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [UPDATE], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [UPDATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -429,11 +429,11 @@ describe("auth/where", () => {
     describe("delete", () => {
         test("should add $jwt.id to where", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [DELETE], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [DELETE], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -442,7 +442,7 @@ describe("auth/where", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.delete}(where: { id: "${userId}" }){
+                    ${User.operations.delete}(where: { id_EQ: "${userId}" }){
                         nodesDeleted
                     }
                 }
@@ -480,17 +480,17 @@ describe("auth/where", () => {
     describe("connect", () => {
         test("should add jwt.id to where - update update", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -502,7 +502,7 @@ describe("auth/where", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(update: { posts: { connect: { where: { node: { id: "${postId}" } } } } }) {
+                    ${User.operations.update}(update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
                             id
                             posts {
@@ -538,17 +538,17 @@ describe("auth/where", () => {
 
         test("should add jwt.id to where - update connect", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -560,7 +560,7 @@ describe("auth/where", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(connect:{posts:{where:{node:{id: "${postId}"}}}}) {
+                    ${User.operations.update}(update:{posts:{connect:{where:{node:{id_EQ: "${postId}"}}}}}) {
                         ${User.plural} {
                             id
                             posts {
@@ -598,17 +598,17 @@ describe("auth/where", () => {
     describe("disconnect", () => {
         test("should add $jwt.id to where (update update)", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -623,7 +623,7 @@ describe("auth/where", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(update: { posts: { disconnect: { where: { node: { id: "${postId1}" } } } } }) {
+                    ${User.operations.update}(update: { posts: { disconnect: { where: { node: { id_EQ: "${postId1}" } } } } }) {
                         ${User.plural} {
                             id
                             posts {
@@ -660,17 +660,17 @@ describe("auth/where", () => {
 
         test("should add $jwt.id to where (update disconnect)", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -685,7 +685,7 @@ describe("auth/where", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(disconnect: { posts: { where: {node: { id : "${postId1}"}}}}) {
+                    ${User.operations.update}(update: { posts: { disconnect: { where: {node: { id_EQ: "${postId1}"}}}}}) {
                         ${User.plural} {
                             id
                             posts {

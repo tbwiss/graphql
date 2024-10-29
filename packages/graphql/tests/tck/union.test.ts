@@ -18,8 +18,8 @@
  */
 
 import { Neo4jGraphQL } from "../../src";
-import { formatCypher, translateQuery, formatParams } from "./utils/tck-test-utils";
 import { createBearerToken } from "../utils/create-bearer-token";
+import { formatCypher, formatParams, translateQuery } from "./utils/tck-test-utils";
 
 describe("Cypher Union", () => {
     const secret = "secret";
@@ -31,15 +31,20 @@ describe("Cypher Union", () => {
             union Search = Genre | Movie
 
             type Genre
+                @node
                 @authorization(
                     validate: [
-                        { when: [BEFORE], operations: [READ], where: { node: { name: "$jwt.jwtAllowedNamesExample" } } }
+                        {
+                            when: [BEFORE]
+                            operations: [READ]
+                            where: { node: { name_EQ: "$jwt.jwtAllowedNamesExample" } }
+                        }
                     ]
                 ) {
                 name: String
             }
 
-            type Movie {
+            type Movie @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -155,10 +160,11 @@ describe("Cypher Union", () => {
     test("Read Unions with filter and limit", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { title: "some title" }) {
+                movies(where: { title_EQ: "some title" }) {
                     search(
-                        where: { Movie: { title: "The Matrix" }, Genre: { name: "Horror" } }
-                        options: { offset: 1, limit: 10 }
+                        where: { Movie: { title_EQ: "The Matrix" }, Genre: { name_EQ: "Horror" } }
+                        offset: 1
+                        limit: 10
                     ) {
                         ... on Movie {
                             title
@@ -267,7 +273,7 @@ describe("Cypher Union", () => {
     test("Create Unions from update create(top-level)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(create: { search: { Genre: [{ node: { name: "some genre" } }] } }) {
+                updateMovies(update: { search: { Genre: { create: [{ node: { name: "some genre" } }] } } }) {
                     movies {
                         title
                     }
@@ -280,16 +286,16 @@ describe("Cypher Union", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            CREATE (this_create_search_Genre0_node:Genre)
-            SET this_create_search_Genre0_node.name = $this_create_search_Genre0_node_name
-            MERGE (this)-[:SEARCH]->(this_create_search_Genre0_node)
-            WITH *
+            WITH this
+            CREATE (this_search_Genre0_create0_node:Genre)
+            SET this_search_Genre0_create0_node.name = $this_search_Genre0_create0_node_name
+            MERGE (this)-[:SEARCH]->(this_search_Genre0_create0_node)
             RETURN collect(DISTINCT this { .title }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_create_search_Genre0_node_name\\": \\"some genre\\",
+                \\"this_search_Genre0_create0_node_name\\": \\"some genre\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -302,7 +308,7 @@ describe("Cypher Union", () => {
                     input: [
                         {
                             title: "some movie"
-                            search: { Genre: { connect: [{ where: { node: { name: "some genre" } } }] } }
+                            search: { Genre: { connect: [{ where: { node: { name_EQ: "some genre" } } }] } }
                         }
                     ]
                 ) {
@@ -360,11 +366,11 @@ describe("Cypher Union", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "some movie" }
+                    where: { title_EQ: "some movie" }
                     update: {
                         search: {
                             Genre: {
-                                where: { node: { name: "some genre" } }
+                                where: { node: { name_EQ: "some genre" } }
                                 update: { node: { name: "some new genre" } }
                             }
                         }
@@ -407,7 +413,7 @@ describe("Cypher Union", () => {
                                     {
                                         \\"where\\": {
                                             \\"node\\": {
-                                                \\"name\\": \\"some genre\\"
+                                                \\"name_EQ\\": \\"some genre\\"
                                             }
                                         },
                                         \\"update\\": {
@@ -430,8 +436,8 @@ describe("Cypher Union", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "some movie" }
-                    update: { search: { Genre: { disconnect: [{ where: { node: { name: "some genre" } } }] } } }
+                    where: { title_EQ: "some movie" }
+                    update: { search: { Genre: { disconnect: [{ where: { node: { name_EQ: "some genre" } } }] } } }
                 ) {
                     movies {
                         title
@@ -476,7 +482,7 @@ describe("Cypher Union", () => {
                                             {
                                                 \\"where\\": {
                                                     \\"node\\": {
-                                                        \\"name\\": \\"some genre\\"
+                                                        \\"name_EQ\\": \\"some genre\\"
                                                     }
                                                 }
                                             }
@@ -492,75 +498,12 @@ describe("Cypher Union", () => {
         `);
     });
 
-    test("Disconnect Unions", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateMovies(
-                    where: { title: "some movie" }
-                    disconnect: { search: { Genre: { where: { node: { name: "some genre" } } } } }
-                ) {
-                    movies {
-                        title
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", {});
-        const result = await translateQuery(neoSchema, query, { token });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:Movie)
-            WHERE this.title = $param0
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_search_Genre0_rel:SEARCH]->(this_disconnect_search_Genre0:Genre)
-            WHERE this_disconnect_search_Genre0.name = $updateMovies_args_disconnect_search_Genre0_where_Genre_this_disconnect_search_Genre0param0
-            CALL {
-            	WITH this_disconnect_search_Genre0, this_disconnect_search_Genre0_rel, this
-            	WITH collect(this_disconnect_search_Genre0) as this_disconnect_search_Genre0, this_disconnect_search_Genre0_rel, this
-            	UNWIND this_disconnect_search_Genre0 as x
-            	DELETE this_disconnect_search_Genre0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_search_Genre_Genre
-            }
-            WITH *
-            RETURN collect(DISTINCT this { .title }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"some movie\\",
-                \\"updateMovies_args_disconnect_search_Genre0_where_Genre_this_disconnect_search_Genre0param0\\": \\"some genre\\",
-                \\"updateMovies\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"search\\": {
-                                \\"Genre\\": [
-                                    {
-                                        \\"where\\": {
-                                            \\"node\\": {
-                                                \\"name\\": \\"some genre\\"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
     test("Connect Unions (in update)", async () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "some movie" }
-                    connect: { search: { Genre: { where: { node: { name: "some genre" } } } } }
+                    where: { title_EQ: "some movie" }
+                    update: { search: { Genre: { connect: { where: { node: { name_EQ: "some genre" } } } } } }
                 ) {
                     movies {
                         title
@@ -578,29 +521,28 @@ describe("Cypher Union", () => {
             WITH *
             CALL {
             	WITH this
-            	OPTIONAL MATCH (this_connect_search_Genre0_node:Genre)
-            	WHERE this_connect_search_Genre0_node.name = $this_connect_search_Genre0_node_param0
+            	OPTIONAL MATCH (this_search_Genre0_connect0_node:Genre)
+            	WHERE this_search_Genre0_connect0_node.name = $this_search_Genre0_connect0_node_param0
             	CALL {
             		WITH *
-            		WITH collect(this_connect_search_Genre0_node) as connectedNodes, collect(this) as parentNodes
+            		WITH collect(this_search_Genre0_connect0_node) as connectedNodes, collect(this) as parentNodes
             		CALL {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_search_Genre0_node
-            			MERGE (this)-[:SEARCH]->(this_connect_search_Genre0_node)
+            			UNWIND connectedNodes as this_search_Genre0_connect0_node
+            			MERGE (this)-[:SEARCH]->(this_search_Genre0_connect0_node)
             		}
             	}
-            WITH this, this_connect_search_Genre0_node
-            	RETURN count(*) AS connect_this_connect_search_Genre_Genre0
+            WITH this, this_search_Genre0_connect0_node
+            	RETURN count(*) AS connect_this_search_Genre0_connect_Genre0
             }
-            WITH *
             RETURN collect(DISTINCT this { .title }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"some movie\\",
-                \\"this_connect_search_Genre0_node_param0\\": \\"some genre\\",
+                \\"this_search_Genre0_connect0_node_param0\\": \\"some genre\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -610,8 +552,8 @@ describe("Cypher Union", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "some movie" }
-                    delete: { search: { Genre: { where: { node: { name: "some genre" } } } } }
+                    where: { title_EQ: "some movie" }
+                    update: { search: { Genre: { delete: { where: { node: { name_EQ: "some genre" } } } } } }
                 ) {
                     movies {
                         title
@@ -629,34 +571,37 @@ describe("Cypher Union", () => {
             WITH *
             CALL {
             WITH *
-            OPTIONAL MATCH (this)-[this_delete_search_Genre0_relationship:SEARCH]->(this_delete_search_Genre0:Genre)
-            WHERE this_delete_search_Genre0.name = $updateMovies_args_delete_search_Genre0_where_this_delete_search_Genre0param0
-            WITH this_delete_search_Genre0_relationship, collect(DISTINCT this_delete_search_Genre0) AS this_delete_search_Genre0_to_delete
+            OPTIONAL MATCH (this)-[this_search_Genre0_delete0_relationship:SEARCH]->(this_search_Genre0_delete0:Genre)
+            WHERE this_search_Genre0_delete0.name = $updateMovies_args_update_search0_delete_Genre0_where_this_search_Genre0_delete0param0
+            WITH this_search_Genre0_delete0_relationship, collect(DISTINCT this_search_Genre0_delete0) AS this_search_Genre0_delete0_to_delete
             CALL {
-            	WITH this_delete_search_Genre0_to_delete
-            	UNWIND this_delete_search_Genre0_to_delete AS x
+            	WITH this_search_Genre0_delete0_to_delete
+            	UNWIND this_search_Genre0_delete0_to_delete AS x
             	DETACH DELETE x
             }
             }
-            WITH *
             RETURN collect(DISTINCT this { .title }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"some movie\\",
-                \\"updateMovies_args_delete_search_Genre0_where_this_delete_search_Genre0param0\\": \\"some genre\\",
+                \\"updateMovies_args_update_search0_delete_Genre0_where_this_search_Genre0_delete0param0\\": \\"some genre\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
-                        \\"delete\\": {
+                        \\"update\\": {
                             \\"search\\": {
                                 \\"Genre\\": [
                                     {
-                                        \\"where\\": {
-                                            \\"node\\": {
-                                                \\"name\\": \\"some genre\\"
+                                        \\"delete\\": [
+                                            {
+                                                \\"where\\": {
+                                                    \\"node\\": {
+                                                        \\"name_EQ\\": \\"some genre\\"
+                                                    }
+                                                }
                                             }
-                                        }
+                                        ]
                                     }
                                 ]
                             }

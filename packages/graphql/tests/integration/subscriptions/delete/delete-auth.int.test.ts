@@ -18,17 +18,11 @@
  */
 
 import { generate } from "randomstring";
-import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 import { createBearerToken } from "../../../utils/create-bearer-token";
 import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Subscriptions delete", () => {
-    const testHelper = new TestHelper();
-    let plugin: TestSubscriptionsEngine;
-
-    beforeEach(() => {
-        plugin = new TestSubscriptionsEngine();
-    });
+    const testHelper = new TestHelper({ cdc: true });
 
     afterEach(async () => {
         await testHelper.close();
@@ -37,11 +31,11 @@ describe("Subscriptions delete", () => {
     test("should throw Forbidden when deleting a node with invalid allow", async () => {
         const typeUser = testHelper.createUniqueType("User");
         const typeDefs = `
-        type ${typeUser.name} {
+        type ${typeUser.name} @node {
             id: ID
         }
 
-        extend type ${typeUser.name} @authorization(validate: [{ operations: [DELETE], when: [BEFORE], where: { node: { id: "$jwt.sub" } } }])
+        extend type ${typeUser.name} @authorization(validate: [{ operations: [DELETE], when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
     `;
 
         const userId = generate({
@@ -51,7 +45,7 @@ describe("Subscriptions delete", () => {
         const query = `
         mutation {
             ${typeUser.operations.delete}(
-                where: { id: "${userId}" }
+                where: { id_EQ: "${userId}" }
             ) {
                nodesDeleted
             }
@@ -64,7 +58,7 @@ describe("Subscriptions delete", () => {
                 authorization: {
                     key: "secret",
                 },
-                subscriptions: plugin,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 

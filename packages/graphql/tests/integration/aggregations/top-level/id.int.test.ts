@@ -28,7 +28,7 @@ describe("aggregations-top_level-id", () => {
     beforeEach(async () => {
         Movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-        type ${Movie} {
+        type ${Movie} @node {
             testId: ID
             id: ID
         }
@@ -61,7 +61,7 @@ describe("aggregations-top_level-id", () => {
 
         const query = `
                 {
-                    ${Movie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${Movie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         id {
                             shortest
                         }
@@ -104,7 +104,7 @@ describe("aggregations-top_level-id", () => {
 
         const query = `
                 {
-                    ${Movie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${Movie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         id {
                             longest
                         }
@@ -147,7 +147,7 @@ describe("aggregations-top_level-id", () => {
 
         const query = `
                 {
-                    ${Movie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${Movie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         id {
                             shortest
                             longest

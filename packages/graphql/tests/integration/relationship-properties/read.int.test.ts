@@ -50,12 +50,12 @@ describe("Relationship properties - read", () => {
         );
 
         typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -75,7 +75,7 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     actorsConnection {
                         totalCount
@@ -134,7 +134,7 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     actorsConnection(
                         where: { AND: [{ edge: { screenTime_GT: 60 } }, { node: { name_STARTS_WITH: "a" } }] }
@@ -190,7 +190,7 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query ConnectionWithSort($nameSort: SortDirection) {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     actorsConnection(
                         sort: [{ edge: { screenTime: DESC } }, { node: { name: $nameSort } }]
@@ -419,7 +419,7 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query ConnectionWithSort($nameSort: SortDirection) {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     actorsConnection(
                         where: { edge: { screenTime_GT: 60 } }
@@ -514,7 +514,7 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query {
-                ${typeActor.plural}(where: { name: "${actorA}" }) {
+                ${typeActor.plural}(where: { name_EQ: "${actorA}" }) {
                     name
                     movies {
                         title
@@ -570,11 +570,11 @@ describe("Relationship properties - read", () => {
 
         const query = `
             query {
-                ${typeActor.plural}(where: { name: "${actorA}" }) {
+                ${typeActor.plural}(where: { name_EQ: "${actorA}" }) {
                     name
                     movies {
                         title
-                        actorsConnection(where: { node: { name_NOT: "${actorA}" } }) {
+                        actorsConnection(where: { node: { NOT: { name_EQ: "${actorA}" } } }) {
                             edges {
                                properties {
                                  screenTime

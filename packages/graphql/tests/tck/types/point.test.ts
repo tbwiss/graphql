@@ -18,7 +18,7 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("Cypher Points", () => {
     let typeDefs: string;
@@ -26,7 +26,7 @@ describe("Cypher Points", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type PointContainer {
+            type PointContainer @node {
                 id: String
                 point: Point
             }
@@ -40,7 +40,7 @@ describe("Cypher Points", () => {
     test("Simple Point query", async () => {
         const query = /* GraphQL */ `
             {
-                pointContainers(where: { point: { longitude: 1.0, latitude: 2.0 } }) {
+                pointContainers(where: { point_EQ: { longitude: 1.0, latitude: 2.0 } }) {
                     point {
                         longitude
                         latitude
@@ -71,7 +71,7 @@ describe("Cypher Points", () => {
     test("Simple Point NOT query", async () => {
         const query = /* GraphQL */ `
             {
-                pointContainers(where: { point_NOT: { longitude: 1.0, latitude: 2.0 } }) {
+                pointContainers(where: { NOT: { point_EQ: { longitude: 1.0, latitude: 2.0 } } }) {
                     point {
                         longitude
                         latitude
@@ -116,39 +116,6 @@ describe("Cypher Points", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:PointContainer)
             WHERE this.point IN [var0 IN $param0 | point(var0)]
-            RETURN this { .point } AS this"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": [
-                    {
-                        \\"longitude\\": 1,
-                        \\"latitude\\": 2
-                    }
-                ]
-            }"
-        `);
-    });
-
-    test("Simple Point NOT IN query", async () => {
-        const query = /* GraphQL */ `
-            {
-                pointContainers(where: { point_NOT_IN: [{ longitude: 1.0, latitude: 2.0 }] }) {
-                    point {
-                        longitude
-                        latitude
-                        crs
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:PointContainer)
-            WHERE NOT (this.point IN [var0 IN $param0 | point(var0)])
             RETURN this { .point } AS this"
         `);
 
@@ -379,7 +346,7 @@ describe("Cypher Points", () => {
     test("Simple Point update mutation", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePointContainers(where: { id: "id" }, update: { point: { longitude: 1.0, latitude: 2.0 } }) {
+                updatePointContainers(where: { id_EQ: "id" }, update: { point: { longitude: 1.0, latitude: 2.0 } }) {
                     pointContainers {
                         point {
                             longitude

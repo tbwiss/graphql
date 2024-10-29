@@ -37,7 +37,7 @@ describe("DateTime", () => {
     describe("create", () => {
         test("should create a movie (with a DateTime)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                   id: ID
                   datetime: DateTime
                 }
@@ -81,7 +81,7 @@ describe("DateTime", () => {
 
         test("should create a movie (with many DateTime)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                   id: ID
                   datetimes: [DateTime]
                 }
@@ -132,7 +132,7 @@ describe("DateTime", () => {
     describe("find", () => {
         test("should find a movie (with a DateTime)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie.name} {
+                type ${Movie.name} @node {
                     datetime: DateTime
                 }
             `;
@@ -143,7 +143,7 @@ describe("DateTime", () => {
 
             const query = `
                 query {
-                    ${Movie.plural}(where: { datetime: "${date.toISOString()}" }) {
+                    ${Movie.plural}(where: { datetime_EQ: "${date.toISOString()}" }) {
                         datetime
                     }
                 }
@@ -167,7 +167,7 @@ describe("DateTime", () => {
 
         test("should find a movie (with a DateTime created with a timezone)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie.name} {
+                type ${Movie.name} @node {
                     name: String
                     datetime: DateTime
                 }
@@ -179,7 +179,7 @@ describe("DateTime", () => {
 
             const query = /* GraphQL */ `
                 query {
-                    ${Movie.plural}(where: { name: "${Movie.name}" }) {
+                    ${Movie.plural}(where: { name_EQ: "${Movie.name}" }) {
                         datetime
                     }
                 }
@@ -201,7 +201,7 @@ describe("DateTime", () => {
     describe("update", () => {
         test("should update a movie (with a DateTime)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                   id: ID
                   datetime: DateTime
                 }
@@ -217,7 +217,7 @@ describe("DateTime", () => {
 
             const create = /* GraphQL */ `
                 mutation {
-                    ${Movie.operations.update}(where: {id: "${id}"}, update: {datetime: "${date.toISOString()}"}) {
+                    ${Movie.operations.update}(where: {id_EQ: "${id}"}, update: {datetime: "${date.toISOString()}"}) {
                         ${Movie.plural} {
                             id
                             datetime

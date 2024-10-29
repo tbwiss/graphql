@@ -31,12 +31,12 @@ describe("fragments", () => {
             runtime: Int!
         }
 
-        type ${Movie} implements Production {
+        type ${Movie} implements Production @node {
             title: String!
             runtime: Int!
         }
 
-        type ${Series} implements Production {
+        type ${Series} implements Production @node {
             title: String!
             runtime: Int!
             episodes: Int!
@@ -50,7 +50,7 @@ describe("fragments", () => {
             actedIn: [Production!]! @declareRelationship
         }
 
-        type ${Actor} implements InterfaceA {
+        type ${Actor} implements InterfaceA @node {
             name: String!
             actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
         }
@@ -96,7 +96,7 @@ describe("fragments", () => {
     test("should be able project fragment on type", async () => {
         const query = /* GraphQL */ `
             query ($actorName: String!) {
-                ${Actor.plural}(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     ...FragmentOnType
                 }
             }
@@ -120,7 +120,7 @@ describe("fragments", () => {
     test("should be able project fragment on interface", async () => {
         const query = /* GraphQL */ `
             query ($actorName: String!) {
-                ${Actor.plural}(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     name
                     actedIn {
                         ...FragmentOnInterface
@@ -153,7 +153,7 @@ describe("fragments", () => {
     test("should be able to project nested fragments", async () => {
         const query = `
             query ($actorName: String!) {
-                ${Actor.plural}(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     name
                     actedIn {
                         ...FragmentA

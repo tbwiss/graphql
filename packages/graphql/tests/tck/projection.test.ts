@@ -26,7 +26,7 @@ describe("Cypher Projection", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Product {
+            type Product @node {
                 id: ID!
                 name: String
                 sizes: [Size!]! @relationship(type: "HAS_SIZE", direction: OUT)
@@ -34,18 +34,18 @@ describe("Cypher Projection", () => {
                 photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
             }
 
-            type Size {
+            type Size @node {
                 id: ID!
                 name: String!
             }
 
-            type Color {
+            type Color @node {
                 id: ID!
                 name: String!
                 photos: [Photo!]! @relationship(type: "OF_COLOR", direction: IN)
             }
 
-            type Photo {
+            type Photo @node {
                 id: ID!
                 description: String!
                 url: String!
@@ -65,7 +65,7 @@ describe("Cypher Projection", () => {
                 createProducts(input: [{ id: "1" }, { id: "2" }]) {
                     products {
                         id
-                        photos(where: { url: "url.com" }) {
+                        photos(where: { url_EQ: "url.com" }) {
                             url
                             location {
                                 latitude
@@ -73,10 +73,10 @@ describe("Cypher Projection", () => {
                                 height
                             }
                         }
-                        colors(where: { id: 123 }) {
+                        colors(where: { id_EQ: 123 }) {
                             id
                         }
-                        sizes(where: { name: "small" }) {
+                        sizes(where: { name_EQ: "small" }) {
                             name
                         }
                     }

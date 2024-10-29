@@ -17,61 +17,37 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQLSubscriptionsCDCEngine } from "../../../src/classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
-import type { Neo4jGraphQLSubscriptionsEngine } from "../../../src/types";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 import type { TestGraphQLServer } from "../setup/apollo-server";
 import { ApolloTestServer } from "../setup/apollo-server";
 import { WebSocketTestClient } from "../setup/ws-client";
 
-describe.each([
-    {
-        name: "Neo4jGraphQLSubscriptionsDefaultEngine",
-        engine: (_driver: Driver, _db: string) => new Neo4jGraphQLSubscriptionsDefaultEngine(),
-    },
-    {
-        name: "Neo4jGraphQLSubscriptionsCDCEngine",
-        engine: (driver: Driver, db: string) =>
-            new Neo4jGraphQLSubscriptionsCDCEngine({
-                driver,
-                pollTime: 100,
-                queryConfig: {
-                    database: db,
-                },
-            }),
-    },
-])("$name Delete Subscription", ({ engine }) => {
+describe("$name Delete Subscription", () => {
     const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
     let typeActor: UniqueType;
-    let subscriptionEngine: Neo4jGraphQLSubscriptionsEngine;
 
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         typeActor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-        type ${typeMovie} {
+        type ${typeMovie} @node {
             title: String
             actors: [${typeActor}]
         }
-        type ${typeActor} @subscription(events: []) {
+        type ${typeActor} @subscription(events: []) @node {
            name: String
         }`;
-
-        const driver = await testHelper.getDriver();
-        subscriptionEngine = engine(driver, testHelper.database);
 
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: subscriptionEngine,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -89,7 +65,6 @@ describe.each([
 
     afterEach(async () => {
         await wsClient.close();
-        subscriptionEngine.close();
         await server.close();
         await testHelper.close();
     });
@@ -136,7 +111,7 @@ describe.each([
     test("delete subscription with where", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.deleted}(where: { title: "movie3" }) {
+                ${typeMovie.operations.subscribe.deleted}(where: { title_EQ: "movie3" }) {
                     ${typeMovie.operations.subscribe.payload.deleted} {
                         title
                     }
@@ -167,7 +142,7 @@ describe.each([
         await wsClient.subscribe(
             `
             subscription {
-                ${typeActor.operations.subscribe.deleted}(where: { name: "Keanu" }) {
+                ${typeActor.operations.subscribe.deleted}(where: { name_EQ: "Keanu" }) {
                     ${typeActor.operations.subscribe.payload.deleted} {
                         name
                     }
@@ -222,7 +197,7 @@ describe.each([
             .send({
                 query: `
                     mutation {
-                        ${typeMovie.operations.delete}(where: { title: "${title}" }) {
+                        ${typeMovie.operations.delete}(where: { title_EQ: "${title}" }) {
                             nodesDeleted
                         }
                     }
@@ -237,7 +212,7 @@ describe.each([
             .send({
                 query: `
                         mutation {
-                            ${typeActor.operations.update}(where: { name: "${name}" }) {
+                            ${typeActor.operations.update}(where: { name_EQ: "${name}" }) {
                                 ${typeActor.plural} {
                                     name
                                 }

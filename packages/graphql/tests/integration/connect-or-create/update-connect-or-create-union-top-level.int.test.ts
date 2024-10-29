@@ -30,12 +30,12 @@ describe("Update -> ConnectOrCreate union top level", () => {
 
     beforeEach(async () => {
         typeDefs = /* GraphQL */ `
-        type ${typeMovie.name} {
+        type ${typeMovie.name} @node {
         	title: String!
         	isan: String! @unique
         }
 
-        type ${typeSeries.name} {
+        type ${typeSeries.name} @node {
             title: String!
         	isan: String! @unique
         }
@@ -46,7 +46,7 @@ describe("Update -> ConnectOrCreate union top level", () => {
         	screentime: Int!
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
           name: String!
           actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
         }
@@ -69,23 +69,25 @@ describe("Update -> ConnectOrCreate union top level", () => {
                 ${typeActor.operations.update}(
                     update: {
                             name: "Tom Hanks"
-                    },
-                    connectOrCreate: {
                         actedIn: {
                             ${typeMovie.name}: {
-                                where: { node: { isan: "${movieIsan}" } }
-                                onCreate: {
-                                    edge: { screentime: 105 }
-                                    node: { title: "Forrest Gump", isan: "${movieIsan}" }
+                                connectOrCreate: {
+                                    where: { node: { isan_EQ: "${movieIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 105 }
+                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
+                                    }
                                 }
                             }
                             ${typeSeries.name}: {
-                                where: { node: { isan: "${seriesIsan}" } }
-                                onCreate: {
-                                    edge: { screentime: 126 }
-                                    node: {
-                                        title: "Band of Brothers"
-                                        isan: "${seriesIsan}"
+                                connectOrCreate: {
+                                    where: { node: { isan_EQ: "${seriesIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 126 }
+                                        node: {
+                                            title: "Band of Brothers"
+                                            isan: "${seriesIsan}"
+                                        }
                                     }
                                 }
                             }
@@ -155,29 +157,31 @@ describe("Update -> ConnectOrCreate union top level", () => {
                 ${typeActor.operations.update}(
                     update: {
                             name: "${actorName}"
-                    },
-                    connectOrCreate: {
                         actedIn: {
                             ${typeMovie.name}: {
-                                where: { node: { isan: "${movieIsan}" } }
-                                onCreate: {
-                                    edge: { screentime: 105 }
-                                    node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                }
+                                connectOrCreate: {
+                                    where: { node: { isan_EQ: "${movieIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 105 }
+                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
+                                    }
+                                }   
                             }
                             ${typeSeries.name}: {
-                                where: { node: { isan: "${seriesIsan}" } }
-                                onCreate: {
-                                    edge: { screentime: 126 }
-                                    node: {
-                                        title: "Band of Brothers"
-                                        isan: "${seriesIsan}"
+                                connectOrCreate: {
+                                    where: { node: { isan_EQ: "${seriesIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 126 }
+                                        node: {
+                                            title: "Band of Brothers"
+                                            isan: "${seriesIsan}"
+                                        }
                                     }
-                                }
+                                }   
                             }
                         }
                 }
-                where: { name: "${actorName}"}){
+                where: { name_EQ: "${actorName}"}){
                     ${typeActor.plural} {
                         name
                     }

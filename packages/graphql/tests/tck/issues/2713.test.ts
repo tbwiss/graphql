@@ -24,18 +24,18 @@ describe("https://github.com/neo4j/graphql/issues/2713", () => {
     let neoSchema: Neo4jGraphQL;
 
     const typeDefs = /* GraphQL */ `
-        type Movie {
+        type Movie @node {
             title: String
             genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "InGenre")
         }
 
-        type Genre {
+        type Genre @node {
             name: String
             movies: [Movie!]! @relationship(type: "IN_GENRE", direction: IN, properties: "InGenre")
             series: [Series!]! @relationship(type: "IN_GENRE", direction: IN, properties: "InGenre")
         }
 
-        type Series {
+        type Series @node {
             name: String!
             genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "InGenre")
         }
@@ -54,7 +54,7 @@ describe("https://github.com/neo4j/graphql/issues/2713", () => {
     test("should not find genresConnection_ALL where NONE true", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genresConnection_ALL: { node: { moviesAggregate: { count: 0 } } } }) {
+                movies(where: { genresConnection_ALL: { node: { moviesAggregate: { count_EQ: 0 } } } }) {
                     title
                 }
             }
@@ -110,7 +110,9 @@ describe("https://github.com/neo4j/graphql/issues/2713", () => {
     test("should not find genresConnection_ALL where NONE true and filter by genre title", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genresConnection_ALL: { node: { moviesAggregate: { count: 0 }, name: "Thriller" } } }) {
+                movies(
+                    where: { genresConnection_ALL: { node: { moviesAggregate: { count_EQ: 0 }, name_EQ: "Thriller" } } }
+                ) {
                     title
                 }
             }
@@ -168,7 +170,7 @@ describe("https://github.com/neo4j/graphql/issues/2713", () => {
     test("should not find genresConnection_ALL by genre title", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { genresConnection_ALL: { node: { name: "Thriller" } } }) {
+                movies(where: { genresConnection_ALL: { node: { name_EQ: "Thriller" } } }) {
                     title
                 }
             }

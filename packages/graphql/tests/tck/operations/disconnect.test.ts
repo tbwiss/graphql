@@ -18,7 +18,7 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("Cypher Disconnect", () => {
     let typeDefs: string;
@@ -26,7 +26,7 @@ describe("Cypher Disconnect", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Product {
+            type Product @node {
                 id: ID!
                 name: String
                 sizes: [Size!]! @relationship(type: "HAS_SIZE", direction: OUT)
@@ -34,18 +34,18 @@ describe("Cypher Disconnect", () => {
                 photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
             }
 
-            type Size {
+            type Size @node {
                 id: ID!
                 name: String!
             }
 
-            type Color {
+            type Color @node {
                 id: ID!
                 name: String!
                 photos: [Photo!]! @relationship(type: "OF_COLOR", direction: IN)
             }
 
-            type Photo {
+            type Photo @node {
                 id: ID!
                 description: String!
                 url: String!
@@ -68,12 +68,12 @@ describe("Cypher Disconnect", () => {
                         colors: {
                             disconnect: [
                                 {
-                                    where: { node: { name: "Red" } }
+                                    where: { node: { name_EQ: "Red" } }
                                     disconnect: {
                                         photos: [
                                             {
-                                                where: { node: { id: "123" } }
-                                                disconnect: { color: { where: { node: { id: "134" } } } }
+                                                where: { node: { id_EQ: "123" } }
+                                                disconnect: { color: { where: { node: { id_EQ: "134" } } } }
                                             }
                                         ]
                                     }
@@ -83,12 +83,12 @@ describe("Cypher Disconnect", () => {
                         photos: {
                             disconnect: [
                                 {
-                                    where: { node: { id: "321" } }
-                                    disconnect: { color: { where: { node: { name: "Green" } } } }
+                                    where: { node: { id_EQ: "321" } }
+                                    disconnect: { color: { where: { node: { name_EQ: "Green" } } } }
                                 }
                                 {
-                                    where: { node: { id: "33211" } }
-                                    disconnect: { color: { where: { node: { name: "Red" } } } }
+                                    where: { node: { id_EQ: "33211" } }
+                                    disconnect: { color: { where: { node: { name_EQ: "Red" } } } }
                                 }
                             ]
                         }
@@ -219,7 +219,7 @@ describe("Cypher Disconnect", () => {
                                         {
                                             \\"where\\": {
                                                 \\"node\\": {
-                                                    \\"name\\": \\"Red\\"
+                                                    \\"name_EQ\\": \\"Red\\"
                                                 }
                                             },
                                             \\"disconnect\\": {
@@ -227,14 +227,14 @@ describe("Cypher Disconnect", () => {
                                                     {
                                                         \\"where\\": {
                                                             \\"node\\": {
-                                                                \\"id\\": \\"123\\"
+                                                                \\"id_EQ\\": \\"123\\"
                                                             }
                                                         },
                                                         \\"disconnect\\": {
                                                             \\"color\\": {
                                                                 \\"where\\": {
                                                                     \\"node\\": {
-                                                                        \\"id\\": \\"134\\"
+                                                                        \\"id_EQ\\": \\"134\\"
                                                                     }
                                                                 }
                                                             }
@@ -252,14 +252,14 @@ describe("Cypher Disconnect", () => {
                                         {
                                             \\"where\\": {
                                                 \\"node\\": {
-                                                    \\"id\\": \\"321\\"
+                                                    \\"id_EQ\\": \\"321\\"
                                                 }
                                             },
                                             \\"disconnect\\": {
                                                 \\"color\\": {
                                                     \\"where\\": {
                                                         \\"node\\": {
-                                                            \\"name\\": \\"Green\\"
+                                                            \\"name_EQ\\": \\"Green\\"
                                                         }
                                                     }
                                                 }
@@ -268,14 +268,14 @@ describe("Cypher Disconnect", () => {
                                         {
                                             \\"where\\": {
                                                 \\"node\\": {
-                                                    \\"id\\": \\"33211\\"
+                                                    \\"id_EQ\\": \\"33211\\"
                                                 }
                                             },
                                             \\"disconnect\\": {
                                                 \\"color\\": {
                                                     \\"where\\": {
                                                         \\"node\\": {
-                                                            \\"name\\": \\"Red\\"
+                                                            \\"name_EQ\\": \\"Red\\"
                                                         }
                                                     }
                                                 }

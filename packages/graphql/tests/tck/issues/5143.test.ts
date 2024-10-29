@@ -28,15 +28,15 @@ describe("https://github.com/neo4j/graphql/issues/5143", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 id: ID! @id
             }
 
-            type Video {
+            type Video @node {
                 id: ID! @id
                 publisher: User! @relationship(type: "PUBLISHER", direction: IN)
             }
-            extend type Video @authorization(filter: [{ where: { node: { publisher: { id: "$jwt.sub" } } } }])
+            extend type Video @authorization(filter: [{ where: { node: { publisher: { id_EQ: "$jwt.sub" } } } }])
 
             type Query {
                 getAllVids: [Video]!

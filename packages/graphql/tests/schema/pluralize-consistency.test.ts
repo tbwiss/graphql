@@ -18,19 +18,19 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { lexicographicSortSchema } from "graphql/utilities";
 import { gql } from "graphql-tag";
+import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Pluralize consistency", () => {
     test("Schema with underscore types", async () => {
         const typeDefs = gql`
-            type super_user {
+            type super_user @node {
                 name: String!
                 my_friend: [super_friend!]! @relationship(type: "FRIEND", direction: OUT)
             }
 
-            type super_friend {
+            type super_friend @node {
                 name: String!
             }
         `;
@@ -47,7 +47,6 @@ describe("Pluralize consistency", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -66,7 +65,6 @@ describe("Pluralize consistency", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -77,7 +75,7 @@ describe("Pluralize consistency", () => {
               deleteSuperFriends(where: super_friendWhere): DeleteInfo!
               deleteSuperUsers(delete: super_userDeleteInput, where: super_userWhere): DeleteInfo!
               updateSuperFriends(update: super_friendUpdateInput, where: super_friendWhere): UpdateSuperFriendsMutationResponse!
-              updateSuperUsers(connect: super_userConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: super_userRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: super_userDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: super_userDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: super_userUpdateInput, where: super_userWhere): UpdateSuperUsersMutationResponse!
+              updateSuperUsers(update: super_userUpdateInput, where: super_userWhere): UpdateSuperUsersMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -89,12 +87,12 @@ describe("Pluralize consistency", () => {
             }
 
             type Query {
-              superFriends(options: super_friendOptions, where: super_friendWhere): [super_friend!]!
+              superFriends(limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
               superFriendsAggregate(where: super_friendWhere): super_friendAggregateSelection!
-              superFriendsConnection(after: String, first: Int, sort: [super_friendSort], where: super_friendWhere): SuperFriendsConnection!
-              superUsers(options: super_userOptions, where: super_userWhere): [super_user!]!
+              superFriendsConnection(after: String, first: Int, sort: [super_friendSort!], where: super_friendWhere): SuperFriendsConnection!
+              superUsers(limit: Int, offset: Int, options: super_userOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_userSort!], where: super_userWhere): [super_user!]!
               superUsersAggregate(where: super_userWhere): super_userAggregateSelection!
-              superUsersConnection(after: String, first: Int, sort: [super_userSort], where: super_userWhere): SuperUsersConnection!
+              superUsersConnection(after: String, first: Int, sort: [super_userSort!], where: super_userWhere): SuperUsersConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -126,7 +124,6 @@ describe("Pluralize consistency", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -189,32 +186,24 @@ describe("Pluralize consistency", () => {
               AND: [super_friendWhere!]
               NOT: super_friendWhere
               OR: [super_friendWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             type super_user {
-              my_friend(directed: Boolean = true, options: super_friendOptions, where: super_friendWhere): [super_friend!]!
-              my_friendAggregate(directed: Boolean = true, where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
-              my_friendConnection(after: String, directed: Boolean = true, first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
+              my_friend(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
+              my_friendAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
+              my_friendConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
               name: String!
             }
 
             type super_userAggregateSelection {
               count: Int!
               name: StringAggregateSelection!
-            }
-
-            input super_userConnectInput {
-              my_friend: [super_userMy_friendConnectFieldInput!]
             }
 
             input super_userCreateInput {
@@ -226,10 +215,6 @@ describe("Pluralize consistency", () => {
               my_friend: [super_userMy_friendDeleteFieldInput!]
             }
 
-            input super_userDisconnectInput {
-              my_friend: [super_userMy_friendDisconnectFieldInput!]
-            }
-
             type super_userEdge {
               cursor: String!
               node: super_user!
@@ -239,7 +224,8 @@ describe("Pluralize consistency", () => {
               AND: [super_userMy_friendAggregateInput!]
               NOT: super_userMy_friendAggregateInput
               OR: [super_userMy_friendAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -270,7 +256,6 @@ describe("Pluralize consistency", () => {
               NOT: super_userMy_friendConnectionWhere
               OR: [super_userMy_friendConnectionWhere!]
               node: super_friendWhere
-              node_NOT: super_friendWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input super_userMy_friendCreateFieldInput {
@@ -294,41 +279,21 @@ describe("Pluralize consistency", () => {
               AND: [super_userMy_friendNodeAggregationWhereInput!]
               NOT: super_userMy_friendNodeAggregationWhereInput
               OR: [super_userMy_friendNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type super_userMy_friendRelationship {
@@ -358,10 +323,6 @@ describe("Pluralize consistency", () => {
               sort: [super_userSort!]
             }
 
-            input super_userRelationInput {
-              my_friend: [super_userMy_friendCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort SuperUsers by. The order in which sorts are applied is not guaranteed when specifying many fields in one super_userSort object.
             \\"\\"\\"
@@ -378,9 +339,7 @@ describe("Pluralize consistency", () => {
               AND: [super_userWhere!]
               NOT: super_userWhere
               OR: [super_userWhere!]
-              my_friend: super_friendWhere @deprecated(reason: \\"Use \`my_friend_SOME\` instead.\\")
               my_friendAggregate: super_userMy_friendAggregateInput
-              my_friendConnection: super_userMy_friendConnectionWhere @deprecated(reason: \\"Use \`my_friendConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return super_users where all of the related super_userMy_friendConnections match this filter
               \\"\\"\\"
@@ -389,7 +348,6 @@ describe("Pluralize consistency", () => {
               Return super_users where none of the related super_userMy_friendConnections match this filter
               \\"\\"\\"
               my_friendConnection_NONE: super_userMy_friendConnectionWhere
-              my_friendConnection_NOT: super_userMy_friendConnectionWhere @deprecated(reason: \\"Use \`my_friendConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return super_users where one of the related super_userMy_friendConnections match this filter
               \\"\\"\\"
@@ -406,7 +364,6 @@ describe("Pluralize consistency", () => {
               Return super_users where none of the related super_friends match this filter
               \\"\\"\\"
               my_friend_NONE: super_friendWhere
-              my_friend_NOT: super_friendWhere @deprecated(reason: \\"Use \`my_friend_NONE\` instead.\\")
               \\"\\"\\"
               Return super_users where one of the related super_friends match this filter
               \\"\\"\\"
@@ -415,15 +372,11 @@ describe("Pluralize consistency", () => {
               Return super_users where some of the related super_friends match this filter
               \\"\\"\\"
               my_friend_SOME: super_friendWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 

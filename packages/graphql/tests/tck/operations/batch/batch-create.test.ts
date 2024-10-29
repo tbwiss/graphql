@@ -26,20 +26,20 @@ describe("Batch Create", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Actor {
+            type Actor @node {
                 id: ID! @id @unique
                 name: String
                 website: Website @relationship(type: "HAS_WEBSITE", direction: OUT)
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 website: Website @relationship(type: "HAS_WEBSITE", direction: OUT)
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Website {
+            type Website @node {
                 address: String
             }
 
@@ -352,8 +352,8 @@ describe("Batch Create", () => {
             mutation {
                 createMovies(
                     input: [
-                        { id: "1", actors: { connect: { where: { node: { id: "3" } } } } }
-                        { id: "2", actors: { connect: { where: { node: { id: "4" } } } } }
+                        { id: "1", actors: { connect: { where: { node: { id_EQ: "3" } } } } }
+                        { id: "2", actors: { connect: { where: { node: { id_EQ: "4" } } } } }
                     ]
                 ) {
                     movies {
@@ -473,12 +473,12 @@ describe("Batch Create", () => {
                         { id: "1", actors: { create: [{ node: { name: "actor 1" }, edge: { year: 2022 } }] } }
                         { id: "2", actors: { create: [{ node: { name: "actor 2" }, edge: { year: 1999 } }] } }
                         { id: "3", website: { create: { node: { address: "mywebsite.com" } } } }
-                        { id: "4", actors: { connect: { where: { node: { id: "2" } } } } }
+                        { id: "4", actors: { connect: { where: { node: { id_EQ: "2" } } } } }
                         {
                             id: "5"
                             actors: {
                                 connectOrCreate: {
-                                    where: { node: { id: "2" } }
+                                    where: { node: { id_EQ: "2" } }
                                     onCreate: { node: { name: "actor 2" } }
                                 }
                             }

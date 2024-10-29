@@ -29,12 +29,12 @@ describe("Interface Relationships", () => {
                 title: String!
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 title: String!
                 runtime: Int!
             }
 
-            type Series implements Production {
+            type Series implements Production @node {
                 title: String!
                 episodes: Int!
             }
@@ -43,7 +43,7 @@ describe("Interface Relationships", () => {
                 screenTime: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -74,11 +74,6 @@ describe("Interface Relationships", () => {
               screenTime_AVERAGE_GTE: Float
               screenTime_AVERAGE_LT: Float
               screenTime_AVERAGE_LTE: Float
-              screenTime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               screenTime_MAX_EQUAL: Int
               screenTime_MAX_GT: Int
               screenTime_MAX_GTE: Int
@@ -114,20 +109,19 @@ describe("Interface Relationships", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              screenTime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-              actedInAggregate(directed: Boolean = true, where: ProductionWhere): ActorProductionActedInAggregationSelection
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               name: String!
             }
 
@@ -135,7 +129,8 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -165,9 +160,7 @@ describe("Interface Relationships", () => {
               NOT: ActorActedInConnectionWhere
               OR: [ActorActedInConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ProductionWhere
-              node_NOT: ProductionWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ActorActedInCreateFieldInput {
@@ -192,41 +185,21 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInNodeAggregationWhereInput!]
               NOT: ActorActedInNodeAggregationWhereInput
               OR: [ActorActedInNodeAggregationWhereInput!]
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ActorActedInRelationship {
@@ -254,10 +227,6 @@ describe("Interface Relationships", () => {
               name: StringAggregateSelection!
             }
 
-            input ActorConnectInput {
-              actedIn: [ActorActedInConnectFieldInput!]
-            }
-
             input ActorCreateInput {
               actedIn: ActorActedInFieldInput
               name: String!
@@ -265,10 +234,6 @@ describe("Interface Relationships", () => {
 
             input ActorDeleteInput {
               actedIn: [ActorActedInDeleteFieldInput!]
-            }
-
-            input ActorDisconnectInput {
-              actedIn: [ActorActedInDisconnectFieldInput!]
             }
 
             type ActorEdge {
@@ -299,10 +264,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input ActorRelationInput {
-              actedIn: [ActorActedInCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -319,9 +280,7 @@ describe("Interface Relationships", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              actedIn: ProductionWhere @deprecated(reason: \\"Use \`actedIn_SOME\` instead.\\")
               actedInAggregate: ActorActedInAggregateInput
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -330,7 +289,6 @@ describe("Interface Relationships", () => {
               Return Actors where none of the related ActorActedInConnections match this filter
               \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -343,20 +301,15 @@ describe("Interface Relationships", () => {
               actedIn_ALL: ProductionWhere
               \\"\\"\\"Return Actors where none of the related Productions match this filter\\"\\"\\"
               actedIn_NONE: ProductionWhere
-              actedIn_NOT: ProductionWhere @deprecated(reason: \\"Use \`actedIn_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related Productions match this filter\\"\\"\\"
               actedIn_SINGLE: ProductionWhere
               \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
               actedIn_SOME: ProductionWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -375,7 +328,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -394,7 +346,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -455,23 +406,18 @@ describe("Interface Relationships", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -488,7 +434,7 @@ describe("Interface Relationships", () => {
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
               deleteMovies(where: MovieWhere): DeleteInfo!
               deleteSeries(where: SeriesWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
               updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
@@ -535,7 +481,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProductionSort]
+              sort: [ProductionSort!]
             }
 
             \\"\\"\\"
@@ -553,15 +499,11 @@ describe("Interface Relationships", () => {
               AND: [ProductionWhere!]
               NOT: ProductionWhere
               OR: [ProductionWhere!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
               typename_IN: [ProductionImplementation!]
             }
@@ -573,18 +515,18 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements Production {
@@ -642,23 +584,18 @@ describe("Interface Relationships", () => {
               AND: [SeriesWhere!]
               NOT: SeriesWhere
               OR: [SeriesWhere!]
-              episodes: Int
+              episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodes_EQ: Int
               episodes_GT: Int
               episodes_GTE: Int
               episodes_IN: [Int!]
               episodes_LT: Int
               episodes_LTE: Int
-              episodes_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -684,7 +621,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -705,7 +641,7 @@ describe("Interface Relationships", () => {
 
     test("Interface Relationships - multiple - same relationship implementation", async () => {
         const typeDefs = gql`
-            type Episode {
+            type Episode @node {
                 runtime: Int!
                 series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -715,13 +651,13 @@ describe("Interface Relationships", () => {
                 actors: [Actor!]! @declareRelationship
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Series implements Production {
+            type Series implements Production @node {
                 title: String!
                 episodeCount: Int!
                 episodes: [Episode!]! @relationship(type: "HAS_EPISODE", direction: OUT)
@@ -732,7 +668,7 @@ describe("Interface Relationships", () => {
                 screenTime: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -765,11 +701,6 @@ describe("Interface Relationships", () => {
               screenTime_AVERAGE_GTE: Float
               screenTime_AVERAGE_LT: Float
               screenTime_AVERAGE_LTE: Float
-              screenTime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               screenTime_MAX_EQUAL: Int
               screenTime_MAX_GT: Int
               screenTime_MAX_GTE: Int
@@ -805,20 +736,19 @@ describe("Interface Relationships", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              screenTime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-              actedInAggregate(directed: Boolean = true, where: ProductionWhere): ActorProductionActedInAggregationSelection
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               name: String!
             }
 
@@ -826,7 +756,8 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -857,9 +788,7 @@ describe("Interface Relationships", () => {
               NOT: ActorActedInConnectionWhere
               OR: [ActorActedInConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ProductionWhere
-              node_NOT: ProductionWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ActorActedInCreateFieldInput {
@@ -886,41 +815,21 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInNodeAggregationWhereInput!]
               NOT: ActorActedInNodeAggregationWhereInput
               OR: [ActorActedInNodeAggregationWhereInput!]
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ActorActedInRelationship {
@@ -997,10 +906,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input ActorRelationInput {
-              actedIn: [ActorActedInCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -1017,9 +922,7 @@ describe("Interface Relationships", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              actedIn: ProductionWhere @deprecated(reason: \\"Use \`actedIn_SOME\` instead.\\")
               actedInAggregate: ActorActedInAggregateInput
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -1028,7 +931,6 @@ describe("Interface Relationships", () => {
               Return Actors where none of the related ActorActedInConnections match this filter
               \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -1041,20 +943,15 @@ describe("Interface Relationships", () => {
               actedIn_ALL: ProductionWhere
               \\"\\"\\"Return Actors where none of the related Productions match this filter\\"\\"\\"
               actedIn_NONE: ProductionWhere
-              actedIn_NOT: ProductionWhere @deprecated(reason: \\"Use \`actedIn_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related Productions match this filter\\"\\"\\"
               actedIn_SINGLE: ProductionWhere
               \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
               actedIn_SOME: ProductionWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -1078,7 +975,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -1097,16 +993,15 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
             type Episode {
               runtime: Int!
-              series(directed: Boolean = true, options: SeriesOptions, where: SeriesWhere): Series!
-              seriesAggregate(directed: Boolean = true, where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
-              seriesConnection(after: String, directed: Boolean = true, first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
+              series(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): Series!
+              seriesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
+              seriesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
             }
 
             type EpisodeAggregateSelection {
@@ -1149,15 +1044,12 @@ describe("Interface Relationships", () => {
               sort: [EpisodeSort!]
             }
 
-            input EpisodeRelationInput {
-              series: EpisodeSeriesCreateFieldInput
-            }
-
             input EpisodeSeriesAggregateInput {
               AND: [EpisodeSeriesAggregateInput!]
               NOT: EpisodeSeriesAggregateInput
               OR: [EpisodeSeriesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1189,7 +1081,6 @@ describe("Interface Relationships", () => {
               NOT: EpisodeSeriesConnectionWhere
               OR: [EpisodeSeriesConnectionWhere!]
               node: SeriesWhere
-              node_NOT: SeriesWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input EpisodeSeriesCreateFieldInput {
@@ -1220,11 +1111,6 @@ describe("Interface Relationships", () => {
               episodeCount_AVERAGE_GTE: Float
               episodeCount_AVERAGE_LT: Float
               episodeCount_AVERAGE_LTE: Float
-              episodeCount_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               episodeCount_MAX_EQUAL: Int
               episodeCount_MAX_GT: Int
               episodeCount_MAX_GTE: Int
@@ -1240,41 +1126,21 @@ describe("Interface Relationships", () => {
               episodeCount_SUM_GTE: Int
               episodeCount_SUM_LT: Int
               episodeCount_SUM_LTE: Int
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type EpisodeSeriesRelationship {
@@ -1323,19 +1189,16 @@ describe("Interface Relationships", () => {
               AND: [EpisodeWhere!]
               NOT: EpisodeWhere
               OR: [EpisodeWhere!]
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               series: SeriesWhere
               seriesAggregate: EpisodeSeriesAggregateInput
               seriesConnection: EpisodeSeriesConnectionWhere
-              seriesConnection_NOT: EpisodeSeriesConnectionWhere
-              series_NOT: SeriesWhere
             }
 
             type EpisodesConnection {
@@ -1352,9 +1215,9 @@ describe("Interface Relationships", () => {
             }
 
             type Movie implements Production {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               runtime: Int!
               title: String!
             }
@@ -1377,7 +1240,8 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1410,41 +1274,21 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsNodeAggregationWhereInput!]
               NOT: MovieActorsNodeAggregationWhereInput
               OR: [MovieActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input MovieActorsUpdateConnectionInput {
@@ -1467,10 +1311,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input MovieConnectInput {
-              actors: [MovieActorsConnectFieldInput!]
-            }
-
             input MovieCreateInput {
               actors: MovieActorsFieldInput
               runtime: Int!
@@ -1479,10 +1319,6 @@ describe("Interface Relationships", () => {
 
             input MovieDeleteInput {
               actors: [ProductionActorsDeleteFieldInput!]
-            }
-
-            input MovieDisconnectInput {
-              actors: [ProductionActorsDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -1497,10 +1333,6 @@ describe("Interface Relationships", () => {
               Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [MovieSort!]
-            }
-
-            input MovieRelationInput {
-              actors: [MovieActorsCreateFieldInput!]
             }
 
             \\"\\"\\"
@@ -1523,9 +1355,7 @@ describe("Interface Relationships", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: MovieActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Movies where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -1534,7 +1364,6 @@ describe("Interface Relationships", () => {
               Return Movies where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Movies where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -1547,28 +1376,22 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -1587,10 +1410,10 @@ describe("Interface Relationships", () => {
               deleteEpisodes(delete: EpisodeDeleteInput, where: EpisodeWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-              updateEpisodes(connect: EpisodeConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: EpisodeRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: EpisodeDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: EpisodeDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: EpisodeUpdateInput, where: EpisodeWhere): UpdateEpisodesMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateEpisodes(update: EpisodeUpdateInput, where: EpisodeWhere): UpdateEpisodesMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1602,7 +1425,7 @@ describe("Interface Relationships", () => {
             }
 
             interface Production {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               title: String!
             }
@@ -1611,7 +1434,8 @@ describe("Interface Relationships", () => {
               AND: [ProductionActorsAggregateInput!]
               NOT: ProductionActorsAggregateInput
               OR: [ProductionActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1646,9 +1470,7 @@ describe("Interface Relationships", () => {
               NOT: ProductionActorsConnectionWhere
               OR: [ProductionActorsConnectionWhere!]
               edge: ProductionActorsEdgeWhere
-              edge_NOT: ProductionActorsEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ActorWhere
-              node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ProductionActorsCreateFieldInput {
@@ -1715,41 +1537,21 @@ describe("Interface Relationships", () => {
               AND: [ProductionActorsNodeAggregationWhereInput!]
               NOT: ProductionActorsNodeAggregationWhereInput
               OR: [ProductionActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ProductionActorsRelationship {
@@ -1816,7 +1618,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProductionSort]
+              sort: [ProductionSort!]
             }
 
             \\"\\"\\"
@@ -1835,9 +1637,7 @@ describe("Interface Relationships", () => {
               AND: [ProductionWhere!]
               NOT: ProductionWhere
               OR: [ProductionWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: ProductionActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Productions where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -1846,7 +1646,6 @@ describe("Interface Relationships", () => {
               Return Productions where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Productions where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -1859,20 +1658,15 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Productions where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Productions where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Productions where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
               typename_IN: [ProductionImplementation!]
             }
@@ -1884,31 +1678,31 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              episodes(options: EpisodeOptions, where: EpisodeWhere): [Episode!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              episodes(limit: Int, offset: Int, options: EpisodeOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [EpisodeSort!], where: EpisodeWhere): [Episode!]!
               episodesAggregate(where: EpisodeWhere): EpisodeAggregateSelection!
-              episodesConnection(after: String, first: Int, sort: [EpisodeSort], where: EpisodeWhere): EpisodesConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              episodesConnection(after: String, first: Int, sort: [EpisodeSort!], where: EpisodeWhere): EpisodesConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements Production {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): SeriesActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): SeriesActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               episodeCount: Int!
-              episodes(directed: Boolean = true, options: EpisodeOptions, where: EpisodeWhere): [Episode!]!
-              episodesAggregate(directed: Boolean = true, where: EpisodeWhere): SeriesEpisodeEpisodesAggregationSelection
-              episodesConnection(after: String, directed: Boolean = true, first: Int, sort: [SeriesEpisodesConnectionSort!], where: SeriesEpisodesConnectionWhere): SeriesEpisodesConnection!
+              episodes(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: EpisodeOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [EpisodeSort!], where: EpisodeWhere): [Episode!]!
+              episodesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: EpisodeWhere): SeriesEpisodeEpisodesAggregationSelection
+              episodesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [SeriesEpisodesConnectionSort!], where: SeriesEpisodesConnectionWhere): SeriesEpisodesConnection!
               title: String!
             }
 
@@ -1930,7 +1724,8 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsAggregateInput!]
               NOT: SeriesActorsAggregateInput
               OR: [SeriesActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1963,41 +1758,21 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsNodeAggregationWhereInput!]
               NOT: SeriesActorsNodeAggregationWhereInput
               OR: [SeriesActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input SeriesActorsUpdateConnectionInput {
@@ -2070,7 +1845,8 @@ describe("Interface Relationships", () => {
               AND: [SeriesEpisodesAggregateInput!]
               NOT: SeriesEpisodesAggregateInput
               OR: [SeriesEpisodesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2102,7 +1878,6 @@ describe("Interface Relationships", () => {
               NOT: SeriesEpisodesConnectionWhere
               OR: [SeriesEpisodesConnectionWhere!]
               node: EpisodeWhere
-              node_NOT: EpisodeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input SeriesEpisodesCreateFieldInput {
@@ -2133,11 +1908,6 @@ describe("Interface Relationships", () => {
               runtime_AVERAGE_GTE: Float
               runtime_AVERAGE_LT: Float
               runtime_AVERAGE_LTE: Float
-              runtime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               runtime_MAX_EQUAL: Int
               runtime_MAX_GT: Int
               runtime_MAX_GTE: Int
@@ -2182,11 +1952,6 @@ describe("Interface Relationships", () => {
               sort: [SeriesSort!]
             }
 
-            input SeriesRelationInput {
-              actors: [SeriesActorsCreateFieldInput!]
-              episodes: [SeriesEpisodesCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Series by. The order in which sorts are applied is not guaranteed when specifying many fields in one SeriesSort object.
             \\"\\"\\"
@@ -2208,9 +1973,7 @@ describe("Interface Relationships", () => {
               AND: [SeriesWhere!]
               NOT: SeriesWhere
               OR: [SeriesWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: SeriesActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Series where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -2219,7 +1982,6 @@ describe("Interface Relationships", () => {
               Return Series where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Series where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -2232,22 +1994,18 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Series where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Series where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Series where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              episodeCount: Int
+              episodeCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodeCount_EQ: Int
               episodeCount_GT: Int
               episodeCount_GTE: Int
               episodeCount_IN: [Int!]
               episodeCount_LT: Int
               episodeCount_LTE: Int
-              episodeCount_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodeCount_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes: EpisodeWhere @deprecated(reason: \\"Use \`episodes_SOME\` instead.\\")
               episodesAggregate: SeriesEpisodesAggregateInput
-              episodesConnection: SeriesEpisodesConnectionWhere @deprecated(reason: \\"Use \`episodesConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Series where all of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
@@ -2256,7 +2014,6 @@ describe("Interface Relationships", () => {
               Return Series where none of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
               episodesConnection_NONE: SeriesEpisodesConnectionWhere
-              episodesConnection_NOT: SeriesEpisodesConnectionWhere @deprecated(reason: \\"Use \`episodesConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Series where one of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
@@ -2269,20 +2026,15 @@ describe("Interface Relationships", () => {
               episodes_ALL: EpisodeWhere
               \\"\\"\\"Return Series where none of the related Episodes match this filter\\"\\"\\"
               episodes_NONE: EpisodeWhere
-              episodes_NOT: EpisodeWhere @deprecated(reason: \\"Use \`episodes_NONE\` instead.\\")
               \\"\\"\\"Return Series where one of the related Episodes match this filter\\"\\"\\"
               episodes_SINGLE: EpisodeWhere
               \\"\\"\\"Return Series where some of the related Episodes match this filter\\"\\"\\"
               episodes_SOME: EpisodeWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -2313,7 +2065,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -2334,7 +2085,7 @@ describe("Interface Relationships", () => {
 
     test("Interface Relationships - multiple - different relationship implementations", async () => {
         const typeDefs = gql`
-            type Episode {
+            type Episode @node {
                 runtime: Int!
                 series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -2344,13 +2095,13 @@ describe("Interface Relationships", () => {
                 actors: [Actor!]! @declareRelationship
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Series implements Production {
+            type Series implements Production @node {
                 title: String!
                 episodeCount: Int!
                 episodes: [Episode!]! @relationship(type: "HAS_EPISODE", direction: OUT)
@@ -2365,7 +2116,7 @@ describe("Interface Relationships", () => {
                 seasons: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -2397,11 +2148,6 @@ describe("Interface Relationships", () => {
               screenTime_AVERAGE_GTE: Float
               screenTime_AVERAGE_LT: Float
               screenTime_AVERAGE_LTE: Float
-              screenTime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               screenTime_MAX_EQUAL: Int
               screenTime_MAX_GT: Int
               screenTime_MAX_GTE: Int
@@ -2437,20 +2183,19 @@ describe("Interface Relationships", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              screenTime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-              actedInAggregate(directed: Boolean = true, where: ProductionWhere): ActorProductionActedInAggregationSelection
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               name: String!
             }
 
@@ -2458,7 +2203,8 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2489,9 +2235,7 @@ describe("Interface Relationships", () => {
               NOT: ActorActedInConnectionWhere
               OR: [ActorActedInConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ProductionWhere
-              node_NOT: ProductionWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ActorActedInCreateFieldInput {
@@ -2518,41 +2262,21 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInNodeAggregationWhereInput!]
               NOT: ActorActedInNodeAggregationWhereInput
               OR: [ActorActedInNodeAggregationWhereInput!]
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ActorActedInRelationship {
@@ -2629,10 +2353,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input ActorRelationInput {
-              actedIn: [ActorActedInCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -2649,9 +2369,7 @@ describe("Interface Relationships", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              actedIn: ProductionWhere @deprecated(reason: \\"Use \`actedIn_SOME\` instead.\\")
               actedInAggregate: ActorActedInAggregateInput
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -2660,7 +2378,6 @@ describe("Interface Relationships", () => {
               Return Actors where none of the related ActorActedInConnections match this filter
               \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -2673,20 +2390,15 @@ describe("Interface Relationships", () => {
               actedIn_ALL: ProductionWhere
               \\"\\"\\"Return Actors where none of the related Productions match this filter\\"\\"\\"
               actedIn_NONE: ProductionWhere
-              actedIn_NOT: ProductionWhere @deprecated(reason: \\"Use \`actedIn_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related Productions match this filter\\"\\"\\"
               actedIn_SINGLE: ProductionWhere
               \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
               actedIn_SOME: ProductionWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -2710,7 +2422,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -2729,16 +2440,15 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
             type Episode {
               runtime: Int!
-              series(directed: Boolean = true, options: SeriesOptions, where: SeriesWhere): Series!
-              seriesAggregate(directed: Boolean = true, where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
-              seriesConnection(after: String, directed: Boolean = true, first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
+              series(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): Series!
+              seriesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
+              seriesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
             }
 
             type EpisodeAggregateSelection {
@@ -2781,15 +2491,12 @@ describe("Interface Relationships", () => {
               sort: [EpisodeSort!]
             }
 
-            input EpisodeRelationInput {
-              series: EpisodeSeriesCreateFieldInput
-            }
-
             input EpisodeSeriesAggregateInput {
               AND: [EpisodeSeriesAggregateInput!]
               NOT: EpisodeSeriesAggregateInput
               OR: [EpisodeSeriesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2821,7 +2528,6 @@ describe("Interface Relationships", () => {
               NOT: EpisodeSeriesConnectionWhere
               OR: [EpisodeSeriesConnectionWhere!]
               node: SeriesWhere
-              node_NOT: SeriesWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input EpisodeSeriesCreateFieldInput {
@@ -2852,11 +2558,6 @@ describe("Interface Relationships", () => {
               episodeCount_AVERAGE_GTE: Float
               episodeCount_AVERAGE_LT: Float
               episodeCount_AVERAGE_LTE: Float
-              episodeCount_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeCount_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               episodeCount_MAX_EQUAL: Int
               episodeCount_MAX_GT: Int
               episodeCount_MAX_GTE: Int
@@ -2872,41 +2573,21 @@ describe("Interface Relationships", () => {
               episodeCount_SUM_GTE: Int
               episodeCount_SUM_LT: Int
               episodeCount_SUM_LTE: Int
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type EpisodeSeriesRelationship {
@@ -2955,19 +2636,16 @@ describe("Interface Relationships", () => {
               AND: [EpisodeWhere!]
               NOT: EpisodeWhere
               OR: [EpisodeWhere!]
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               series: SeriesWhere
               seriesAggregate: EpisodeSeriesAggregateInput
               seriesConnection: EpisodeSeriesConnectionWhere
-              seriesConnection_NOT: EpisodeSeriesConnectionWhere
-              series_NOT: SeriesWhere
             }
 
             type EpisodesConnection {
@@ -2984,9 +2662,9 @@ describe("Interface Relationships", () => {
             }
 
             type Movie implements Production {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               runtime: Int!
               title: String!
             }
@@ -3009,7 +2687,8 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3042,41 +2721,21 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsNodeAggregationWhereInput!]
               NOT: MovieActorsNodeAggregationWhereInput
               OR: [MovieActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input MovieActorsUpdateConnectionInput {
@@ -3099,10 +2758,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input MovieConnectInput {
-              actors: [MovieActorsConnectFieldInput!]
-            }
-
             input MovieCreateInput {
               actors: MovieActorsFieldInput
               runtime: Int!
@@ -3111,10 +2766,6 @@ describe("Interface Relationships", () => {
 
             input MovieDeleteInput {
               actors: [ProductionActorsDeleteFieldInput!]
-            }
-
-            input MovieDisconnectInput {
-              actors: [ProductionActorsDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -3129,10 +2780,6 @@ describe("Interface Relationships", () => {
               Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [MovieSort!]
-            }
-
-            input MovieRelationInput {
-              actors: [MovieActorsCreateFieldInput!]
             }
 
             \\"\\"\\"
@@ -3155,9 +2802,7 @@ describe("Interface Relationships", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: MovieActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Movies where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3166,7 +2811,6 @@ describe("Interface Relationships", () => {
               Return Movies where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Movies where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3179,28 +2823,22 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -3219,10 +2857,10 @@ describe("Interface Relationships", () => {
               deleteEpisodes(delete: EpisodeDeleteInput, where: EpisodeWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-              updateEpisodes(connect: EpisodeConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: EpisodeRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: EpisodeDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: EpisodeDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: EpisodeUpdateInput, where: EpisodeWhere): UpdateEpisodesMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateEpisodes(update: EpisodeUpdateInput, where: EpisodeWhere): UpdateEpisodesMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -3234,7 +2872,7 @@ describe("Interface Relationships", () => {
             }
 
             interface Production {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               title: String!
             }
@@ -3243,7 +2881,8 @@ describe("Interface Relationships", () => {
               AND: [ProductionActorsAggregateInput!]
               NOT: ProductionActorsAggregateInput
               OR: [ProductionActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3278,9 +2917,7 @@ describe("Interface Relationships", () => {
               NOT: ProductionActorsConnectionWhere
               OR: [ProductionActorsConnectionWhere!]
               edge: ProductionActorsEdgeWhere
-              edge_NOT: ProductionActorsEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ActorWhere
-              node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ProductionActorsCreateFieldInput {
@@ -3367,41 +3004,21 @@ describe("Interface Relationships", () => {
               AND: [ProductionActorsNodeAggregationWhereInput!]
               NOT: ProductionActorsNodeAggregationWhereInput
               OR: [ProductionActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ProductionActorsRelationship {
@@ -3468,7 +3085,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProductionSort]
+              sort: [ProductionSort!]
             }
 
             \\"\\"\\"
@@ -3487,9 +3104,7 @@ describe("Interface Relationships", () => {
               AND: [ProductionWhere!]
               NOT: ProductionWhere
               OR: [ProductionWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: ProductionActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Productions where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3498,7 +3113,6 @@ describe("Interface Relationships", () => {
               Return Productions where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Productions where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3511,20 +3125,15 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Productions where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Productions where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Productions where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
               typename_IN: [ProductionImplementation!]
             }
@@ -3536,31 +3145,31 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              episodes(options: EpisodeOptions, where: EpisodeWhere): [Episode!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              episodes(limit: Int, offset: Int, options: EpisodeOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [EpisodeSort!], where: EpisodeWhere): [Episode!]!
               episodesAggregate(where: EpisodeWhere): EpisodeAggregateSelection!
-              episodesConnection(after: String, first: Int, sort: [EpisodeSort], where: EpisodeWhere): EpisodesConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              episodesConnection(after: String, first: Int, sort: [EpisodeSort!], where: EpisodeWhere): EpisodesConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements Production {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): SeriesActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): SeriesActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
               episodeCount: Int!
-              episodes(directed: Boolean = true, options: EpisodeOptions, where: EpisodeWhere): [Episode!]!
-              episodesAggregate(directed: Boolean = true, where: EpisodeWhere): SeriesEpisodeEpisodesAggregationSelection
-              episodesConnection(after: String, directed: Boolean = true, first: Int, sort: [SeriesEpisodesConnectionSort!], where: SeriesEpisodesConnectionWhere): SeriesEpisodesConnection!
+              episodes(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: EpisodeOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [EpisodeSort!], where: EpisodeWhere): [Episode!]!
+              episodesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: EpisodeWhere): SeriesEpisodeEpisodesAggregationSelection
+              episodesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [SeriesEpisodesConnectionSort!], where: SeriesEpisodesConnectionWhere): SeriesEpisodesConnection!
               title: String!
             }
 
@@ -3582,7 +3191,8 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsAggregateInput!]
               NOT: SeriesActorsAggregateInput
               OR: [SeriesActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3615,41 +3225,21 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsNodeAggregationWhereInput!]
               NOT: SeriesActorsNodeAggregationWhereInput
               OR: [SeriesActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input SeriesActorsUpdateConnectionInput {
@@ -3722,7 +3312,8 @@ describe("Interface Relationships", () => {
               AND: [SeriesEpisodesAggregateInput!]
               NOT: SeriesEpisodesAggregateInput
               OR: [SeriesEpisodesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3754,7 +3345,6 @@ describe("Interface Relationships", () => {
               NOT: SeriesEpisodesConnectionWhere
               OR: [SeriesEpisodesConnectionWhere!]
               node: EpisodeWhere
-              node_NOT: EpisodeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input SeriesEpisodesCreateFieldInput {
@@ -3785,11 +3375,6 @@ describe("Interface Relationships", () => {
               runtime_AVERAGE_GTE: Float
               runtime_AVERAGE_LT: Float
               runtime_AVERAGE_LTE: Float
-              runtime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              runtime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               runtime_MAX_EQUAL: Int
               runtime_MAX_GT: Int
               runtime_MAX_GTE: Int
@@ -3834,11 +3419,6 @@ describe("Interface Relationships", () => {
               sort: [SeriesSort!]
             }
 
-            input SeriesRelationInput {
-              actors: [SeriesActorsCreateFieldInput!]
-              episodes: [SeriesEpisodesCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Series by. The order in which sorts are applied is not guaranteed when specifying many fields in one SeriesSort object.
             \\"\\"\\"
@@ -3860,9 +3440,7 @@ describe("Interface Relationships", () => {
               AND: [SeriesWhere!]
               NOT: SeriesWhere
               OR: [SeriesWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: SeriesActorsAggregateInput
-              actorsConnection: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Series where all of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3871,7 +3449,6 @@ describe("Interface Relationships", () => {
               Return Series where none of the related ProductionActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ProductionActorsConnectionWhere
-              actorsConnection_NOT: ProductionActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Series where one of the related ProductionActorsConnections match this filter
               \\"\\"\\"
@@ -3884,22 +3461,18 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Series where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Series where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Series where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              episodeCount: Int
+              episodeCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodeCount_EQ: Int
               episodeCount_GT: Int
               episodeCount_GTE: Int
               episodeCount_IN: [Int!]
               episodeCount_LT: Int
               episodeCount_LTE: Int
-              episodeCount_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodeCount_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes: EpisodeWhere @deprecated(reason: \\"Use \`episodes_SOME\` instead.\\")
               episodesAggregate: SeriesEpisodesAggregateInput
-              episodesConnection: SeriesEpisodesConnectionWhere @deprecated(reason: \\"Use \`episodesConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Series where all of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
@@ -3908,7 +3481,6 @@ describe("Interface Relationships", () => {
               Return Series where none of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
               episodesConnection_NONE: SeriesEpisodesConnectionWhere
-              episodesConnection_NOT: SeriesEpisodesConnectionWhere @deprecated(reason: \\"Use \`episodesConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Series where one of the related SeriesEpisodesConnections match this filter
               \\"\\"\\"
@@ -3921,20 +3493,15 @@ describe("Interface Relationships", () => {
               episodes_ALL: EpisodeWhere
               \\"\\"\\"Return Series where none of the related Episodes match this filter\\"\\"\\"
               episodes_NONE: EpisodeWhere
-              episodes_NOT: EpisodeWhere @deprecated(reason: \\"Use \`episodes_NONE\` instead.\\")
               \\"\\"\\"Return Series where one of the related Episodes match this filter\\"\\"\\"
               episodes_SINGLE: EpisodeWhere
               \\"\\"\\"Return Series where some of the related Episodes match this filter\\"\\"\\"
               episodes_SOME: EpisodeWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -3963,11 +3530,6 @@ describe("Interface Relationships", () => {
               seasons_AVERAGE_GTE: Float
               seasons_AVERAGE_LT: Float
               seasons_AVERAGE_LTE: Float
-              seasons_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              seasons_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              seasons_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              seasons_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              seasons_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               seasons_MAX_EQUAL: Int
               seasons_MAX_GT: Int
               seasons_MAX_GTE: Int
@@ -4003,14 +3565,13 @@ describe("Interface Relationships", () => {
               AND: [StarredInWhere!]
               NOT: StarredInWhere
               OR: [StarredInWhere!]
-              seasons: Int
+              seasons: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              seasons_EQ: Int
               seasons_GT: Int
               seasons_GTE: Int
               seasons_IN: [Int!]
               seasons_LT: Int
               seasons_LTE: Int
-              seasons_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              seasons_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type StringAggregateSelection {
@@ -4032,7 +3593,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -4062,25 +3622,25 @@ describe("Interface Relationships", () => {
                 field2: String
             }
 
-            type Type1Interface1 implements Interface1 {
+            type Type1Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]! @relationship(type: "INTERFACE_TWO", direction: OUT)
             }
 
-            type Type2Interface1 implements Interface1 {
+            type Type2Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]! @relationship(type: "INTERFACE_TWO", direction: OUT)
             }
 
-            type Type1Interface2 implements Interface2 {
+            type Type1Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type2Interface2 implements Interface2 {
+            type Type2Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type1 {
+            type Type1 @node {
                 field1: String!
                 interface1: [Interface1!]! @relationship(type: "INTERFACE_ONE", direction: OUT)
             }
@@ -4099,7 +3659,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -4133,14 +3692,13 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
             interface Interface1 {
               field1: String!
-              interface2(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface2(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2Connection(after: String, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
@@ -4184,7 +3742,8 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2AggregateInput!]
               NOT: Interface1Interface2AggregateInput
               OR: [Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -4211,7 +3770,6 @@ describe("Interface Relationships", () => {
               NOT: Interface1Interface2ConnectionWhere
               OR: [Interface1Interface2ConnectionWhere!]
               node: Interface2Where
-              node_NOT: Interface2Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Interface1Interface2CreateFieldInput {
@@ -4230,41 +3788,21 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2NodeAggregationWhereInput!]
               NOT: Interface1Interface2NodeAggregationWhereInput
               OR: [Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type Interface1Interface2Relationship {
@@ -4291,7 +3829,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface1Sort objects to sort Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface1Sort]
+              sort: [Interface1Sort!]
             }
 
             \\"\\"\\"
@@ -4310,19 +3848,13 @@ describe("Interface Relationships", () => {
               AND: [Interface1Where!]
               NOT: Interface1Where
               OR: [Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -4331,7 +3863,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -4348,7 +3879,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -4400,7 +3930,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface2Sort objects to sort Interface2s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface2Sort]
+              sort: [Interface2Sort!]
             }
 
             \\"\\"\\"
@@ -4418,15 +3948,11 @@ describe("Interface Relationships", () => {
               AND: [Interface2Where!]
               NOT: Interface2Where
               OR: [Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
               typename_IN: [Interface2Implementation!]
             }
@@ -4448,10 +3974,10 @@ describe("Interface Relationships", () => {
               deleteType1s(delete: Type1DeleteInput, where: Type1Where): DeleteInfo!
               deleteType2Interface1s(delete: Type2Interface1DeleteInput, where: Type2Interface1Where): DeleteInfo!
               deleteType2Interface2s(where: Type2Interface2Where): DeleteInfo!
-              updateType1Interface1s(connect: Type1Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
+              updateType1Interface1s(update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
               updateType1Interface2s(update: Type1Interface2UpdateInput, where: Type1Interface2Where): UpdateType1Interface2sMutationResponse!
-              updateType1s(connect: Type1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
-              updateType2Interface1s(connect: Type2Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type2Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type2Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type2Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
+              updateType1s(update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
+              updateType2Interface1s(update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
               updateType2Interface2s(update: Type2Interface2UpdateInput, where: Type2Interface2Where): UpdateType2Interface2sMutationResponse!
             }
 
@@ -4464,27 +3990,27 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              interface1s(options: Interface1Options, where: Interface1Where): [Interface1!]!
+              interface1s(limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
               interface1sAggregate(where: Interface1Where): Interface1AggregateSelection!
-              interface1sConnection(after: String, first: Int, sort: [Interface1Sort], where: Interface1Where): Interface1sConnection!
-              interface2s(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface1sConnection(after: String, first: Int, sort: [Interface1Sort!], where: Interface1Where): Interface1sConnection!
+              interface2s(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2sAggregate(where: Interface2Where): Interface2AggregateSelection!
-              interface2sConnection(after: String, first: Int, sort: [Interface2Sort], where: Interface2Where): Interface2sConnection!
-              type1Interface1s(options: Type1Interface1Options, where: Type1Interface1Where): [Type1Interface1!]!
+              interface2sConnection(after: String, first: Int, sort: [Interface2Sort!], where: Interface2Where): Interface2sConnection!
+              type1Interface1s(limit: Int, offset: Int, options: Type1Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface1Sort!], where: Type1Interface1Where): [Type1Interface1!]!
               type1Interface1sAggregate(where: Type1Interface1Where): Type1Interface1AggregateSelection!
-              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort], where: Type1Interface1Where): Type1Interface1sConnection!
-              type1Interface2s(options: Type1Interface2Options, where: Type1Interface2Where): [Type1Interface2!]!
+              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort!], where: Type1Interface1Where): Type1Interface1sConnection!
+              type1Interface2s(limit: Int, offset: Int, options: Type1Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface2Sort!], where: Type1Interface2Where): [Type1Interface2!]!
               type1Interface2sAggregate(where: Type1Interface2Where): Type1Interface2AggregateSelection!
-              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort], where: Type1Interface2Where): Type1Interface2sConnection!
-              type1s(options: Type1Options, where: Type1Where): [Type1!]!
+              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort!], where: Type1Interface2Where): Type1Interface2sConnection!
+              type1s(limit: Int, offset: Int, options: Type1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Sort!], where: Type1Where): [Type1!]!
               type1sAggregate(where: Type1Where): Type1AggregateSelection!
-              type1sConnection(after: String, first: Int, sort: [Type1Sort], where: Type1Where): Type1sConnection!
-              type2Interface1s(options: Type2Interface1Options, where: Type2Interface1Where): [Type2Interface1!]!
+              type1sConnection(after: String, first: Int, sort: [Type1Sort!], where: Type1Where): Type1sConnection!
+              type2Interface1s(limit: Int, offset: Int, options: Type2Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface1Sort!], where: Type2Interface1Where): [Type2Interface1!]!
               type2Interface1sAggregate(where: Type2Interface1Where): Type2Interface1AggregateSelection!
-              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort], where: Type2Interface1Where): Type2Interface1sConnection!
-              type2Interface2s(options: Type2Interface2Options, where: Type2Interface2Where): [Type2Interface2!]!
+              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort!], where: Type2Interface1Where): Type2Interface1sConnection!
+              type2Interface2s(limit: Int, offset: Int, options: Type2Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface2Sort!], where: Type2Interface2Where): [Type2Interface2!]!
               type2Interface2sAggregate(where: Type2Interface2Where): Type2Interface2AggregateSelection!
-              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort], where: Type2Interface2Where): Type2Interface2sConnection!
+              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort!], where: Type2Interface2Where): Type2Interface2sConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -4502,18 +4028,14 @@ describe("Interface Relationships", () => {
 
             type Type1 {
               field1: String!
-              interface1(directed: Boolean = true, options: Interface1Options, where: Interface1Where): [Interface1!]!
-              interface1Aggregate(directed: Boolean = true, where: Interface1Where): Type1Interface1Interface1AggregationSelection
-              interface1Connection(after: String, directed: Boolean = true, first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
+              interface1(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
+              interface1Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface1Where): Type1Interface1Interface1AggregationSelection
+              interface1Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
             }
 
             type Type1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type1ConnectInput {
-              interface1: [Type1Interface1ConnectFieldInput!]
             }
 
             input Type1CreateInput {
@@ -4525,10 +4047,6 @@ describe("Interface Relationships", () => {
               interface1: [Type1Interface1DeleteFieldInput!]
             }
 
-            input Type1DisconnectInput {
-              interface1: [Type1Interface1DisconnectFieldInput!]
-            }
-
             type Type1Edge {
               cursor: String!
               node: Type1!
@@ -4536,16 +4054,17 @@ describe("Interface Relationships", () => {
 
             type Type1Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             input Type1Interface1AggregateInput {
               AND: [Type1Interface1AggregateInput!]
               NOT: Type1Interface1AggregateInput
               OR: [Type1Interface1AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -4563,10 +4082,6 @@ describe("Interface Relationships", () => {
               where: Interface1ConnectWhere
             }
 
-            input Type1Interface1ConnectInput {
-              interface2: [Type1Interface1Interface2ConnectFieldInput!]
-            }
-
             type Type1Interface1Connection {
               edges: [Type1Interface1Relationship!]!
               pageInfo: PageInfo!
@@ -4582,7 +4097,6 @@ describe("Interface Relationships", () => {
               NOT: Type1Interface1ConnectionWhere
               OR: [Type1Interface1ConnectionWhere!]
               node: Interface1Where
-              node_NOT: Interface1Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Type1Interface1CreateFieldInput {
@@ -4608,10 +4122,6 @@ describe("Interface Relationships", () => {
               where: Type1Interface1ConnectionWhere
             }
 
-            input Type1Interface1DisconnectInput {
-              interface2: [Type1Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type1Interface1Edge {
               cursor: String!
               node: Type1Interface1!
@@ -4635,7 +4145,8 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2AggregateInput!]
               NOT: Type1Interface1Interface2AggregateInput
               OR: [Type1Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -4677,41 +4188,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type1Interface1Interface2NodeAggregationWhereInput
               OR: [Type1Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Interface2UpdateConnectionInput {
@@ -4731,41 +4222,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1NodeAggregationWhereInput!]
               NOT: Type1Interface1NodeAggregationWhereInput
               OR: [Type1Interface1NodeAggregationWhereInput!]
-              field1_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_AVERAGE_LENGTH_EQUAL: Float
               field1_AVERAGE_LENGTH_GT: Float
               field1_AVERAGE_LENGTH_GTE: Float
               field1_AVERAGE_LENGTH_LT: Float
               field1_AVERAGE_LENGTH_LTE: Float
-              field1_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_LONGEST_LENGTH_EQUAL: Int
               field1_LONGEST_LENGTH_GT: Int
               field1_LONGEST_LENGTH_GTE: Int
               field1_LONGEST_LENGTH_LT: Int
               field1_LONGEST_LENGTH_LTE: Int
-              field1_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_SHORTEST_LENGTH_EQUAL: Int
               field1_SHORTEST_LENGTH_GT: Int
               field1_SHORTEST_LENGTH_GTE: Int
               field1_SHORTEST_LENGTH_LT: Int
               field1_SHORTEST_LENGTH_LTE: Int
-              field1_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Options {
@@ -4775,10 +4246,6 @@ describe("Interface Relationships", () => {
               Specify one or more Type1Interface1Sort objects to sort Type1Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [Type1Interface1Sort!]
-            }
-
-            input Type1Interface1RelationInput {
-              interface2: [Type1Interface1Interface2CreateFieldInput!]
             }
 
             type Type1Interface1Relationship {
@@ -4815,19 +4282,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Where!]
               NOT: Type1Interface1Where
               OR: [Type1Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type1Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -4836,7 +4297,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -4853,7 +4313,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -4912,15 +4371,11 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface2Where!]
               NOT: Type1Interface2Where
               OR: [Type1Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -4939,10 +4394,6 @@ describe("Interface Relationships", () => {
               sort: [Type1Sort!]
             }
 
-            input Type1RelationInput {
-              interface1: [Type1Interface1CreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Type1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Type1Sort object.
             \\"\\"\\"
@@ -4959,19 +4410,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Where!]
               NOT: Type1Where
               OR: [Type1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface1: Interface1Where @deprecated(reason: \\"Use \`interface1_SOME\` instead.\\")
               interface1Aggregate: Type1Interface1AggregateInput
-              interface1Connection: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1s where all of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -4980,7 +4425,6 @@ describe("Interface Relationships", () => {
               Return Type1s where none of the related Type1Interface1Connections match this filter
               \\"\\"\\"
               interface1Connection_NONE: Type1Interface1ConnectionWhere
-              interface1Connection_NOT: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1s where one of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -4993,7 +4437,6 @@ describe("Interface Relationships", () => {
               interface1_ALL: Interface1Where
               \\"\\"\\"Return Type1s where none of the related Interface1s match this filter\\"\\"\\"
               interface1_NONE: Interface1Where
-              interface1_NOT: Interface1Where @deprecated(reason: \\"Use \`interface1_NONE\` instead.\\")
               \\"\\"\\"Return Type1s where one of the related Interface1s match this filter\\"\\"\\"
               interface1_SINGLE: Interface1Where
               \\"\\"\\"Return Type1s where some of the related Interface1s match this filter\\"\\"\\"
@@ -5008,18 +4451,14 @@ describe("Interface Relationships", () => {
 
             type Type2Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             type Type2Interface1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type2Interface1ConnectInput {
-              interface2: [Type2Interface1Interface2ConnectFieldInput!]
             }
 
             input Type2Interface1CreateInput {
@@ -5031,10 +4470,6 @@ describe("Interface Relationships", () => {
               interface2: [Type2Interface1Interface2DeleteFieldInput!]
             }
 
-            input Type2Interface1DisconnectInput {
-              interface2: [Type2Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type2Interface1Edge {
               cursor: String!
               node: Type2Interface1!
@@ -5044,7 +4479,8 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2AggregateInput!]
               NOT: Type2Interface1Interface2AggregateInput
               OR: [Type2Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -5086,41 +4522,21 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type2Interface1Interface2NodeAggregationWhereInput
               OR: [Type2Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type2Interface1Interface2UpdateConnectionInput {
@@ -5145,10 +4561,6 @@ describe("Interface Relationships", () => {
               sort: [Type2Interface1Sort!]
             }
 
-            input Type2Interface1RelationInput {
-              interface2: [Type2Interface1Interface2CreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Type2Interface1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Type2Interface1Sort object.
             \\"\\"\\"
@@ -5165,19 +4577,13 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Where!]
               NOT: Type2Interface1Where
               OR: [Type2Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type2Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -5186,7 +4592,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -5203,7 +4608,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -5262,15 +4666,11 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface2Where!]
               NOT: Type2Interface2Where
               OR: [Type2Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -5284,7 +4684,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -5334,25 +4733,25 @@ describe("Interface Relationships", () => {
                 field2: String
             }
 
-            type Type1Interface1 implements Interface1 {
+            type Type1Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]! @relationship(type: "INTERFACE_TWO", direction: OUT, properties: "Props")
             }
 
-            type Type2Interface1 implements Interface1 {
+            type Type2Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]! @relationship(type: "INTERFACE_TWO", direction: OUT, properties: "Props")
             }
 
-            type Type1Interface2 implements Interface2 {
+            type Type1Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type2Interface2 implements Interface2 {
+            type Type2Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type1 {
+            type Type1 @node {
                 field1: String!
                 interface1: [Interface1!]! @relationship(type: "INTERFACE_ONE", direction: OUT)
             }
@@ -5375,7 +4774,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -5409,7 +4807,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -5423,7 +4820,7 @@ describe("Interface Relationships", () => {
 
             interface Interface1 {
               field1: String!
-              interface2(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface2(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2Connection(after: String, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
@@ -5467,7 +4864,8 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2AggregateInput!]
               NOT: Interface1Interface2AggregateInput
               OR: [Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -5497,9 +4895,7 @@ describe("Interface Relationships", () => {
               NOT: Interface1Interface2ConnectionWhere
               OR: [Interface1Interface2ConnectionWhere!]
               edge: Interface1Interface2EdgeWhere
-              edge_NOT: Interface1Interface2EdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: Interface2Where
-              node_NOT: Interface2Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Interface1Interface2CreateFieldInput {
@@ -5564,41 +4960,21 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2NodeAggregationWhereInput!]
               NOT: Interface1Interface2NodeAggregationWhereInput
               OR: [Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type Interface1Interface2Relationship {
@@ -5629,7 +5005,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface1Sort objects to sort Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface1Sort]
+              sort: [Interface1Sort!]
             }
 
             \\"\\"\\"
@@ -5648,19 +5024,13 @@ describe("Interface Relationships", () => {
               AND: [Interface1Where!]
               NOT: Interface1Where
               OR: [Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -5669,7 +5039,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -5686,7 +5055,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -5738,7 +5106,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface2Sort objects to sort Interface2s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface2Sort]
+              sort: [Interface2Sort!]
             }
 
             \\"\\"\\"
@@ -5756,15 +5124,11 @@ describe("Interface Relationships", () => {
               AND: [Interface2Where!]
               NOT: Interface2Where
               OR: [Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
               typename_IN: [Interface2Implementation!]
             }
@@ -5786,10 +5150,10 @@ describe("Interface Relationships", () => {
               deleteType1s(delete: Type1DeleteInput, where: Type1Where): DeleteInfo!
               deleteType2Interface1s(delete: Type2Interface1DeleteInput, where: Type2Interface1Where): DeleteInfo!
               deleteType2Interface2s(where: Type2Interface2Where): DeleteInfo!
-              updateType1Interface1s(connect: Type1Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
+              updateType1Interface1s(update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
               updateType1Interface2s(update: Type1Interface2UpdateInput, where: Type1Interface2Where): UpdateType1Interface2sMutationResponse!
-              updateType1s(connect: Type1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
-              updateType2Interface1s(connect: Type2Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type2Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type2Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type2Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
+              updateType1s(update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
+              updateType2Interface1s(update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
               updateType2Interface2s(update: Type2Interface2UpdateInput, where: Type2Interface2Where): UpdateType2Interface2sMutationResponse!
             }
 
@@ -5819,11 +5183,6 @@ describe("Interface Relationships", () => {
               propsField_AVERAGE_GTE: Float
               propsField_AVERAGE_LT: Float
               propsField_AVERAGE_LTE: Float
-              propsField_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              propsField_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              propsField_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              propsField_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              propsField_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               propsField_MAX_EQUAL: Int
               propsField_MAX_GT: Int
               propsField_MAX_GTE: Int
@@ -5859,38 +5218,37 @@ describe("Interface Relationships", () => {
               AND: [PropsWhere!]
               NOT: PropsWhere
               OR: [PropsWhere!]
-              propsField: Int
+              propsField: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              propsField_EQ: Int
               propsField_GT: Int
               propsField_GTE: Int
               propsField_IN: [Int!]
               propsField_LT: Int
               propsField_LTE: Int
-              propsField_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              propsField_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type Query {
-              interface1s(options: Interface1Options, where: Interface1Where): [Interface1!]!
+              interface1s(limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
               interface1sAggregate(where: Interface1Where): Interface1AggregateSelection!
-              interface1sConnection(after: String, first: Int, sort: [Interface1Sort], where: Interface1Where): Interface1sConnection!
-              interface2s(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface1sConnection(after: String, first: Int, sort: [Interface1Sort!], where: Interface1Where): Interface1sConnection!
+              interface2s(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2sAggregate(where: Interface2Where): Interface2AggregateSelection!
-              interface2sConnection(after: String, first: Int, sort: [Interface2Sort], where: Interface2Where): Interface2sConnection!
-              type1Interface1s(options: Type1Interface1Options, where: Type1Interface1Where): [Type1Interface1!]!
+              interface2sConnection(after: String, first: Int, sort: [Interface2Sort!], where: Interface2Where): Interface2sConnection!
+              type1Interface1s(limit: Int, offset: Int, options: Type1Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface1Sort!], where: Type1Interface1Where): [Type1Interface1!]!
               type1Interface1sAggregate(where: Type1Interface1Where): Type1Interface1AggregateSelection!
-              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort], where: Type1Interface1Where): Type1Interface1sConnection!
-              type1Interface2s(options: Type1Interface2Options, where: Type1Interface2Where): [Type1Interface2!]!
+              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort!], where: Type1Interface1Where): Type1Interface1sConnection!
+              type1Interface2s(limit: Int, offset: Int, options: Type1Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface2Sort!], where: Type1Interface2Where): [Type1Interface2!]!
               type1Interface2sAggregate(where: Type1Interface2Where): Type1Interface2AggregateSelection!
-              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort], where: Type1Interface2Where): Type1Interface2sConnection!
-              type1s(options: Type1Options, where: Type1Where): [Type1!]!
+              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort!], where: Type1Interface2Where): Type1Interface2sConnection!
+              type1s(limit: Int, offset: Int, options: Type1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Sort!], where: Type1Where): [Type1!]!
               type1sAggregate(where: Type1Where): Type1AggregateSelection!
-              type1sConnection(after: String, first: Int, sort: [Type1Sort], where: Type1Where): Type1sConnection!
-              type2Interface1s(options: Type2Interface1Options, where: Type2Interface1Where): [Type2Interface1!]!
+              type1sConnection(after: String, first: Int, sort: [Type1Sort!], where: Type1Where): Type1sConnection!
+              type2Interface1s(limit: Int, offset: Int, options: Type2Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface1Sort!], where: Type2Interface1Where): [Type2Interface1!]!
               type2Interface1sAggregate(where: Type2Interface1Where): Type2Interface1AggregateSelection!
-              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort], where: Type2Interface1Where): Type2Interface1sConnection!
-              type2Interface2s(options: Type2Interface2Options, where: Type2Interface2Where): [Type2Interface2!]!
+              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort!], where: Type2Interface1Where): Type2Interface1sConnection!
+              type2Interface2s(limit: Int, offset: Int, options: Type2Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface2Sort!], where: Type2Interface2Where): [Type2Interface2!]!
               type2Interface2sAggregate(where: Type2Interface2Where): Type2Interface2AggregateSelection!
-              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort], where: Type2Interface2Where): Type2Interface2sConnection!
+              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort!], where: Type2Interface2Where): Type2Interface2sConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -5908,18 +5266,14 @@ describe("Interface Relationships", () => {
 
             type Type1 {
               field1: String!
-              interface1(directed: Boolean = true, options: Interface1Options, where: Interface1Where): [Interface1!]!
-              interface1Aggregate(directed: Boolean = true, where: Interface1Where): Type1Interface1Interface1AggregationSelection
-              interface1Connection(after: String, directed: Boolean = true, first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
+              interface1(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
+              interface1Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface1Where): Type1Interface1Interface1AggregationSelection
+              interface1Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
             }
 
             type Type1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type1ConnectInput {
-              interface1: [Type1Interface1ConnectFieldInput!]
             }
 
             input Type1CreateInput {
@@ -5931,10 +5285,6 @@ describe("Interface Relationships", () => {
               interface1: [Type1Interface1DeleteFieldInput!]
             }
 
-            input Type1DisconnectInput {
-              interface1: [Type1Interface1DisconnectFieldInput!]
-            }
-
             type Type1Edge {
               cursor: String!
               node: Type1!
@@ -5942,16 +5292,17 @@ describe("Interface Relationships", () => {
 
             type Type1Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             input Type1Interface1AggregateInput {
               AND: [Type1Interface1AggregateInput!]
               NOT: Type1Interface1AggregateInput
               OR: [Type1Interface1AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -5969,10 +5320,6 @@ describe("Interface Relationships", () => {
               where: Interface1ConnectWhere
             }
 
-            input Type1Interface1ConnectInput {
-              interface2: [Type1Interface1Interface2ConnectFieldInput!]
-            }
-
             type Type1Interface1Connection {
               edges: [Type1Interface1Relationship!]!
               pageInfo: PageInfo!
@@ -5988,7 +5335,6 @@ describe("Interface Relationships", () => {
               NOT: Type1Interface1ConnectionWhere
               OR: [Type1Interface1ConnectionWhere!]
               node: Interface1Where
-              node_NOT: Interface1Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Type1Interface1CreateFieldInput {
@@ -6014,10 +5360,6 @@ describe("Interface Relationships", () => {
               where: Type1Interface1ConnectionWhere
             }
 
-            input Type1Interface1DisconnectInput {
-              interface2: [Type1Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type1Interface1Edge {
               cursor: String!
               node: Type1Interface1!
@@ -6041,7 +5383,8 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2AggregateInput!]
               NOT: Type1Interface1Interface2AggregateInput
               OR: [Type1Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -6091,41 +5434,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type1Interface1Interface2NodeAggregationWhereInput
               OR: [Type1Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Interface2UpdateConnectionInput {
@@ -6146,41 +5469,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1NodeAggregationWhereInput!]
               NOT: Type1Interface1NodeAggregationWhereInput
               OR: [Type1Interface1NodeAggregationWhereInput!]
-              field1_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_AVERAGE_LENGTH_EQUAL: Float
               field1_AVERAGE_LENGTH_GT: Float
               field1_AVERAGE_LENGTH_GTE: Float
               field1_AVERAGE_LENGTH_LT: Float
               field1_AVERAGE_LENGTH_LTE: Float
-              field1_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_LONGEST_LENGTH_EQUAL: Int
               field1_LONGEST_LENGTH_GT: Int
               field1_LONGEST_LENGTH_GTE: Int
               field1_LONGEST_LENGTH_LT: Int
               field1_LONGEST_LENGTH_LTE: Int
-              field1_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_SHORTEST_LENGTH_EQUAL: Int
               field1_SHORTEST_LENGTH_GT: Int
               field1_SHORTEST_LENGTH_GTE: Int
               field1_SHORTEST_LENGTH_LT: Int
               field1_SHORTEST_LENGTH_LTE: Int
-              field1_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Options {
@@ -6190,10 +5493,6 @@ describe("Interface Relationships", () => {
               Specify one or more Type1Interface1Sort objects to sort Type1Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [Type1Interface1Sort!]
-            }
-
-            input Type1Interface1RelationInput {
-              interface2: [Type1Interface1Interface2CreateFieldInput!]
             }
 
             type Type1Interface1Relationship {
@@ -6230,19 +5529,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Where!]
               NOT: Type1Interface1Where
               OR: [Type1Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type1Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -6251,7 +5544,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -6268,7 +5560,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -6327,15 +5618,11 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface2Where!]
               NOT: Type1Interface2Where
               OR: [Type1Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -6354,10 +5641,6 @@ describe("Interface Relationships", () => {
               sort: [Type1Sort!]
             }
 
-            input Type1RelationInput {
-              interface1: [Type1Interface1CreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Type1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Type1Sort object.
             \\"\\"\\"
@@ -6374,19 +5657,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Where!]
               NOT: Type1Where
               OR: [Type1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface1: Interface1Where @deprecated(reason: \\"Use \`interface1_SOME\` instead.\\")
               interface1Aggregate: Type1Interface1AggregateInput
-              interface1Connection: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1s where all of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -6395,7 +5672,6 @@ describe("Interface Relationships", () => {
               Return Type1s where none of the related Type1Interface1Connections match this filter
               \\"\\"\\"
               interface1Connection_NONE: Type1Interface1ConnectionWhere
-              interface1Connection_NOT: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1s where one of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -6408,7 +5684,6 @@ describe("Interface Relationships", () => {
               interface1_ALL: Interface1Where
               \\"\\"\\"Return Type1s where none of the related Interface1s match this filter\\"\\"\\"
               interface1_NONE: Interface1Where
-              interface1_NOT: Interface1Where @deprecated(reason: \\"Use \`interface1_NONE\` instead.\\")
               \\"\\"\\"Return Type1s where one of the related Interface1s match this filter\\"\\"\\"
               interface1_SINGLE: Interface1Where
               \\"\\"\\"Return Type1s where some of the related Interface1s match this filter\\"\\"\\"
@@ -6423,18 +5698,14 @@ describe("Interface Relationships", () => {
 
             type Type2Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             type Type2Interface1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type2Interface1ConnectInput {
-              interface2: [Type2Interface1Interface2ConnectFieldInput!]
             }
 
             input Type2Interface1CreateInput {
@@ -6446,10 +5717,6 @@ describe("Interface Relationships", () => {
               interface2: [Type2Interface1Interface2DeleteFieldInput!]
             }
 
-            input Type2Interface1DisconnectInput {
-              interface2: [Type2Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type2Interface1Edge {
               cursor: String!
               node: Type2Interface1!
@@ -6459,7 +5726,8 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2AggregateInput!]
               NOT: Type2Interface1Interface2AggregateInput
               OR: [Type2Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -6509,41 +5777,21 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type2Interface1Interface2NodeAggregationWhereInput
               OR: [Type2Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type2Interface1Interface2UpdateConnectionInput {
@@ -6569,10 +5817,6 @@ describe("Interface Relationships", () => {
               sort: [Type2Interface1Sort!]
             }
 
-            input Type2Interface1RelationInput {
-              interface2: [Type2Interface1Interface2CreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Type2Interface1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Type2Interface1Sort object.
             \\"\\"\\"
@@ -6589,19 +5833,13 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Where!]
               NOT: Type2Interface1Where
               OR: [Type2Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type2Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -6610,7 +5848,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -6627,7 +5864,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -6686,15 +5922,11 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface2Where!]
               NOT: Type2Interface2Where
               OR: [Type2Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -6708,7 +5940,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -6758,27 +5989,27 @@ describe("Interface Relationships", () => {
                 field2: String
             }
 
-            type Type1Interface1 implements Interface1 {
+            type Type1Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]!
                     @relationship(type: "INTERFACE_TWO", direction: OUT, properties: "Type1Props")
             }
 
-            type Type2Interface1 implements Interface1 {
+            type Type2Interface1 implements Interface1 @node {
                 field1: String!
                 interface2: [Interface2!]!
                     @relationship(type: "INTERFACE_TWO", direction: OUT, properties: "Type2Props")
             }
 
-            type Type1Interface2 implements Interface2 {
+            type Type1Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type2Interface2 implements Interface2 {
+            type Type2Interface2 implements Interface2 @node {
                 field2: String!
             }
 
-            type Type1 {
+            type Type1 @node {
                 field1: String!
                 interface1: [Interface1!]! @relationship(type: "INTERFACE_ONE", direction: OUT)
             }
@@ -6805,7 +6036,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -6839,7 +6069,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -6853,7 +6082,7 @@ describe("Interface Relationships", () => {
 
             interface Interface1 {
               field1: String!
-              interface2(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface2(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2Connection(after: String, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
@@ -6897,7 +6126,8 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2AggregateInput!]
               NOT: Interface1Interface2AggregateInput
               OR: [Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -6927,9 +6157,7 @@ describe("Interface Relationships", () => {
               NOT: Interface1Interface2ConnectionWhere
               OR: [Interface1Interface2ConnectionWhere!]
               edge: Interface1Interface2EdgeWhere
-              edge_NOT: Interface1Interface2EdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: Interface2Where
-              node_NOT: Interface2Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Interface1Interface2CreateFieldInput {
@@ -7014,41 +6242,21 @@ describe("Interface Relationships", () => {
               AND: [Interface1Interface2NodeAggregationWhereInput!]
               NOT: Interface1Interface2NodeAggregationWhereInput
               OR: [Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type Interface1Interface2Relationship {
@@ -7079,7 +6287,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface1Sort objects to sort Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface1Sort]
+              sort: [Interface1Sort!]
             }
 
             \\"\\"\\"
@@ -7098,19 +6306,13 @@ describe("Interface Relationships", () => {
               AND: [Interface1Where!]
               NOT: Interface1Where
               OR: [Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -7119,7 +6321,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -7136,7 +6337,6 @@ describe("Interface Relationships", () => {
               Return Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -7188,7 +6388,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more Interface2Sort objects to sort Interface2s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [Interface2Sort]
+              sort: [Interface2Sort!]
             }
 
             \\"\\"\\"
@@ -7206,15 +6406,11 @@ describe("Interface Relationships", () => {
               AND: [Interface2Where!]
               NOT: Interface2Where
               OR: [Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
               typename_IN: [Interface2Implementation!]
             }
@@ -7236,10 +6432,10 @@ describe("Interface Relationships", () => {
               deleteType1s(delete: Type1DeleteInput, where: Type1Where): DeleteInfo!
               deleteType2Interface1s(delete: Type2Interface1DeleteInput, where: Type2Interface1Where): DeleteInfo!
               deleteType2Interface2s(where: Type2Interface2Where): DeleteInfo!
-              updateType1Interface1s(connect: Type1Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
+              updateType1Interface1s(update: Type1Interface1UpdateInput, where: Type1Interface1Where): UpdateType1Interface1sMutationResponse!
               updateType1Interface2s(update: Type1Interface2UpdateInput, where: Type1Interface2Where): UpdateType1Interface2sMutationResponse!
-              updateType1s(connect: Type1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
-              updateType2Interface1s(connect: Type2Interface1ConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: Type2Interface1RelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: Type2Interface1DeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: Type2Interface1DisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
+              updateType1s(update: Type1UpdateInput, where: Type1Where): UpdateType1sMutationResponse!
+              updateType2Interface1s(update: Type2Interface1UpdateInput, where: Type2Interface1Where): UpdateType2Interface1sMutationResponse!
               updateType2Interface2s(update: Type2Interface2UpdateInput, where: Type2Interface2Where): UpdateType2Interface2sMutationResponse!
             }
 
@@ -7252,27 +6448,27 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              interface1s(options: Interface1Options, where: Interface1Where): [Interface1!]!
+              interface1s(limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
               interface1sAggregate(where: Interface1Where): Interface1AggregateSelection!
-              interface1sConnection(after: String, first: Int, sort: [Interface1Sort], where: Interface1Where): Interface1sConnection!
-              interface2s(options: Interface2Options, where: Interface2Where): [Interface2!]!
+              interface1sConnection(after: String, first: Int, sort: [Interface1Sort!], where: Interface1Where): Interface1sConnection!
+              interface2s(limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
               interface2sAggregate(where: Interface2Where): Interface2AggregateSelection!
-              interface2sConnection(after: String, first: Int, sort: [Interface2Sort], where: Interface2Where): Interface2sConnection!
-              type1Interface1s(options: Type1Interface1Options, where: Type1Interface1Where): [Type1Interface1!]!
+              interface2sConnection(after: String, first: Int, sort: [Interface2Sort!], where: Interface2Where): Interface2sConnection!
+              type1Interface1s(limit: Int, offset: Int, options: Type1Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface1Sort!], where: Type1Interface1Where): [Type1Interface1!]!
               type1Interface1sAggregate(where: Type1Interface1Where): Type1Interface1AggregateSelection!
-              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort], where: Type1Interface1Where): Type1Interface1sConnection!
-              type1Interface2s(options: Type1Interface2Options, where: Type1Interface2Where): [Type1Interface2!]!
+              type1Interface1sConnection(after: String, first: Int, sort: [Type1Interface1Sort!], where: Type1Interface1Where): Type1Interface1sConnection!
+              type1Interface2s(limit: Int, offset: Int, options: Type1Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Interface2Sort!], where: Type1Interface2Where): [Type1Interface2!]!
               type1Interface2sAggregate(where: Type1Interface2Where): Type1Interface2AggregateSelection!
-              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort], where: Type1Interface2Where): Type1Interface2sConnection!
-              type1s(options: Type1Options, where: Type1Where): [Type1!]!
+              type1Interface2sConnection(after: String, first: Int, sort: [Type1Interface2Sort!], where: Type1Interface2Where): Type1Interface2sConnection!
+              type1s(limit: Int, offset: Int, options: Type1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type1Sort!], where: Type1Where): [Type1!]!
               type1sAggregate(where: Type1Where): Type1AggregateSelection!
-              type1sConnection(after: String, first: Int, sort: [Type1Sort], where: Type1Where): Type1sConnection!
-              type2Interface1s(options: Type2Interface1Options, where: Type2Interface1Where): [Type2Interface1!]!
+              type1sConnection(after: String, first: Int, sort: [Type1Sort!], where: Type1Where): Type1sConnection!
+              type2Interface1s(limit: Int, offset: Int, options: Type2Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface1Sort!], where: Type2Interface1Where): [Type2Interface1!]!
               type2Interface1sAggregate(where: Type2Interface1Where): Type2Interface1AggregateSelection!
-              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort], where: Type2Interface1Where): Type2Interface1sConnection!
-              type2Interface2s(options: Type2Interface2Options, where: Type2Interface2Where): [Type2Interface2!]!
+              type2Interface1sConnection(after: String, first: Int, sort: [Type2Interface1Sort!], where: Type2Interface1Where): Type2Interface1sConnection!
+              type2Interface2s(limit: Int, offset: Int, options: Type2Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Type2Interface2Sort!], where: Type2Interface2Where): [Type2Interface2!]!
               type2Interface2sAggregate(where: Type2Interface2Where): Type2Interface2AggregateSelection!
-              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort], where: Type2Interface2Where): Type2Interface2sConnection!
+              type2Interface2sConnection(after: String, first: Int, sort: [Type2Interface2Sort!], where: Type2Interface2Where): Type2Interface2sConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -7290,18 +6486,14 @@ describe("Interface Relationships", () => {
 
             type Type1 {
               field1: String!
-              interface1(directed: Boolean = true, options: Interface1Options, where: Interface1Where): [Interface1!]!
-              interface1Aggregate(directed: Boolean = true, where: Interface1Where): Type1Interface1Interface1AggregationSelection
-              interface1Connection(after: String, directed: Boolean = true, first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
+              interface1(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface1Sort!], where: Interface1Where): [Interface1!]!
+              interface1Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface1Where): Type1Interface1Interface1AggregationSelection
+              interface1Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Type1Interface1ConnectionSort!], where: Type1Interface1ConnectionWhere): Type1Interface1Connection!
             }
 
             type Type1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type1ConnectInput {
-              interface1: [Type1Interface1ConnectFieldInput!]
             }
 
             input Type1CreateInput {
@@ -7313,10 +6505,6 @@ describe("Interface Relationships", () => {
               interface1: [Type1Interface1DeleteFieldInput!]
             }
 
-            input Type1DisconnectInput {
-              interface1: [Type1Interface1DisconnectFieldInput!]
-            }
-
             type Type1Edge {
               cursor: String!
               node: Type1!
@@ -7324,16 +6512,17 @@ describe("Interface Relationships", () => {
 
             type Type1Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type1Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             input Type1Interface1AggregateInput {
               AND: [Type1Interface1AggregateInput!]
               NOT: Type1Interface1AggregateInput
               OR: [Type1Interface1AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -7351,10 +6540,6 @@ describe("Interface Relationships", () => {
               where: Interface1ConnectWhere
             }
 
-            input Type1Interface1ConnectInput {
-              interface2: [Type1Interface1Interface2ConnectFieldInput!]
-            }
-
             type Type1Interface1Connection {
               edges: [Type1Interface1Relationship!]!
               pageInfo: PageInfo!
@@ -7370,7 +6555,6 @@ describe("Interface Relationships", () => {
               NOT: Type1Interface1ConnectionWhere
               OR: [Type1Interface1ConnectionWhere!]
               node: Interface1Where
-              node_NOT: Interface1Where @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input Type1Interface1CreateFieldInput {
@@ -7396,10 +6580,6 @@ describe("Interface Relationships", () => {
               where: Type1Interface1ConnectionWhere
             }
 
-            input Type1Interface1DisconnectInput {
-              interface2: [Type1Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type1Interface1Edge {
               cursor: String!
               node: Type1Interface1!
@@ -7423,7 +6603,8 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2AggregateInput!]
               NOT: Type1Interface1Interface2AggregateInput
               OR: [Type1Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -7473,41 +6654,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type1Interface1Interface2NodeAggregationWhereInput
               OR: [Type1Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Interface2UpdateConnectionInput {
@@ -7528,41 +6689,21 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1NodeAggregationWhereInput!]
               NOT: Type1Interface1NodeAggregationWhereInput
               OR: [Type1Interface1NodeAggregationWhereInput!]
-              field1_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_AVERAGE_LENGTH_EQUAL: Float
               field1_AVERAGE_LENGTH_GT: Float
               field1_AVERAGE_LENGTH_GTE: Float
               field1_AVERAGE_LENGTH_LT: Float
               field1_AVERAGE_LENGTH_LTE: Float
-              field1_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_LONGEST_LENGTH_EQUAL: Int
               field1_LONGEST_LENGTH_GT: Int
               field1_LONGEST_LENGTH_GTE: Int
               field1_LONGEST_LENGTH_LT: Int
               field1_LONGEST_LENGTH_LTE: Int
-              field1_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field1_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field1_SHORTEST_LENGTH_EQUAL: Int
               field1_SHORTEST_LENGTH_GT: Int
               field1_SHORTEST_LENGTH_GTE: Int
               field1_SHORTEST_LENGTH_LT: Int
               field1_SHORTEST_LENGTH_LTE: Int
-              field1_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field1_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type1Interface1Options {
@@ -7572,10 +6713,6 @@ describe("Interface Relationships", () => {
               Specify one or more Type1Interface1Sort objects to sort Type1Interface1s by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [Type1Interface1Sort!]
-            }
-
-            input Type1Interface1RelationInput {
-              interface2: [Type1Interface1Interface2CreateFieldInput!]
             }
 
             type Type1Interface1Relationship {
@@ -7612,19 +6749,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface1Where!]
               NOT: Type1Interface1Where
               OR: [Type1Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type1Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -7633,7 +6764,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -7650,7 +6780,6 @@ describe("Interface Relationships", () => {
               Return Type1Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -7709,15 +6838,11 @@ describe("Interface Relationships", () => {
               AND: [Type1Interface2Where!]
               NOT: Type1Interface2Where
               OR: [Type1Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -7753,11 +6878,6 @@ describe("Interface Relationships", () => {
               type1Field_AVERAGE_GTE: Float
               type1Field_AVERAGE_LT: Float
               type1Field_AVERAGE_LTE: Float
-              type1Field_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type1Field_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type1Field_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type1Field_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type1Field_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               type1Field_MAX_EQUAL: Int
               type1Field_MAX_GT: Int
               type1Field_MAX_GTE: Int
@@ -7793,18 +6913,13 @@ describe("Interface Relationships", () => {
               AND: [Type1PropsWhere!]
               NOT: Type1PropsWhere
               OR: [Type1PropsWhere!]
-              type1Field: Int
+              type1Field: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              type1Field_EQ: Int
               type1Field_GT: Int
               type1Field_GTE: Int
               type1Field_IN: [Int!]
               type1Field_LT: Int
               type1Field_LTE: Int
-              type1Field_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              type1Field_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
-            input Type1RelationInput {
-              interface1: [Type1Interface1CreateFieldInput!]
             }
 
             \\"\\"\\"
@@ -7823,19 +6938,13 @@ describe("Interface Relationships", () => {
               AND: [Type1Where!]
               NOT: Type1Where
               OR: [Type1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface1: Interface1Where @deprecated(reason: \\"Use \`interface1_SOME\` instead.\\")
               interface1Aggregate: Type1Interface1AggregateInput
-              interface1Connection: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type1s where all of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -7844,7 +6953,6 @@ describe("Interface Relationships", () => {
               Return Type1s where none of the related Type1Interface1Connections match this filter
               \\"\\"\\"
               interface1Connection_NONE: Type1Interface1ConnectionWhere
-              interface1Connection_NOT: Type1Interface1ConnectionWhere @deprecated(reason: \\"Use \`interface1Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type1s where one of the related Type1Interface1Connections match this filter
               \\"\\"\\"
@@ -7857,7 +6965,6 @@ describe("Interface Relationships", () => {
               interface1_ALL: Interface1Where
               \\"\\"\\"Return Type1s where none of the related Interface1s match this filter\\"\\"\\"
               interface1_NONE: Interface1Where
-              interface1_NOT: Interface1Where @deprecated(reason: \\"Use \`interface1_NONE\` instead.\\")
               \\"\\"\\"Return Type1s where one of the related Interface1s match this filter\\"\\"\\"
               interface1_SINGLE: Interface1Where
               \\"\\"\\"Return Type1s where some of the related Interface1s match this filter\\"\\"\\"
@@ -7872,18 +6979,14 @@ describe("Interface Relationships", () => {
 
             type Type2Interface1 implements Interface1 {
               field1: String!
-              interface2(directed: Boolean = true, options: Interface2Options, where: Interface2Where): [Interface2!]!
-              interface2Aggregate(directed: Boolean = true, where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
-              interface2Connection(after: String, directed: Boolean = true, first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
+              interface2(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Interface2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Interface2Sort!], where: Interface2Where): [Interface2!]!
+              interface2Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Interface2Where): Type2Interface1Interface2Interface2AggregationSelection
+              interface2Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Interface1Interface2ConnectionSort!], where: Interface1Interface2ConnectionWhere): Interface1Interface2Connection!
             }
 
             type Type2Interface1AggregateSelection {
               count: Int!
               field1: StringAggregateSelection!
-            }
-
-            input Type2Interface1ConnectInput {
-              interface2: [Type2Interface1Interface2ConnectFieldInput!]
             }
 
             input Type2Interface1CreateInput {
@@ -7895,10 +6998,6 @@ describe("Interface Relationships", () => {
               interface2: [Type2Interface1Interface2DeleteFieldInput!]
             }
 
-            input Type2Interface1DisconnectInput {
-              interface2: [Type2Interface1Interface2DisconnectFieldInput!]
-            }
-
             type Type2Interface1Edge {
               cursor: String!
               node: Type2Interface1!
@@ -7908,7 +7007,8 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2AggregateInput!]
               NOT: Type2Interface1Interface2AggregateInput
               OR: [Type2Interface1Interface2AggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -7958,41 +7058,21 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Interface2NodeAggregationWhereInput!]
               NOT: Type2Interface1Interface2NodeAggregationWhereInput
               OR: [Type2Interface1Interface2NodeAggregationWhereInput!]
-              field2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_AVERAGE_LENGTH_EQUAL: Float
               field2_AVERAGE_LENGTH_GT: Float
               field2_AVERAGE_LENGTH_GTE: Float
               field2_AVERAGE_LENGTH_LT: Float
               field2_AVERAGE_LENGTH_LTE: Float
-              field2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_LONGEST_LENGTH_EQUAL: Int
               field2_LONGEST_LENGTH_GT: Int
               field2_LONGEST_LENGTH_GTE: Int
               field2_LONGEST_LENGTH_LT: Int
               field2_LONGEST_LENGTH_LTE: Int
-              field2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              field2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               field2_SHORTEST_LENGTH_EQUAL: Int
               field2_SHORTEST_LENGTH_GT: Int
               field2_SHORTEST_LENGTH_GTE: Int
               field2_SHORTEST_LENGTH_LT: Int
               field2_SHORTEST_LENGTH_LTE: Int
-              field2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              field2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input Type2Interface1Interface2UpdateConnectionInput {
@@ -8018,10 +7098,6 @@ describe("Interface Relationships", () => {
               sort: [Type2Interface1Sort!]
             }
 
-            input Type2Interface1RelationInput {
-              interface2: [Type2Interface1Interface2CreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Type2Interface1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Type2Interface1Sort object.
             \\"\\"\\"
@@ -8038,19 +7114,13 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface1Where!]
               NOT: Type2Interface1Where
               OR: [Type2Interface1Where!]
-              field1: String
+              field1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field1_CONTAINS: String
               field1_ENDS_WITH: String
+              field1_EQ: String
               field1_IN: [String!]
-              field1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field1_STARTS_WITH: String
-              interface2: Interface2Where @deprecated(reason: \\"Use \`interface2_SOME\` instead.\\")
               interface2Aggregate: Type2Interface1Interface2AggregateInput
-              interface2Connection: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_SOME\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where all of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -8059,7 +7129,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
               interface2Connection_NONE: Interface1Interface2ConnectionWhere
-              interface2Connection_NOT: Interface1Interface2ConnectionWhere @deprecated(reason: \\"Use \`interface2Connection_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface1Interface2Connections match this filter
               \\"\\"\\"
@@ -8076,7 +7145,6 @@ describe("Interface Relationships", () => {
               Return Type2Interface1s where none of the related Interface2s match this filter
               \\"\\"\\"
               interface2_NONE: Interface2Where
-              interface2_NOT: Interface2Where @deprecated(reason: \\"Use \`interface2_NONE\` instead.\\")
               \\"\\"\\"
               Return Type2Interface1s where one of the related Interface2s match this filter
               \\"\\"\\"
@@ -8135,15 +7203,11 @@ describe("Interface Relationships", () => {
               AND: [Type2Interface2Where!]
               NOT: Type2Interface2Where
               OR: [Type2Interface2Where!]
-              field2: String
+              field2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               field2_CONTAINS: String
               field2_ENDS_WITH: String
+              field2_EQ: String
               field2_IN: [String!]
-              field2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              field2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               field2_STARTS_WITH: String
             }
 
@@ -8170,11 +7234,6 @@ describe("Interface Relationships", () => {
               type2Field_AVERAGE_GTE: Float
               type2Field_AVERAGE_LT: Float
               type2Field_AVERAGE_LTE: Float
-              type2Field_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type2Field_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type2Field_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type2Field_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              type2Field_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               type2Field_MAX_EQUAL: Int
               type2Field_MAX_GT: Int
               type2Field_MAX_GTE: Int
@@ -8210,21 +7269,19 @@ describe("Interface Relationships", () => {
               AND: [Type2PropsWhere!]
               NOT: Type2PropsWhere
               OR: [Type2PropsWhere!]
-              type2Field: Int
+              type2Field: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              type2Field_EQ: Int
               type2Field_GT: Int
               type2Field_GTE: Int
               type2Field_IN: [Int!]
               type2Field_LT: Int
               type2Field_LTE: Int
-              type2Field_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              type2Field_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             \\"\\"\\"
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -8271,21 +7328,21 @@ describe("Interface Relationships", () => {
                 creator: User! @declareRelationship
             }
 
-            type Comment implements Content {
+            type Comment implements Content @node {
                 id: ID
                 content: String
                 creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
                 post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
             }
 
-            type Post implements Content {
+            type Post implements Content @node {
                 id: ID
                 content: String
                 creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 content: [Content!]! @relationship(type: "HAS_CONTENT", direction: OUT)
@@ -8303,13 +7360,13 @@ describe("Interface Relationships", () => {
 
             type Comment implements Content {
               content: String
-              creator(directed: Boolean = true, options: UserOptions, where: UserWhere): User!
-              creatorAggregate(directed: Boolean = true, where: UserWhere): CommentUserCreatorAggregationSelection
-              creatorConnection(after: String, directed: Boolean = true, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
+              creator(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): User!
+              creatorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): CommentUserCreatorAggregationSelection
+              creatorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
-              post(directed: Boolean = true, options: PostOptions, where: PostWhere): Post!
-              postAggregate(directed: Boolean = true, where: PostWhere): CommentPostPostAggregationSelection
-              postConnection(after: String, directed: Boolean = true, first: Int, sort: [CommentPostConnectionSort!], where: CommentPostConnectionWhere): CommentPostConnection!
+              post(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): Post!
+              postAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PostWhere): CommentPostPostAggregationSelection
+              postConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CommentPostConnectionSort!], where: CommentPostConnectionWhere): CommentPostConnection!
             }
 
             type CommentAggregateSelection {
@@ -8338,7 +7395,8 @@ describe("Interface Relationships", () => {
               AND: [CommentCreatorAggregateInput!]
               NOT: CommentCreatorAggregateInput
               OR: [CommentCreatorAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -8368,42 +7426,31 @@ describe("Interface Relationships", () => {
               AND: [CommentCreatorNodeAggregationWhereInput!]
               NOT: CommentCreatorNodeAggregationWhereInput
               OR: [CommentCreatorNodeAggregationWhereInput!]
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input CommentCreatorUpdateConnectionInput {
@@ -8447,7 +7494,8 @@ describe("Interface Relationships", () => {
               AND: [CommentPostAggregateInput!]
               NOT: CommentPostAggregateInput
               OR: [CommentPostAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -8479,7 +7527,6 @@ describe("Interface Relationships", () => {
               NOT: CommentPostConnectionWhere
               OR: [CommentPostConnectionWhere!]
               node: PostWhere
-              node_NOT: PostWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input CommentPostCreateFieldInput {
@@ -8505,42 +7552,31 @@ describe("Interface Relationships", () => {
               AND: [CommentPostNodeAggregationWhereInput!]
               NOT: CommentPostNodeAggregationWhereInput
               OR: [CommentPostNodeAggregationWhereInput!]
-              content_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_AVERAGE_LENGTH_EQUAL: Float
               content_AVERAGE_LENGTH_GT: Float
               content_AVERAGE_LENGTH_GTE: Float
               content_AVERAGE_LENGTH_LT: Float
               content_AVERAGE_LENGTH_LTE: Float
-              content_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_LONGEST_LENGTH_EQUAL: Int
               content_LONGEST_LENGTH_GT: Int
               content_LONGEST_LENGTH_GTE: Int
               content_LONGEST_LENGTH_LT: Int
               content_LONGEST_LENGTH_LTE: Int
-              content_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_SHORTEST_LENGTH_EQUAL: Int
               content_SHORTEST_LENGTH_GT: Int
               content_SHORTEST_LENGTH_GTE: Int
               content_SHORTEST_LENGTH_LT: Int
               content_SHORTEST_LENGTH_LTE: Int
-              content_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
             }
 
             type CommentPostPostAggregationSelection {
@@ -8569,11 +7605,6 @@ describe("Interface Relationships", () => {
               disconnect: CommentPostDisconnectFieldInput
               update: CommentPostUpdateConnectionInput
               where: CommentPostConnectionWhere
-            }
-
-            input CommentRelationInput {
-              creator: CommentCreatorCreateFieldInput
-              post: CommentPostCreateFieldInput
             }
 
             \\"\\"\\"
@@ -8605,36 +7636,24 @@ describe("Interface Relationships", () => {
               AND: [CommentWhere!]
               NOT: CommentWhere
               OR: [CommentWhere!]
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
+              content_EQ: String
               content_IN: [String]
-              content_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               content_STARTS_WITH: String
               creator: UserWhere
               creatorAggregate: CommentCreatorAggregateInput
               creatorConnection: ContentCreatorConnectionWhere
-              creatorConnection_NOT: ContentCreatorConnectionWhere
-              creator_NOT: UserWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
               post: PostWhere
               postAggregate: CommentPostAggregateInput
               postConnection: CommentPostConnectionWhere
-              postConnection_NOT: CommentPostConnectionWhere
-              post_NOT: PostWhere
             }
 
             type CommentsConnection {
@@ -8645,7 +7664,7 @@ describe("Interface Relationships", () => {
 
             interface Content {
               content: String
-              creator(options: UserOptions, where: UserWhere): User!
+              creator(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): User!
               creatorConnection(after: String, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
             }
@@ -8673,7 +7692,8 @@ describe("Interface Relationships", () => {
               AND: [ContentCreatorAggregateInput!]
               NOT: ContentCreatorAggregateInput
               OR: [ContentCreatorAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -8705,7 +7725,6 @@ describe("Interface Relationships", () => {
               NOT: ContentCreatorConnectionWhere
               OR: [ContentCreatorConnectionWhere!]
               node: UserWhere
-              node_NOT: UserWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ContentCreatorCreateFieldInput {
@@ -8726,42 +7745,31 @@ describe("Interface Relationships", () => {
               AND: [ContentCreatorNodeAggregationWhereInput!]
               NOT: ContentCreatorNodeAggregationWhereInput
               OR: [ContentCreatorNodeAggregationWhereInput!]
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ContentCreatorRelationship {
@@ -8806,7 +7814,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ContentSort objects to sort Contents by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ContentSort]
+              sort: [ContentSort!]
             }
 
             \\"\\"\\"
@@ -8827,30 +7835,20 @@ describe("Interface Relationships", () => {
               AND: [ContentWhere!]
               NOT: ContentWhere
               OR: [ContentWhere!]
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
+              content_EQ: String
               content_IN: [String]
-              content_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               content_STARTS_WITH: String
               creator: UserWhere
               creatorAggregate: ContentCreatorAggregateInput
               creatorConnection: ContentCreatorConnectionWhere
-              creatorConnection_NOT: ContentCreatorConnectionWhere
-              creator_NOT: UserWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
               typename_IN: [ContentImplementation!]
             }
@@ -8870,7 +7868,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -8889,7 +7886,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -8906,9 +7902,9 @@ describe("Interface Relationships", () => {
               deleteComments(delete: CommentDeleteInput, where: CommentWhere): DeleteInfo!
               deletePosts(delete: PostDeleteInput, where: PostWhere): DeleteInfo!
               deleteUsers(delete: UserDeleteInput, where: UserWhere): DeleteInfo!
-              updateComments(connect: CommentConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: CommentRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: CommentDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: CommentDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: CommentUpdateInput, where: CommentWhere): UpdateCommentsMutationResponse!
-              updatePosts(connect: PostConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: PostRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: PostDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: PostDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: PostUpdateInput, where: PostWhere): UpdatePostsMutationResponse!
-              updateUsers(connect: UserConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: UserRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: UserDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: UserDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: UserUpdateInput, where: UserWhere): UpdateUsersMutationResponse!
+              updateComments(update: CommentUpdateInput, where: CommentWhere): UpdateCommentsMutationResponse!
+              updatePosts(update: PostUpdateInput, where: PostWhere): UpdatePostsMutationResponse!
+              updateUsers(update: UserUpdateInput, where: UserWhere): UpdateUsersMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -8920,13 +7916,13 @@ describe("Interface Relationships", () => {
             }
 
             type Post implements Content {
-              comments(directed: Boolean = true, options: CommentOptions, where: CommentWhere): [Comment!]!
-              commentsAggregate(directed: Boolean = true, where: CommentWhere): PostCommentCommentsAggregationSelection
-              commentsConnection(after: String, directed: Boolean = true, first: Int, sort: [PostCommentsConnectionSort!], where: PostCommentsConnectionWhere): PostCommentsConnection!
+              comments(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: CommentOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CommentSort!], where: CommentWhere): [Comment!]!
+              commentsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: CommentWhere): PostCommentCommentsAggregationSelection
+              commentsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostCommentsConnectionSort!], where: PostCommentsConnectionWhere): PostCommentsConnection!
               content: String
-              creator(directed: Boolean = true, options: UserOptions, where: UserWhere): User!
-              creatorAggregate(directed: Boolean = true, where: UserWhere): PostUserCreatorAggregationSelection
-              creatorConnection(after: String, directed: Boolean = true, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
+              creator(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): User!
+              creatorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserCreatorAggregationSelection
+              creatorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
             }
 
@@ -8950,7 +7946,8 @@ describe("Interface Relationships", () => {
               AND: [PostCommentsAggregateInput!]
               NOT: PostCommentsAggregateInput
               OR: [PostCommentsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -8982,7 +7979,6 @@ describe("Interface Relationships", () => {
               NOT: PostCommentsConnectionWhere
               OR: [PostCommentsConnectionWhere!]
               node: CommentWhere
-              node_NOT: CommentWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input PostCommentsCreateFieldInput {
@@ -9008,42 +8004,31 @@ describe("Interface Relationships", () => {
               AND: [PostCommentsNodeAggregationWhereInput!]
               NOT: PostCommentsNodeAggregationWhereInput
               OR: [PostCommentsNodeAggregationWhereInput!]
-              content_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_AVERAGE_LENGTH_EQUAL: Float
               content_AVERAGE_LENGTH_GT: Float
               content_AVERAGE_LENGTH_GTE: Float
               content_AVERAGE_LENGTH_LT: Float
               content_AVERAGE_LENGTH_LTE: Float
-              content_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_LONGEST_LENGTH_EQUAL: Int
               content_LONGEST_LENGTH_GT: Int
               content_LONGEST_LENGTH_GTE: Int
               content_LONGEST_LENGTH_LT: Int
               content_LONGEST_LENGTH_LTE: Int
-              content_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_SHORTEST_LENGTH_EQUAL: Int
               content_SHORTEST_LENGTH_GT: Int
               content_SHORTEST_LENGTH_GTE: Int
               content_SHORTEST_LENGTH_LT: Int
               content_SHORTEST_LENGTH_LTE: Int
-              content_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
             }
 
             type PostCommentsRelationship {
@@ -9084,7 +8069,8 @@ describe("Interface Relationships", () => {
               AND: [PostCreatorAggregateInput!]
               NOT: PostCreatorAggregateInput
               OR: [PostCreatorAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -9114,42 +8100,31 @@ describe("Interface Relationships", () => {
               AND: [PostCreatorNodeAggregationWhereInput!]
               NOT: PostCreatorNodeAggregationWhereInput
               OR: [PostCreatorNodeAggregationWhereInput!]
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input PostCreatorUpdateConnectionInput {
@@ -9189,11 +8164,6 @@ describe("Interface Relationships", () => {
               sort: [PostSort!]
             }
 
-            input PostRelationInput {
-              comments: [PostCommentsCreateFieldInput!]
-              creator: PostCreatorCreateFieldInput
-            }
-
             \\"\\"\\"
             Fields to sort Posts by. The order in which sorts are applied is not guaranteed when specifying many fields in one PostSort object.
             \\"\\"\\"
@@ -9223,9 +8193,7 @@ describe("Interface Relationships", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              comments: CommentWhere @deprecated(reason: \\"Use \`comments_SOME\` instead.\\")
               commentsAggregate: PostCommentsAggregateInput
-              commentsConnection: PostCommentsConnectionWhere @deprecated(reason: \\"Use \`commentsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Posts where all of the related PostCommentsConnections match this filter
               \\"\\"\\"
@@ -9234,7 +8202,6 @@ describe("Interface Relationships", () => {
               Return Posts where none of the related PostCommentsConnections match this filter
               \\"\\"\\"
               commentsConnection_NONE: PostCommentsConnectionWhere
-              commentsConnection_NOT: PostCommentsConnectionWhere @deprecated(reason: \\"Use \`commentsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Posts where one of the related PostCommentsConnections match this filter
               \\"\\"\\"
@@ -9247,35 +8214,24 @@ describe("Interface Relationships", () => {
               comments_ALL: CommentWhere
               \\"\\"\\"Return Posts where none of the related Comments match this filter\\"\\"\\"
               comments_NONE: CommentWhere
-              comments_NOT: CommentWhere @deprecated(reason: \\"Use \`comments_NONE\` instead.\\")
               \\"\\"\\"Return Posts where one of the related Comments match this filter\\"\\"\\"
               comments_SINGLE: CommentWhere
               \\"\\"\\"Return Posts where some of the related Comments match this filter\\"\\"\\"
               comments_SOME: CommentWhere
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
+              content_EQ: String
               content_IN: [String]
-              content_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              content_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               content_STARTS_WITH: String
               creator: UserWhere
               creatorAggregate: PostCreatorAggregateInput
               creatorConnection: ContentCreatorConnectionWhere
-              creatorConnection_NOT: ContentCreatorConnectionWhere
-              creator_NOT: UserWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
             }
 
@@ -9286,18 +8242,18 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              comments(options: CommentOptions, where: CommentWhere): [Comment!]!
+              comments(limit: Int, offset: Int, options: CommentOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CommentSort!], where: CommentWhere): [Comment!]!
               commentsAggregate(where: CommentWhere): CommentAggregateSelection!
-              commentsConnection(after: String, first: Int, sort: [CommentSort], where: CommentWhere): CommentsConnection!
-              contents(options: ContentOptions, where: ContentWhere): [Content!]!
+              commentsConnection(after: String, first: Int, sort: [CommentSort!], where: CommentWhere): CommentsConnection!
+              contents(limit: Int, offset: Int, options: ContentOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ContentSort!], where: ContentWhere): [Content!]!
               contentsAggregate(where: ContentWhere): ContentAggregateSelection!
-              contentsConnection(after: String, first: Int, sort: [ContentSort], where: ContentWhere): ContentsConnection!
-              posts(options: PostOptions, where: PostWhere): [Post!]!
+              contentsConnection(after: String, first: Int, sort: [ContentSort!], where: ContentWhere): ContentsConnection!
+              posts(limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): [Post!]!
               postsAggregate(where: PostWhere): PostAggregateSelection!
-              postsConnection(after: String, first: Int, sort: [PostSort], where: PostWhere): PostsConnection!
-              users(options: UserOptions, where: UserWhere): [User!]!
+              postsConnection(after: String, first: Int, sort: [PostSort!], where: PostWhere): PostsConnection!
+              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
               usersAggregate(where: UserWhere): UserAggregateSelection!
-              usersConnection(after: String, first: Int, sort: [UserSort], where: UserWhere): UsersConnection!
+              usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -9322,7 +8278,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -9340,9 +8295,9 @@ describe("Interface Relationships", () => {
             }
 
             type User {
-              content(directed: Boolean = true, options: ContentOptions, where: ContentWhere): [Content!]!
-              contentAggregate(directed: Boolean = true, where: ContentWhere): UserContentContentAggregationSelection
-              contentConnection(after: String, directed: Boolean = true, first: Int, sort: [UserContentConnectionSort!], where: UserContentConnectionWhere): UserContentConnection!
+              content(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ContentOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ContentSort!], where: ContentWhere): [Content!]!
+              contentAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ContentWhere): UserContentContentAggregationSelection
+              contentConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserContentConnectionSort!], where: UserContentConnectionWhere): UserContentConnection!
               id: ID
               name: String
             }
@@ -9365,7 +8320,8 @@ describe("Interface Relationships", () => {
               AND: [UserContentAggregateInput!]
               NOT: UserContentAggregateInput
               OR: [UserContentAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -9393,7 +8349,6 @@ describe("Interface Relationships", () => {
               NOT: UserContentConnectionWhere
               OR: [UserContentConnectionWhere!]
               node: ContentWhere
-              node_NOT: ContentWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type UserContentContentAggregationSelection {
@@ -9429,42 +8384,31 @@ describe("Interface Relationships", () => {
               AND: [UserContentNodeAggregationWhereInput!]
               NOT: UserContentNodeAggregationWhereInput
               OR: [UserContentNodeAggregationWhereInput!]
-              content_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_AVERAGE_LENGTH_EQUAL: Float
               content_AVERAGE_LENGTH_GT: Float
               content_AVERAGE_LENGTH_GTE: Float
               content_AVERAGE_LENGTH_LT: Float
               content_AVERAGE_LENGTH_LTE: Float
-              content_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_LONGEST_LENGTH_EQUAL: Int
               content_LONGEST_LENGTH_GT: Int
               content_LONGEST_LENGTH_GTE: Int
               content_LONGEST_LENGTH_LT: Int
               content_LONGEST_LENGTH_LTE: Int
-              content_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              content_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               content_SHORTEST_LENGTH_EQUAL: Int
               content_SHORTEST_LENGTH_GT: Int
               content_SHORTEST_LENGTH_GTE: Int
               content_SHORTEST_LENGTH_LT: Int
               content_SHORTEST_LENGTH_LTE: Int
-              content_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              content_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
             }
 
             type UserContentRelationship {
@@ -9513,10 +8457,6 @@ describe("Interface Relationships", () => {
               sort: [UserSort!]
             }
 
-            input UserRelationInput {
-              content: [UserContentCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Users by. The order in which sorts are applied is not guaranteed when specifying many fields in one UserSort object.
             \\"\\"\\"
@@ -9535,9 +8475,7 @@ describe("Interface Relationships", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              content: ContentWhere @deprecated(reason: \\"Use \`content_SOME\` instead.\\")
               contentAggregate: UserContentAggregateInput
-              contentConnection: UserContentConnectionWhere @deprecated(reason: \\"Use \`contentConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Users where all of the related UserContentConnections match this filter
               \\"\\"\\"
@@ -9546,7 +8484,6 @@ describe("Interface Relationships", () => {
               Return Users where none of the related UserContentConnections match this filter
               \\"\\"\\"
               contentConnection_NONE: UserContentConnectionWhere
-              contentConnection_NOT: UserContentConnectionWhere @deprecated(reason: \\"Use \`contentConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Users where one of the related UserContentConnections match this filter
               \\"\\"\\"
@@ -9559,30 +8496,21 @@ describe("Interface Relationships", () => {
               content_ALL: ContentWhere
               \\"\\"\\"Return Users where none of the related Contents match this filter\\"\\"\\"
               content_NONE: ContentWhere
-              content_NOT: ContentWhere @deprecated(reason: \\"Use \`content_NONE\` instead.\\")
               \\"\\"\\"Return Users where one of the related Contents match this filter\\"\\"\\"
               content_SINGLE: ContentWhere
               \\"\\"\\"Return Users where some of the related Contents match this filter\\"\\"\\"
               content_SOME: ContentWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -9606,13 +8534,13 @@ describe("Interface Relationships", () => {
                 actors: [Actor!]!
             }
 
-            type Movie implements Production & Show {
+            type Movie implements Production & Show @node {
                 title: String!
                 runtime: Int!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Series implements Production & Show {
+            type Series implements Production & Show @node {
                 title: String!
                 episodeCount: Int!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "StarredIn")
@@ -9626,7 +8554,7 @@ describe("Interface Relationships", () => {
                 episodeNr: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Show!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -9659,11 +8587,6 @@ describe("Interface Relationships", () => {
               screenTime_AVERAGE_GTE: Float
               screenTime_AVERAGE_LT: Float
               screenTime_AVERAGE_LTE: Float
-              screenTime_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              screenTime_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               screenTime_MAX_EQUAL: Int
               screenTime_MAX_GT: Int
               screenTime_MAX_GTE: Int
@@ -9699,20 +8622,19 @@ describe("Interface Relationships", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              screenTime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: ShowOptions, where: ShowWhere): [Show!]!
-              actedInAggregate(directed: Boolean = true, where: ShowWhere): ActorShowActedInAggregationSelection
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ShowOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ShowSort!], where: ShowWhere): [Show!]!
+              actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ShowWhere): ActorShowActedInAggregationSelection
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               name: String!
             }
 
@@ -9720,7 +8642,8 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -9751,9 +8674,7 @@ describe("Interface Relationships", () => {
               NOT: ActorActedInConnectionWhere
               OR: [ActorActedInConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ShowWhere
-              node_NOT: ShowWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ActorActedInCreateFieldInput {
@@ -9780,41 +8701,21 @@ describe("Interface Relationships", () => {
               AND: [ActorActedInNodeAggregationWhereInput!]
               NOT: ActorActedInNodeAggregationWhereInput
               OR: [ActorActedInNodeAggregationWhereInput!]
-              title_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_AVERAGE_LENGTH_EQUAL: Float
               title_AVERAGE_LENGTH_GT: Float
               title_AVERAGE_LENGTH_GTE: Float
               title_AVERAGE_LENGTH_LT: Float
               title_AVERAGE_LENGTH_LTE: Float
-              title_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_LONGEST_LENGTH_EQUAL: Int
               title_LONGEST_LENGTH_GT: Int
               title_LONGEST_LENGTH_GTE: Int
               title_LONGEST_LENGTH_LT: Int
               title_LONGEST_LENGTH_LTE: Int
-              title_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              title_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               title_SHORTEST_LENGTH_EQUAL: Int
               title_SHORTEST_LENGTH_GT: Int
               title_SHORTEST_LENGTH_GTE: Int
               title_SHORTEST_LENGTH_LT: Int
               title_SHORTEST_LENGTH_LTE: Int
-              title_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              title_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ActorActedInRelationship {
@@ -9877,10 +8778,6 @@ describe("Interface Relationships", () => {
               sort: [ActorSort!]
             }
 
-            input ActorRelationInput {
-              actedIn: [ActorActedInCreateFieldInput!]
-            }
-
             type ActorShowActedInAggregationSelection {
               count: Int!
               edge: ActorShowActedInEdgeAggregateSelection
@@ -9911,9 +8808,7 @@ describe("Interface Relationships", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              actedIn: ShowWhere @deprecated(reason: \\"Use \`actedIn_SOME\` instead.\\")
               actedInAggregate: ActorActedInAggregateInput
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Actors where all of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -9922,7 +8817,6 @@ describe("Interface Relationships", () => {
               Return Actors where none of the related ActorActedInConnections match this filter
               \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Actors where one of the related ActorActedInConnections match this filter
               \\"\\"\\"
@@ -9935,20 +8829,15 @@ describe("Interface Relationships", () => {
               actedIn_ALL: ShowWhere
               \\"\\"\\"Return Actors where none of the related Shows match this filter\\"\\"\\"
               actedIn_NONE: ShowWhere
-              actedIn_NOT: ShowWhere @deprecated(reason: \\"Use \`actedIn_NONE\` instead.\\")
               \\"\\"\\"Return Actors where one of the related Shows match this filter\\"\\"\\"
               actedIn_SINGLE: ShowWhere
               \\"\\"\\"Return Actors where some of the related Shows match this filter\\"\\"\\"
               actedIn_SOME: ShowWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -9967,7 +8856,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -9986,7 +8874,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -9999,9 +8886,9 @@ describe("Interface Relationships", () => {
             }
 
             type Movie implements Production & Show {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ShowActorsConnectionSort!], where: ShowActorsConnectionWhere): ShowActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ShowActorsConnectionSort!], where: ShowActorsConnectionWhere): ShowActorsConnection!
               runtime: Int!
               title: String!
             }
@@ -10024,7 +8911,8 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -10057,41 +8945,21 @@ describe("Interface Relationships", () => {
               AND: [MovieActorsNodeAggregationWhereInput!]
               NOT: MovieActorsNodeAggregationWhereInput
               OR: [MovieActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input MovieActorsUpdateConnectionInput {
@@ -10114,10 +8982,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input MovieConnectInput {
-              actors: [MovieActorsConnectFieldInput!]
-            }
-
             input MovieCreateInput {
               actors: MovieActorsFieldInput
               runtime: Int!
@@ -10126,10 +8990,6 @@ describe("Interface Relationships", () => {
 
             input MovieDeleteInput {
               actors: [ShowActorsDeleteFieldInput!]
-            }
-
-            input MovieDisconnectInput {
-              actors: [ShowActorsDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -10144,10 +9004,6 @@ describe("Interface Relationships", () => {
               Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [MovieSort!]
-            }
-
-            input MovieRelationInput {
-              actors: [MovieActorsCreateFieldInput!]
             }
 
             \\"\\"\\"
@@ -10170,9 +9026,7 @@ describe("Interface Relationships", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: MovieActorsAggregateInput
-              actorsConnection: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Movies where all of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10181,7 +9035,6 @@ describe("Interface Relationships", () => {
               Return Movies where none of the related ShowActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ShowActorsConnectionWhere
-              actorsConnection_NOT: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Movies where one of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10194,28 +9047,22 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              runtime: Int
+              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              runtime_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              runtime_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -10232,9 +9079,9 @@ describe("Interface Relationships", () => {
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: ActorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: ActorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: ActorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -10271,7 +9118,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProductionSort]
+              sort: [ProductionSort!]
             }
 
             \\"\\"\\"
@@ -10285,15 +9132,11 @@ describe("Interface Relationships", () => {
               AND: [ProductionWhere!]
               NOT: ProductionWhere
               OR: [ProductionWhere!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
               typename_IN: [ProductionImplementation!]
             }
@@ -10305,27 +9148,27 @@ describe("Interface Relationships", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              productions(options: ProductionOptions, where: ProductionWhere): [Production!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort], where: ProductionWhere): ProductionsConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
-              shows(options: ShowOptions, where: ShowWhere): [Show!]!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
+              shows(limit: Int, offset: Int, options: ShowOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ShowSort!], where: ShowWhere): [Show!]!
               showsAggregate(where: ShowWhere): ShowAggregateSelection!
-              showsConnection(after: String, first: Int, sort: [ShowSort], where: ShowWhere): ShowsConnection!
+              showsConnection(after: String, first: Int, sort: [ShowSort!], where: ShowWhere): ShowsConnection!
             }
 
             type Series implements Production & Show {
-              actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true, where: ActorWhere): SeriesActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [ShowActorsConnectionSort!], where: ShowActorsConnectionWhere): ShowActorsConnection!
+              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): SeriesActorActorsAggregationSelection
+              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ShowActorsConnectionSort!], where: ShowActorsConnectionWhere): ShowActorsConnection!
               episodeCount: Int!
               title: String!
             }
@@ -10348,7 +9191,8 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsAggregateInput!]
               NOT: SeriesActorsAggregateInput
               OR: [SeriesActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -10381,41 +9225,21 @@ describe("Interface Relationships", () => {
               AND: [SeriesActorsNodeAggregationWhereInput!]
               NOT: SeriesActorsNodeAggregationWhereInput
               OR: [SeriesActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             input SeriesActorsUpdateConnectionInput {
@@ -10438,10 +9262,6 @@ describe("Interface Relationships", () => {
               title: StringAggregateSelection!
             }
 
-            input SeriesConnectInput {
-              actors: [SeriesActorsConnectFieldInput!]
-            }
-
             type SeriesConnection {
               edges: [SeriesEdge!]!
               pageInfo: PageInfo!
@@ -10458,10 +9278,6 @@ describe("Interface Relationships", () => {
               actors: [ShowActorsDeleteFieldInput!]
             }
 
-            input SeriesDisconnectInput {
-              actors: [ShowActorsDisconnectFieldInput!]
-            }
-
             type SeriesEdge {
               cursor: String!
               node: Series!
@@ -10474,10 +9290,6 @@ describe("Interface Relationships", () => {
               Specify one or more SeriesSort objects to sort Series by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
               sort: [SeriesSort!]
-            }
-
-            input SeriesRelationInput {
-              actors: [SeriesActorsCreateFieldInput!]
             }
 
             \\"\\"\\"
@@ -10500,9 +9312,7 @@ describe("Interface Relationships", () => {
               AND: [SeriesWhere!]
               NOT: SeriesWhere
               OR: [SeriesWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: SeriesActorsAggregateInput
-              actorsConnection: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Series where all of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10511,7 +9321,6 @@ describe("Interface Relationships", () => {
               Return Series where none of the related ShowActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ShowActorsConnectionWhere
-              actorsConnection_NOT: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Series where one of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10524,33 +9333,27 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Series where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Series where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Series where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              episodeCount: Int
+              episodeCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodeCount_EQ: Int
               episodeCount_GT: Int
               episodeCount_GTE: Int
               episodeCount_IN: [Int!]
               episodeCount_LT: Int
               episodeCount_LTE: Int
-              episodeCount_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodeCount_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
             interface Show {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsConnection(after: String, first: Int, sort: [ShowActorsConnectionSort!], where: ShowActorsConnectionWhere): ShowActorsConnection!
               title: String!
             }
@@ -10559,7 +9362,8 @@ describe("Interface Relationships", () => {
               AND: [ShowActorsAggregateInput!]
               NOT: ShowActorsAggregateInput
               OR: [ShowActorsAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -10594,9 +9398,7 @@ describe("Interface Relationships", () => {
               NOT: ShowActorsConnectionWhere
               OR: [ShowActorsConnectionWhere!]
               edge: ShowActorsEdgeWhere
-              edge_NOT: ShowActorsEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ActorWhere
-              node_NOT: ActorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input ShowActorsCreateFieldInput {
@@ -10683,41 +9485,21 @@ describe("Interface Relationships", () => {
               AND: [ShowActorsNodeAggregationWhereInput!]
               NOT: ShowActorsNodeAggregationWhereInput
               OR: [ShowActorsNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type ShowActorsRelationship {
@@ -10784,7 +9566,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Specify one or more ShowSort objects to sort Shows by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ShowSort]
+              sort: [ShowSort!]
             }
 
             \\"\\"\\"
@@ -10803,9 +9585,7 @@ describe("Interface Relationships", () => {
               AND: [ShowWhere!]
               NOT: ShowWhere
               OR: [ShowWhere!]
-              actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
               actorsAggregate: ShowActorsAggregateInput
-              actorsConnection: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Shows where all of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10814,7 +9594,6 @@ describe("Interface Relationships", () => {
               Return Shows where none of the related ShowActorsConnections match this filter
               \\"\\"\\"
               actorsConnection_NONE: ShowActorsConnectionWhere
-              actorsConnection_NOT: ShowActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Shows where one of the related ShowActorsConnections match this filter
               \\"\\"\\"
@@ -10827,20 +9606,15 @@ describe("Interface Relationships", () => {
               actors_ALL: ActorWhere
               \\"\\"\\"Return Shows where none of the related Actors match this filter\\"\\"\\"
               actors_NONE: ActorWhere
-              actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
               \\"\\"\\"Return Shows where one of the related Actors match this filter\\"\\"\\"
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Shows where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
               typename_IN: [ShowImplementation!]
             }
@@ -10876,11 +9650,6 @@ describe("Interface Relationships", () => {
               episodeNr_AVERAGE_GTE: Float
               episodeNr_AVERAGE_LT: Float
               episodeNr_AVERAGE_LTE: Float
-              episodeNr_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeNr_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeNr_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeNr_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodeNr_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               episodeNr_MAX_EQUAL: Int
               episodeNr_MAX_GT: Int
               episodeNr_MAX_GTE: Int
@@ -10916,14 +9685,13 @@ describe("Interface Relationships", () => {
               AND: [StarredInWhere!]
               NOT: StarredInWhere
               OR: [StarredInWhere!]
-              episodeNr: Int
+              episodeNr: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodeNr_EQ: Int
               episodeNr_GT: Int
               episodeNr_GTE: Int
               episodeNr_IN: [Int!]
               episodeNr_LT: Int
               episodeNr_LTE: Int
-              episodeNr_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodeNr_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type StringAggregateSelection {
@@ -10940,7 +9708,6 @@ describe("Interface Relationships", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

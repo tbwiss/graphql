@@ -26,19 +26,19 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Content {
+            type Content @node {
                 id: Int!
                 name: String!
             }
 
-            type Project {
+            type Project @node {
                 id: Int!
                 name: String!
             }
 
             union FeedItem = Content | Project
 
-            type Community {
+            type Community @node {
                 id: Int!
                 name: String!
 
@@ -61,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
     test("collect unions returned by cypher directive", async () => {
         const query = /* GraphQL */ `
             query {
-                communities(where: { id: 4656564 }) {
+                communities(where: { id_EQ: 4656564 }) {
                     id
                     hasFeedItems {
                         __typename

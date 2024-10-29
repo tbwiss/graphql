@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -50,9 +50,9 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "Forrest Gump" }
+                    where: { title_EQ: "Forrest Gump" }
                     update: {
-                        actors: [{ where: { node: { name: "Tom Hanks" } }, update: { edge: { screenTime: 60 } } }]
+                        actors: [{ where: { node: { name_EQ: "Tom Hanks" } }, update: { edge: { screenTime: 60 } } }]
                     }
                 ) {
                     movies {
@@ -89,7 +89,7 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                                 {
                                     \\"where\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"Tom Hanks\\"
+                                            \\"name_EQ\\": \\"Tom Hanks\\"
                                         }
                                     },
                                     \\"update\\": {
@@ -114,11 +114,11 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title: "Forrest Gump" }
+                    where: { title_EQ: "Forrest Gump" }
                     update: {
                         actors: [
                             {
-                                where: { node: { name: "Tom Hanks" } }
+                                where: { node: { name_EQ: "Tom Hanks" } }
                                 update: { edge: { screenTime: 60 }, node: { name: "Tom Hanks" } }
                             }
                         ]
@@ -160,7 +160,7 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                                 {
                                     \\"where\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"Tom Hanks\\"
+                                            \\"name_EQ\\": \\"Tom Hanks\\"
                                         }
                                     },
                                     \\"update\\": {

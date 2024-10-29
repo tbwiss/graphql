@@ -54,7 +54,6 @@ import { attributeAdapterToComposeFields, graphqlDirectivesToCompose } from "./t
 // GraphQL type imports
 import type { GraphQLToolsResolveMethods } from "graphql-compose/lib/SchemaComposer";
 import type { Subgraph } from "../classes/Subgraph";
-import { Neo4jGraphQLSubscriptionsCDCEngine } from "../classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
 import { SHAREABLE } from "../constants";
 import { CreateInfo } from "../graphql/objects/CreateInfo";
 import { DeleteInfo } from "../graphql/objects/DeleteInfo";
@@ -76,7 +75,6 @@ import { augmentVectorSchema } from "./augment/vector";
 import { createConnectionFields } from "./create-connection-fields";
 import { addGlobalNodeFields } from "./create-global-nodes";
 import { createRelationshipFields } from "./create-relationship-fields/create-relationship-fields";
-import { bookmarkDeprecationMap } from "./deprecation-map";
 import { AugmentedSchemaGenerator } from "./generation/AugmentedSchemaGenerator";
 import { withAggregateSelectionType } from "./generation/aggregate-types";
 import { withCreateInputType } from "./generation/create-input";
@@ -85,7 +83,6 @@ import { withObjectType } from "./generation/object-type";
 import { withMutationResponseTypes } from "./generation/response-types";
 import { withOptionsInputType } from "./generation/sort-and-options-input";
 import { withUpdateInputType } from "./generation/update-input";
-import { shouldAddDeprecatedFields } from "./generation/utils";
 import { withUniqueWhereInputType, withWhereInputType } from "./generation/where-input";
 import getNodes from "./get-nodes";
 import { getResolveAndSubscriptionMethods } from "./get-resolve-and-subscription-methods";
@@ -150,19 +147,6 @@ function makeAugmentedSchema({
     ];
     if (pipedDefs.length) {
         composer.addTypeDefs(print({ kind: Kind.DOCUMENT, definitions: pipedDefs }));
-    }
-
-    // Loop over all entries in the deprecation map and add field deprecations to all types in the map.
-    for (const [typeName, deprecatedFields] of bookmarkDeprecationMap) {
-        const typeComposer = composer.getOTC(typeName);
-
-        if (shouldAddDeprecatedFields(features, "bookmark")) {
-            typeComposer.deprecateFields(
-                deprecatedFields.reduce((acc, { field, reason }) => ({ ...acc, [field]: reason }), {})
-            );
-        } else {
-            typeComposer.removeField(deprecatedFields.map((field) => field.field));
-        }
     }
 
     // TODO: ideally move these in getSubgraphSchema()
@@ -233,11 +217,12 @@ function makeAugmentedSchema({
             def.setDirectives(
                 graphqlDirectivesToCompose(userDefinedDirectivesForUnion.get(unionEntityAdapter.name) || [])
             );
-
             if (unionEntityAdapter.isReadable) {
                 composer.Query.addFields({
                     [unionEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                         entityAdapter: unionEntityAdapter,
+                        features,
+                        composer,
                     }),
                 });
             }
@@ -308,12 +293,10 @@ function makeAugmentedSchema({
     });
 
     if (features?.subscriptions && nodes.length) {
-        const isCDCEngine = features.subscriptions instanceof Neo4jGraphQLSubscriptionsCDCEngine;
         generateSubscriptionTypes({
             schemaComposer: composer,
             schemaModel,
             userDefinedFieldDirectivesForNode,
-            generateRelationshipTypes: !isCDCEngine,
             features,
         });
     }
@@ -567,6 +550,8 @@ function generateObjectType({
         composer.Query.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                 entityAdapter: concreteEntityAdapter,
+                features,
+                composer,
             }),
         });
         composer.Query.setFieldDirectives(
@@ -706,6 +691,8 @@ function generateInterfaceObjectType({
         composer.Query.addFields({
             [interfaceEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                 entityAdapter: interfaceEntityAdapter,
+                features,
+                composer,
             }),
         });
 

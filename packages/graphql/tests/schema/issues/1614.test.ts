@@ -35,11 +35,11 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
                 position: CrewPositionType
             }
 
-            type Movie {
+            type Movie @node {
                 name: String!
             }
 
-            type CrewMember {
+            type CrewMember @node {
                 movies: Movie! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
             }
         `;
@@ -62,7 +62,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -73,17 +72,13 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember {
-              movies(directed: Boolean = true, options: MovieOptions, where: MovieWhere): Movie!
-              moviesAggregate(directed: Boolean = true, where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true, first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
+              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): Movie!
+              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
+              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
             }
 
             type CrewMemberAggregateSelection {
               count: Int!
-            }
-
-            input CrewMemberConnectInput {
-              movies: CrewMemberMoviesConnectFieldInput
             }
 
             input CrewMemberCreateInput {
@@ -92,10 +87,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
 
             input CrewMemberDeleteInput {
               movies: CrewMemberMoviesDeleteFieldInput
-            }
-
-            input CrewMemberDisconnectInput {
-              movies: CrewMemberMoviesDisconnectFieldInput
             }
 
             type CrewMemberEdge {
@@ -116,7 +107,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewMemberMoviesAggregateInput!]
               NOT: CrewMemberMoviesAggregateInput
               OR: [CrewMemberMoviesAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -149,9 +141,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               NOT: CrewMemberMoviesConnectionWhere
               OR: [CrewMemberMoviesConnectionWhere!]
               edge: CrewPositionWhere
-              edge_NOT: CrewPositionWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: MovieWhere
-              node_NOT: MovieWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input CrewMemberMoviesCreateFieldInput {
@@ -176,41 +166,21 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewMemberMoviesNodeAggregationWhereInput!]
               NOT: CrewMemberMoviesNodeAggregationWhereInput
               OR: [CrewMemberMoviesNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type CrewMemberMoviesRelationship {
@@ -238,10 +208,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               offset: Int
             }
 
-            input CrewMemberRelationInput {
-              movies: CrewMemberMoviesCreateFieldInput
-            }
-
             input CrewMemberUpdateInput {
               movies: CrewMemberMoviesUpdateFieldInput
             }
@@ -253,8 +219,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               movies: MovieWhere
               moviesAggregate: CrewMemberMoviesAggregateInput
               moviesConnection: CrewMemberMoviesConnectionWhere
-              moviesConnection_NOT: CrewMemberMoviesConnectionWhere
-              movies_NOT: MovieWhere
             }
 
             type CrewMembersConnection {
@@ -293,17 +257,15 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewPositionWhere!]
               NOT: CrewPositionWhere
               OR: [CrewPositionWhere!]
-              position: CrewPositionType
+              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              position_EQ: CrewPositionType
               position_IN: [CrewPositionType]
-              position_NOT: CrewPositionType @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              position_NOT_IN: [CrewPositionType] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             \\"\\"\\"
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -354,15 +316,11 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -377,7 +335,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
               deleteCrewMembers(delete: CrewMemberDeleteInput, where: CrewMemberWhere): DeleteInfo!
               deleteMovies(where: MovieWhere): DeleteInfo!
-              updateCrewMembers(connect: CrewMemberConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: CrewMemberRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: CrewMemberDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: CrewMemberDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: CrewMemberUpdateInput, where: CrewMemberWhere): UpdateCrewMembersMutationResponse!
+              updateCrewMembers(update: CrewMemberUpdateInput, where: CrewMemberWhere): UpdateCrewMembersMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
             }
 
@@ -390,12 +348,12 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type Query {
-              crewMembers(options: CrewMemberOptions, where: CrewMemberWhere): [CrewMember!]!
+              crewMembers(limit: Int, offset: Int, options: CrewMemberOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: CrewMemberWhere): [CrewMember!]!
               crewMembersAggregate(where: CrewMemberWhere): CrewMemberAggregateSelection!
               crewMembersConnection(after: String, first: Int, where: CrewMemberWhere): CrewMembersConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -420,7 +378,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

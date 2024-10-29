@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Projections -> Create", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -173,7 +173,7 @@ describe("Cypher -> Connections -> Projections -> Create", () => {
                 createMovies(input: [{ title: "Forrest Gump" }, { title: "Toy Story" }]) {
                     movies {
                         title
-                        actorsConnection(where: { node: { name: "Tom Hanks" } }) {
+                        actorsConnection(where: { node: { name_EQ: "Tom Hanks" } }) {
                             edges {
                                 properties {
                                     screenTime

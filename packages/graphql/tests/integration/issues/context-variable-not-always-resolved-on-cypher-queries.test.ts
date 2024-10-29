@@ -54,7 +54,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             hasResourceType: [${resourceType.name}!]!
                 @relationship(type: "hasResourceType", direction: OUT)
         }
-        type ${resourceType.name} @mutation(operations: []) @limit(default: 1, max: 1000) {
+        type ${resourceType.name} @mutation(operations: []) @limit(default: 1, max: 1000) @node {
             iri: ID! @id @alias(property: "uri")
         }
         `;
@@ -84,11 +84,11 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
                     where: {
                         realizationOf: {
                             hasResourceType_SOME: {
-                                iri: "uri-to-be-found"
+                                iri_EQ: "uri-to-be-found"
                             }
                         }
                     }
-                    options: { limit: 1 }
+                     limit: 1 
                 ) {
                     iri
                     realizationOf {

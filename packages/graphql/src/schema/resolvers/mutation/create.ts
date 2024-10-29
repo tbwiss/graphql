@@ -24,7 +24,6 @@ import { translateCreate } from "../../../translate";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { publishEventsToSubscriptionMechanism } from "../../subscriptions/publish-events-to-subscription-mechanism";
 import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
 export function createResolver({
@@ -34,16 +33,7 @@ export function createResolver({
     node: Node;
     concreteEntityAdapter: ConcreteEntityAdapter;
 }) {
-    async function resolve(
-        _root: any,
-        args: any,
-        context: Neo4jGraphQLComposedContext,
-        info: GraphQLResolveInfo
-    ): Promise<{
-        info: {
-            bookmark: string | null;
-        };
-    }> {
+    async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
         const resolveTree = getNeo4jResolveTree(info, { args });
 
         (context as Neo4jGraphQLTranslationContext).resolveTree = resolveTree;
@@ -58,8 +48,6 @@ export function createResolver({
             info,
         });
 
-        publishEventsToSubscriptionMechanism(executeResult, context.features?.subscriptions, context.schemaModel);
-
         const nodeProjection = info.fieldNodes[0]?.selectionSet?.selections.find(
             (selection): selection is FieldNode =>
                 selection.kind === Kind.FIELD && selection.name.value === concreteEntityAdapter.plural
@@ -67,7 +55,6 @@ export function createResolver({
 
         const resolveResult = {
             info: {
-                bookmark: executeResult.bookmark,
                 ...executeResult.statistics,
             },
         };

@@ -18,25 +18,25 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("https://github.com/neo4j/graphql/issues/2871", () => {
     let neoSchema: Neo4jGraphQL;
 
     const typeDefs = /* GraphQL */ `
-        type FirstLevel {
+        type FirstLevel @node {
             id: ID! @id @unique
             secondLevel: SecondLevel! @relationship(type: "HAS_SECOND_LEVEL", direction: OUT)
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
 
-        type SecondLevel {
+        type SecondLevel @node {
             id: ID! @id @unique
             thirdLevel: [ThirdLevel!]! @relationship(type: "HAS_THIRD_LEVEL", direction: OUT)
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
 
-        type ThirdLevel {
+        type ThirdLevel @node {
             id: ID! @id @unique
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
@@ -51,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/2871", () => {
     test("should be able to filter by SOME nested within single relationship", async () => {
         const query = /* GraphQL */ `
             query {
-                firstLevels(where: { secondLevel: { thirdLevel_SOME: { id: "3" } } }) {
+                firstLevels(where: { secondLevel: { thirdLevel_SOME: { id_EQ: "3" } } }) {
                     id
                     createdAt
                 }
@@ -82,7 +82,7 @@ describe("https://github.com/neo4j/graphql/issues/2871", () => {
     test("should be able to filter by ALL nested within single relationship", async () => {
         const query = /* GraphQL */ `
             query {
-                firstLevels(where: { secondLevel: { thirdLevel_ALL: { id: "5" } } }) {
+                firstLevels(where: { secondLevel: { thirdLevel_ALL: { id_EQ: "5" } } }) {
                     id
                     createdAt
                 }
@@ -116,7 +116,7 @@ describe("https://github.com/neo4j/graphql/issues/2871", () => {
     test("should not match if SOME second level relationships meet nested predicates", async () => {
         const query = /* GraphQL */ `
             query {
-                firstLevels(where: { secondLevel: { thirdLevel_NONE: { id: "25" } } }) {
+                firstLevels(where: { secondLevel: { thirdLevel_NONE: { id_EQ: "25" } } }) {
                     id
                     createdAt
                 }

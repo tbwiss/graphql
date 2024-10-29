@@ -28,7 +28,7 @@ describe("[Point]", () => {
     beforeEach(async () => {
         Route = testHelper.createUniqueType("Route");
         const typeDefs = /* GraphQL */ `
-            type ${Route} {
+            type ${Route} @node {
                 id: String!
                 waypoints: [Point!]!
             }
@@ -183,7 +183,7 @@ describe("[Point]", () => {
 
         const update = `
             mutation UpdateRoutes($id: String!, $waypoints: [PointInput!]) {
-                ${Route.operations.update}(where: { id: $id }, update: { waypoints: $waypoints }) {
+                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints: $waypoints }) {
                     ${Route.plural} {
                         id
                         waypoints {
@@ -267,7 +267,7 @@ describe("[Point]", () => {
 
         const update = `
             mutation UpdateRoutes($id: String!, $waypoints: [PointInput!]) {
-                ${Route.operations.update}(where: { id: $id }, update: { waypoints: $waypoints }) {
+                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints: $waypoints }) {
                     ${Route.plural} {
                         id
                         waypoints {
@@ -334,7 +334,7 @@ describe("[Point]", () => {
         // Test for equality
         const routesQuery = /* GraphQL */ `
             query Routes($waypoints: [PointInput!]) {
-                ${Route.plural}(where: { waypoints: $waypoints }) {
+                ${Route.plural}(where: { waypoints_EQ: $waypoints }) {
                     id
                     waypoints {
                         latitude
@@ -378,36 +378,6 @@ describe("[Point]", () => {
             id,
             waypoints: waypoints.map((waypoint) => ({ ...waypoint, height: null, crs: "wgs-84" })),
         });
-
-        // Test NOT INCLUDES functionality
-        const routesNotIncludesQuery = /* GraphQL */ `
-            query RoutesNotIncludes($waypoint: PointInput) {
-                ${Route.plural}(where: { waypoints_NOT_INCLUDES: $waypoint }) {
-                    id
-                    waypoints {
-                        latitude
-                        longitude
-                        height
-                        crs
-                    }
-                }
-            }
-        `;
-
-        const routesNotIncludesResult = await testHelper.executeGraphQL(routesNotIncludesQuery, {
-            variableValues: {
-                waypoint: {
-                    longitude: parseFloat("124.5589"),
-                    latitude: parseFloat("89.7757"),
-                },
-            },
-        });
-
-        expect(routesNotIncludesResult.errors).toBeFalsy();
-        expect((routesNotIncludesResult.data as any)[Route.plural]).toContainEqual({
-            id,
-            waypoints: waypoints.map((waypoint) => ({ ...waypoint, height: null, crs: "wgs-84" })),
-        });
     });
 
     test("enables query of a node with multiple wgs-84-3d points", async () => {
@@ -434,7 +404,7 @@ describe("[Point]", () => {
 
         const routesQuery = /* GraphQL */ `
             query Routes($id: String!) {
-                ${Route.plural}(where: { id: $id }) {
+                ${Route.plural}(where: { id_EQ: $id }) {
                     id
                     waypoints {
                         latitude

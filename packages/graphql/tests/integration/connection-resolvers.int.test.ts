@@ -31,13 +31,13 @@ describe("Connection Resolvers", () => {
         Actor = testHelper.createUniqueType("Actor");
         Movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-              type ${Actor} {
+              type ${Actor} @node {
                   id: ID
                   name: String!
                   movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
               }
   
-              type ${Movie} {
+              type ${Movie} @node {
                   id: ID
                   title: String!
                   actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -218,7 +218,7 @@ describe("Connection Resolvers", () => {
 
         const secondQuery = /* GraphQL */ `
                 query movies($movieId: ID!, $endCursor: String) {
-                    ${Movie.plural}(where: { id: $movieId }) {
+                    ${Movie.plural}(where: { id_EQ: $movieId }) {
                         id
                         title
                         actorsConnection(sort: [{ node: { name: ASC } }], first: 5, after: $endCursor) {
@@ -308,7 +308,7 @@ describe("Connection Resolvers", () => {
 
         const query = `
             query GetMovie($movieId: ID) {
-                ${Movie.plural}(where: { id: $movieId }) {
+                ${Movie.plural}(where: { id_EQ: $movieId }) {
                     id
                     actorsConnection {
                         totalCount

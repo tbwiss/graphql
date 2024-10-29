@@ -26,7 +26,7 @@ describe("Cypher DateTime", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 id: ID
                 datetime: DateTime
             }
@@ -40,7 +40,7 @@ describe("Cypher DateTime", () => {
     test("Simple Read", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { datetime: "1970-01-01T00:00:00.000Z" }) {
+                movies(where: { datetime_EQ: "1970-01-01T00:00:00.000Z" }) {
                     datetime
                 }
             }

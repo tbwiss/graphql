@@ -20,27 +20,24 @@
 import type { DocumentNode } from "graphql";
 import { gql } from "graphql-tag";
 import type { Integer } from "neo4j-driver";
-import type { Neo4jGraphQLSubscriptionsEngine } from "../../../../src/types";
-import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Create -> ConnectOrCreate", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let typeDefs: DocumentNode;
-    let plugin: Neo4jGraphQLSubscriptionsEngine;
 
     const typeMovie = testHelper.createUniqueType("Movie");
     const typeActor = testHelper.createUniqueType("Actor");
 
     beforeAll(() => {
         typeDefs = gql`
-        type ${typeMovie.name} {
+        type ${typeMovie.name} @node {
             title: String!
             id: Int! @unique
             ${typeActor.plural}: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties:"ActedIn")
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
             name: String
             ${typeMovie.plural}: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties:"ActedIn")
         }
@@ -52,8 +49,10 @@ describe("Create -> ConnectOrCreate", () => {
     });
 
     beforeEach(async () => {
-        plugin = new TestSubscriptionsEngine();
-        await testHelper.initNeo4jGraphQL({ typeDefs, features: { subscriptions: plugin } });
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { subscriptions: await testHelper.getSubscriptionEngine() },
+        });
     });
 
     afterEach(async () => {
@@ -69,7 +68,7 @@ describe("Create -> ConnectOrCreate", () => {
                     name: "Tom Hanks"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
-                        where: { node: { id: 5 } }
+                        where: { node: { id_EQ: 5 } }
                         onCreate: { node: { title: "The Terminal", id: 5 } }
                       }
                     }

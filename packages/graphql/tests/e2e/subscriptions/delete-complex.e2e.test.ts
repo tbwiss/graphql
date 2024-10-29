@@ -18,7 +18,6 @@
  */
 
 import supertest from "supertest";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 import type { TestGraphQLServer } from "../setup/apollo-server";
@@ -26,7 +25,7 @@ import { ApolloTestServer } from "../setup/apollo-server";
 import { WebSocketTestClient } from "../setup/ws-client";
 
 describe("Delete Subscriptions - with interfaces, unions and nested operations", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let wsClient2: WebSocketTestClient;
@@ -43,14 +42,14 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
         typeInfluencer = testHelper.createUniqueType("Influencer");
 
         typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 title: String!
                 actors: [${typeActor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 directors: [Director!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
                 reviewers: [Reviewer!]! @relationship(type: "REVIEWED", properties: "Review", direction: IN)
             }
             
-            type ${typeActor} {
+            type ${typeActor} @node {
                 name: String!
                 movies: [${typeMovie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -67,13 +66,13 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                 score: Int!
             }
         
-            type ${typePerson} implements Reviewer {
+            type ${typePerson} implements Reviewer @node {
                 name: String!
                 reputation: Int!
                 movies: [${typeMovie}!]! @relationship(type: "REVIEWED", direction: OUT, properties: "Review")
             }
             
-            type ${typeInfluencer} implements Reviewer {
+            type ${typeInfluencer} implements Reviewer @node {
                 reputation: Int!
                 url: String!
             }
@@ -90,7 +89,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
         // eslint-disable-next-line @typescript-eslint/require-await
@@ -109,7 +108,6 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
     afterEach(async () => {
         await wsClient.close();
         await wsClient2.close();
-
         await server.close();
         await testHelper.close();
     });
@@ -181,14 +179,14 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     actors:  [
                                         {
-                                          where: {
+                                            where: {
                                                 node: {
-                                                    name: "Keanu Reeves"
+                                                    name_EQ: "Keanu Reeves"
                                                 }
                                             }
                                         }
@@ -311,14 +309,14 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     actors:  [
                                         {
                                           where: {
                                                 node: {
-                                                    name: "Keanu Reeves"
+                                                    name_EQ: "Keanu Reeves"
                                                 }
                                             },
                                             delete: {
@@ -326,7 +324,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                                     {
                                                       where: {
                                                             node: {
-                                                                title: "Matrix"
+                                                                title_EQ: "Matrix"
                                                             }
                                                         }
                                                     }
@@ -479,7 +477,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     directors: {
@@ -487,7 +485,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                         {
                                           where: {
                                             node: {
-                                              name: "Keanu Reeves"
+                                              name_EQ: "Keanu Reeves"
                                             }
                                           }
                                         }
@@ -496,7 +494,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                         {
                                           where: {
                                             node: {
-                                              reputation: 10
+                                              reputation_EQ: 10
                                             }
                                           }
                                         }
@@ -671,7 +669,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     directors: {
@@ -679,7 +677,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                         {
                                           where: {
                                             node: {
-                                              name: "Keanu Reeves"
+                                              name_EQ: "Keanu Reeves"
                                             }
                                           },
                                           delete: {
@@ -699,7 +697,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                         {
                                           where: {
                                             node: {
-                                              reputation: 10
+                                              reputation_EQ: 10
                                             }
                                           },
                                           delete: {
@@ -782,65 +780,65 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
             .post("")
             .send({
                 query: `
-                mutation {
-                    ${typeMovie.operations.create}(
-                        input: [
-                            {
-                                reviewers: {
-                                    create: [
-                                            {
-                                            node: {
-                                                ${typePerson.name}: {
-                                                    name: "Ana",
-                                                    reputation: 10
+                    mutation {
+                        ${typeMovie.operations.create}(
+                            input: [
+                                {
+                                    reviewers: {
+                                        create: [
+                                                {
+                                                node: {
+                                                    ${typePerson.name}: {
+                                                        name: "Ana",
+                                                        reputation: 10
+                                                    },
+                                                    ${typeInfluencer.name}: {
+                                                        url: "/bob",
+                                                        reputation: 10
+                                                    }
                                                 },
-                                                ${typeInfluencer.name}: {
-                                                    url: "/bob",
-                                                    reputation: 10
+                                                edge: {
+                                                    score: 100
                                                 }
-                                            },
-                                            edge: {
-                                                score: 100
                                             }
-                                        }
-                                    ]
-                                },
-                                title: "John Wick",
+                                        ]
+                                    },
+                                    title: "John Wick",
+                                }
+                            ]
+                        ) {
+                            ${typeMovie.plural} {
+                                title
                             }
-                        ]
-                    ) {
-                        ${typeMovie.plural} {
-                            title
                         }
                     }
-                }
-            `,
+                `,
             })
             .expect(200);
 
         // 2. subscribe both ways
         await wsClient2.subscribe(`
-        subscription {
-            ${typeMovie.operations.subscribe.deleted} {
-                ${typeMovie.operations.subscribe.payload.deleted} {
-                    title
+            subscription {
+                ${typeMovie.operations.subscribe.deleted} {
+                    ${typeMovie.operations.subscribe.payload.deleted} {
+                        title
+                    }
+                    event
+                    timestamp
                 }
-                event
-                timestamp
             }
-        }
-    `);
+        `);
         await wsClient.subscribe(`
-    subscription {
-        ${typePerson.operations.subscribe.deleted} {
-            ${typePerson.operations.subscribe.payload.deleted} {
-                name
+            subscription {
+                ${typePerson.operations.subscribe.deleted} {
+                    ${typePerson.operations.subscribe.payload.deleted} {
+                        name
+                    }
+                    event
+                    timestamp
+                }
             }
-            event
-            timestamp
-        }
-    }
-`);
+        `);
 
         // 3. perform update on created node
         await supertest(server.path)
@@ -850,14 +848,14 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     reviewers: [
                                         {
                                             where: {
                                                 node: {
-                                                    reputation: 10
+                                                    reputation_EQ: 10
                                                 }
                                             }
                                         }
@@ -998,14 +996,14 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     actors:  [
                                         {
                                           where: {
                                                 node: {
-                                                    name: "Keanu Reeves"
+                                                    name_EQ: "Keanu Reeves"
                                                 }
                                             }
                                         }
@@ -1014,7 +1012,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                         {
                                             where: {
                                                 node: {
-                                                    reputation: 10
+                                                    reputation_EQ: 10
                                                 }
                                             }
                                         }
@@ -1136,7 +1134,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                                             {
                                                                 where: {
                                                                     node: {
-                                                                        title: "Constantine"
+                                                                        title_EQ: "Constantine"
                                                                     }
                                                                 },
                                                                 edge: {
@@ -1171,7 +1169,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                                             {
                                                                 where: {
                                                                     node: {
-                                                                        title: "Constantine"
+                                                                        title_EQ: "Constantine"
                                                                     }
                                                                 },
                                                                 edge: {
@@ -1242,7 +1240,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                     mutation {
                         ${typeMovie.operations.delete}(
                                 where: {
-                                  title: "John Wick"
+                                  title_EQ: "John Wick"
                                 },
                                 delete: {
                                     directors: {
@@ -1250,7 +1248,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                           {
                                             where: {
                                               node: {
-                                                name: "Keanu Reeves"
+                                                name_EQ: "Keanu Reeves"
                                               }
                                             },
                                             delete: {
@@ -1266,7 +1264,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                                             {
                                                                 where: {
                                                                     node: {
-                                                                        reputation: 10
+                                                                        reputation_EQ: 10
                                                                     }
                                                                 }
                                                             }
@@ -1281,7 +1279,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                           {
                                             where: {
                                               node: {
-                                                reputation: 10
+                                                reputation_EQ: 10
                                               }
                                             },
                                             delete: {
@@ -1297,7 +1295,7 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
                                                             {
                                                                 where: {
                                                                     node: {  
-                                                                        reputation: 10
+                                                                        reputation_EQ: 10
                                                                     }
                                                                 }
                                                             }

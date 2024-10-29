@@ -25,7 +25,7 @@ import { Neo4jGraphQL } from "../../../src";
 describe("609", () => {
     test("@deprecated directive should remain in output", async () => {
         const typeDefs = gql`
-            type Deprecated {
+            type Deprecated @node {
                 deprecatedField: String @deprecated
             }
         `;
@@ -47,7 +47,6 @@ describe("609", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -56,7 +55,6 @@ describe("609", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -106,12 +104,8 @@ describe("609", () => {
               deprecatedField: String @deprecated
               deprecatedField_CONTAINS: String @deprecated
               deprecatedField_ENDS_WITH: String @deprecated
+              deprecatedField_EQ: String @deprecated
               deprecatedField_IN: [String] @deprecated
-              deprecatedField_NOT: String @deprecated
-              deprecatedField_NOT_CONTAINS: String @deprecated
-              deprecatedField_NOT_ENDS_WITH: String @deprecated
-              deprecatedField_NOT_IN: [String] @deprecated
-              deprecatedField_NOT_STARTS_WITH: String @deprecated
               deprecatedField_STARTS_WITH: String @deprecated
             }
 
@@ -136,9 +130,9 @@ describe("609", () => {
             }
 
             type Query {
-              deprecateds(options: DeprecatedOptions, where: DeprecatedWhere): [Deprecated!]!
+              deprecateds(limit: Int, offset: Int, options: DeprecatedOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DeprecatedSort!], where: DeprecatedWhere): [Deprecated!]!
               deprecatedsAggregate(where: DeprecatedWhere): DeprecatedAggregateSelection!
-              deprecatedsConnection(after: String, first: Int, sort: [DeprecatedSort], where: DeprecatedWhere): DeprecatedsConnection!
+              deprecatedsConnection(after: String, first: Int, sort: [DeprecatedSort!], where: DeprecatedWhere): DeprecatedsConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -163,7 +157,6 @@ describe("609", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

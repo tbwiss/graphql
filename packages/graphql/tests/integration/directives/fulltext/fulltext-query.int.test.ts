@@ -30,13 +30,13 @@ import { TestHelper } from "../../../utils/tests-helper";
 
 function generatedTypeDefs(personType: UniqueType, movieType: UniqueType): string {
     return `
-        type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }]) {
+        type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }]) @node {
             name: String!
             born: Int!
             actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
         } 
 
-        type ${movieType.name} {
+        type ${movieType.name} @node {
             title: String!
             released: Int!
             actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -265,7 +265,7 @@ describe("@fulltext directive", () => {
 
             const query = `
                 query {
-                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { name: "${person1.name}" } }) {
+                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { name_EQ: "${person1.name}" } }) {
                         score
                         ${personTypeLowerFirst} {
                             name
@@ -494,13 +494,13 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
-                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_SOME: { title: "${movie1.title}" } } }) {
+                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_SOME: { title_EQ: "${movie1.title}" } } }) {
                         score
                         ${personTypeLowerFirst} {
                             name
-                            actedInMovies(options: { sort: [{ released: DESC }] }) {
+                            actedInMovies( sort: [{ released: DESC }] ) {
                                 title
                                 released
                             }
@@ -544,7 +544,7 @@ describe("@fulltext directive", () => {
 
             const query = `
                 query {
-                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_ALL: { released: ${movie1.released} } } }) {
+                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_ALL: { released_EQ: ${movie1.released} } } }) {
                         ${personTypeLowerFirst} {
                             name
                             actedInMovies {
@@ -580,9 +580,9 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
-                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_ALL: { released_NOT_IN: [${movie1.released}, ${movie2.released}] } } }) {
+                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { actedInMovies_ALL: { NOT: { released_IN: [${movie1.released}, ${movie2.released}] }} } }) {
                         score
                         ${personTypeLowerFirst} {
                             name
@@ -639,7 +639,7 @@ describe("@fulltext directive", () => {
             const invalidField = "not_a_field";
             const query = `
                 query {
-                    ${queryType}(phrase: "some name", where: { ${personTypeLowerFirst}: { ${invalidField}: "invalid" } }) {
+                    ${queryType}(phrase: "some name", where: { ${personTypeLowerFirst}: { ${invalidField}_EQ: "invalid" } }) {
                         score
                         ${personTypeLowerFirst} {
                             name
@@ -654,7 +654,7 @@ describe("@fulltext directive", () => {
             const gqlResult = await testHelper.executeGraphQL(query);
 
             expect((gqlResult.errors as any[])[0].message).toStartWith(
-                `Field "${invalidField}" is not defined by type`
+                `Field "${invalidField}_EQ" is not defined by type`
             );
         });
 
@@ -878,12 +878,12 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
                     ${queryType}(phrase: "a name") {
                         ${personTypeLowerFirst} {
                             name
-                            actedInMovies(options: { sort: [{ released: ASC }] }) {
+                            actedInMovies(sort: [{ released: ASC }]) {
                                 title
                                 released
                             }
@@ -1111,7 +1111,7 @@ describe("@fulltext directive", () => {
 
             const query = `
                 query {
-                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { name: "${person1.name}" } }) {
+                    ${queryType}(phrase: "a different name", where: { ${personTypeLowerFirst}: { name_EQ: "${person1.name}" } }) {
                         score
                     }
                 }
@@ -1223,14 +1223,14 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = `
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
-                    @authorization(filter: [{ where: { node: { name: "$jwt.name" } } }]) {
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    @authorization(filter: [{ where: { node: { name_EQ: "$jwt.name" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1286,14 +1286,14 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = `
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
-                    @authorization(filter: [{ where: { node: { name: "$jwt.name" } } }]) {
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    @authorization(filter: [{ where: { node: { name_EQ: "$jwt.name" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1349,14 +1349,14 @@ describe("@fulltext directive", () => {
                         roles: [String!]!
                     }
     
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
                     @authorization(validate: [{ where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1427,14 +1427,14 @@ describe("@fulltext directive", () => {
                         roles: [String!]!
                     }
     
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
                     @authorization(validate: [{ where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1485,14 +1485,14 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = `
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
-                    @authorization(validate: [{ when: BEFORE, where: { node: { name: "$jwt.name" } } }]) {
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    @authorization(validate: [{ when: BEFORE, where: { node: { name_EQ: "$jwt.name" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1519,7 +1519,7 @@ describe("@fulltext directive", () => {
 
             const query = `
                     query {
-                        ${queryType}(phrase: "a name", where: { ${personTypeLowerFirst}: { name: "${person2.name}" } }) {
+                        ${queryType}(phrase: "a name", where: { ${personTypeLowerFirst}: { name_EQ: "${person2.name}" } }) {
                             score
                             ${personTypeLowerFirst} {
                                 name
@@ -1546,14 +1546,14 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = `
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
-                    @authorization(validate: [{ when: BEFORE, where: { node: { name: "$jwt.name" } } }]) {
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    @authorization(validate: [{ when: BEFORE, where: { node: { name_EQ: "$jwt.name" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1608,14 +1608,14 @@ describe("@fulltext directive", () => {
                         roles: [String!]!
                     }
     
-                    type ${personType.name} @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
+                    type ${personType.name} @node @fulltext(indexes: [{ indexName: "${personType.name}Index", fields: ["name"] }])
                     @authorization(validate: [{ operations: [READ], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} {
+                    type ${movieType.name} @node {
                         title: String!
                         released: Int!
                         actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -1668,13 +1668,13 @@ describe("@fulltext directive", () => {
             const moveTypeLowerFirst = movieType.singular;
             queryType = `${movieType.plural}Fulltext${upperFirst(movieType.name)}Index`;
             const typeDefs = `
-                    type ${personType.name} {
+                    type ${personType.name} @node {
                         name: String!
                         born: Int!
                         actedInMovies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
     
-                    type ${movieType.name} @fulltext(indexes: [{ indexName: "${movieType.name}Index", fields: ["title", "description"] }]) {
+                    type ${movieType.name} @node @fulltext(indexes: [{ indexName: "${movieType.name}Index", fields: ["title", "description"] }]) {
                         title: String!
                         description: String
                         released: Int!
@@ -1745,7 +1745,7 @@ describe("@fulltext directive", () => {
             );
 
             const typeDefs = `
-                    type ${personType.name} @fulltext(indexes: [{ queryName: "${queryType}", indexName: "${personType.name}CustomIndex", fields: ["name"] }]) {
+                    type ${personType.name} @node @fulltext(indexes: [{ queryName: "${queryType}", indexName: "${personType.name}CustomIndex", fields: ["name"] }]) {
                         name: String!
                         born: Int!
                     }
@@ -1803,7 +1803,7 @@ describe("@fulltext directive", () => {
             const moveTypeLowerFirst = movieType.singular;
             queryType = "SomeCustomQueryName";
             const typeDefs = `
-                    type ${movieType.name} @fulltext(indexes: [{ queryName: "${queryType}", indexName: "${movieType.name}Index", fields: ["title", "description"] }]) {
+                    type ${movieType.name} @node @fulltext(indexes: [{ queryName: "${queryType}", indexName: "${movieType.name}Index", fields: ["title", "description"] }]) {
                         title: String!
                         description: String
                         released: Int!
@@ -1872,7 +1872,7 @@ describe("@fulltext directive", () => {
             );
 
             const typeDefs = `
-                    type ${movieType.name} @fulltext(indexes: [
+                    type ${movieType.name} @node @fulltext(indexes: [
                             { queryName: "${queryType1}", indexName: "${movieType.name}CustomIndex", fields: ["title"] },
                             { queryName: "${queryType2}", indexName: "${movieType.name}CustomIndex2", fields: ["description"] }
                         ]) {
@@ -1988,154 +1988,6 @@ describe("@fulltext directive", () => {
             await testHelper.executeCypher(deleteIndex2Cypher);
         });
 
-        test("Creates index if it doesn't exist", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-            type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
-                    title: String!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const result = await testHelper.executeCypher(indexQueryCypher);
-
-            expect(result.records[0]?.get("result")).toEqual({
-                name: indexName1,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [type.name],
-                properties: ["title"],
-            });
-        });
-
-        test("Creates two index's if they dont exist", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }, { indexName: "${indexName2}", fields: ["description"] }]) {
-                    title: String!
-                    description: String!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const result = await testHelper.executeCypher(indexQueryCypher);
-
-            expect(result.records[0]?.get("result")).toEqual({
-                name: indexName1,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [type.name],
-                properties: ["title"],
-            });
-            expect(result.records[1]?.get("result")).toEqual({
-                name: indexName2,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [type.name],
-                properties: ["description"],
-            });
-        });
-
-        test("When using the node label, creates index if it doesn't exist", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) @node(labels: ["${label}"]) {
-                    title: String!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const result = await testHelper.executeCypher(indexQueryCypher);
-
-            expect(result.records[0]?.get("result")).toEqual({
-                name: indexName1,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [label],
-                properties: ["title"],
-            });
-        });
-
-        test("When using the field alias, creates index if it doesn't exist", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) @node(labels: ["${label}"]) {
-                    title: String! @alias(property: "${aliasName}")
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const result = await testHelper.executeCypher(indexQueryCypher);
-
-            expect(result.records[0]?.get("result")).toEqual({
-                name: indexName1,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [label],
-                properties: [aliasName],
-            });
-        });
-
         test("Throws when missing index (create index and constraint option not true)", async () => {
             // Skip if multi-db not supported
             if (!MULTIDB_SUPPORT) {
@@ -2144,7 +1996,7 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
+                type ${type.name} @node @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
                     title: String!
                 }
             `;
@@ -2168,7 +2020,7 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
+                type ${type.name} @node @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
                     title: String!
                     description: String!
                 }
@@ -2199,7 +2051,7 @@ describe("@fulltext directive", () => {
             }
 
             const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
+                type ${type.name} @node @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
                     title: String!
                     description: String! @alias(property: "${aliasName}")
                 }
@@ -2224,107 +2076,6 @@ describe("@fulltext directive", () => {
             ).rejects.toThrow(
                 `@fulltext index '${indexName1}' on Node '${type.name}' is missing field 'description' aliased to field '${aliasName}'`
             );
-        });
-
-        test("Doesn't throw if an index exists", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
-                    title: String!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                })
-            ).resolves.not.toThrow();
-        });
-
-        test("Throws when index is missing fields when used with create option", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
-                    title: String!
-                    description: String!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await testHelper.executeCypher(
-                [`CREATE FULLTEXT INDEX ${indexName1}`, `IF NOT EXISTS FOR (n:${type.name})`, `ON EACH [n.title]`].join(
-                    " "
-                )
-            );
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).rejects.toThrow(
-                `@fulltext index '${indexName1}' on Node '${type.name}' already exists, but is missing field 'description'`
-            );
-        });
-
-        test("Create index for ID field if it doesn't exist", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const typeDefs = gql`
-                type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["id"] }]) {
-                    id: ID!
-                }
-            `;
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const result = await testHelper.executeCypher(indexQueryCypher);
-
-            expect(result.records[0]?.get("result")).toEqual({
-                name: indexName1,
-                type: "FULLTEXT",
-                entityType: "NODE",
-                labelsOrTypes: [type.name],
-                properties: ["id"],
-            });
         });
 
         test("should not throw if index exists on an additional label", async () => {
@@ -2359,58 +2110,6 @@ describe("@fulltext directive", () => {
                     sessionConfig: { database: databaseName },
                 })
             ).resolves.not.toThrow();
-        });
-
-        test("should not create new constraint if constraint exists on an additional label", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const baseType = testHelper.createUniqueType("Base");
-            const additionalType = testHelper.createUniqueType("Additional");
-            const typeDefs = `
-                type ${baseType.name} @node(labels: ["${baseType.name}", "${additionalType.name}"]) @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
-                    title: String!
-                }
-            `;
-
-            const createIndexCypher = `
-                CREATE FULLTEXT INDEX ${indexName1}
-                IF NOT EXISTS FOR (n:${additionalType.name})
-                ON EACH [n.title]
-            `;
-
-            await testHelper.executeCypher(createIndexCypher);
-
-            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    sessionConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const dbConstraintsResult = (await testHelper.executeCypher(indexQueryCypher)).records.map((record) => {
-                return record.toObject().result;
-            });
-
-            expect(
-                dbConstraintsResult.filter(
-                    (record) => record.labelsOrTypes.includes(baseType.name) && record.properties.includes("title")
-                )
-            ).toHaveLength(0);
-
-            expect(
-                dbConstraintsResult.filter(
-                    (record) =>
-                        record.labelsOrTypes.includes(additionalType.name) && record.properties.includes("title")
-                )
-            ).toHaveLength(1);
         });
     });
 });

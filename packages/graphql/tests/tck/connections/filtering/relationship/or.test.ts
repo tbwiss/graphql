@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Filtering -> Relationship -> OR", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -102,7 +102,11 @@ describe("Cypher -> Connections -> Filtering -> Relationship -> OR", () => {
     test("OR between edge and node", async () => {
         const query = /* GraphQL */ `
             {
-                movies(where: { actorsConnection: { OR: [{ node: { name: "Harry" } }, { edge: { role: "Tom" } }] } }) {
+                movies(
+                    where: {
+                        actorsConnection_SOME: { OR: [{ node: { name_EQ: "Harry" } }, { edge: { role_EQ: "Tom" } }] }
+                    }
+                ) {
                     title
                 }
             }

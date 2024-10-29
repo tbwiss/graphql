@@ -30,7 +30,7 @@ describe("https://github.com/neo4j/graphql/issues/582", () => {
         type = testHelper.createUniqueType("Entity");
 
         typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 children: [${type.name}!]! @relationship(type: "EDGE", properties: "Edge", direction: OUT)
                 parents: [${type.name}!]! @relationship(type: "EDGE", properties: "Edge", direction: IN)
                 type: String!
@@ -65,13 +65,13 @@ describe("https://github.com/neo4j/graphql/issues/582", () => {
         const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
+                                    type_EQ: "Bird",
                                 },
                             },
                         },
@@ -91,16 +91,16 @@ describe("https://github.com/neo4j/graphql/issues/582", () => {
         const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
-                                    childrenConnection: {
+                                    type_EQ: "Bird",
+                                    childrenConnection_SOME: {
                                         node: {
-                                            type: "Fish",
+                                            type_EQ: "Fish",
                                         },
                                     },
                                 },

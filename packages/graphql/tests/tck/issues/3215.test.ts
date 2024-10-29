@@ -25,7 +25,7 @@ describe("https://github.com/neo4j/graphql/issues/3215", () => {
         let neoSchema: Neo4jGraphQL;
 
         const typeDefs = `#graphql
-            type Actor {
+            type Actor @node {
                 name: String!
                 age: Int!
             }
@@ -37,10 +37,10 @@ describe("https://github.com/neo4j/graphql/issues/3215", () => {
             });
         });
 
-        test("should ignore undefined parameters on _NOT fields", async () => {
+        test("should ignore undefined parameters on NOT fields", async () => {
             const query = /* GraphQL */ `
                 query MyQuery($name: String) {
-                    actors(where: { age_GT: 25, name_NOT: $name }) {
+                    actors(where: { age_GT: 25, NOT: { name_EQ: $name } }) {
                         name
                         age
                     }

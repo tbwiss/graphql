@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Filtering -> Node -> OR", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 firstName: String!
                 lastName: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
@@ -52,7 +52,7 @@ describe("Cypher -> Connections -> Filtering -> Node -> OR", () => {
             query {
                 movies {
                     title
-                    actorsConnection(where: { node: { OR: [{ firstName: "Tom" }, { lastName: "Hanks" }] } }) {
+                    actorsConnection(where: { node: { OR: [{ firstName_EQ: "Tom" }, { lastName_EQ: "Hanks" }] } }) {
                         edges {
                             properties {
                                 screenTime

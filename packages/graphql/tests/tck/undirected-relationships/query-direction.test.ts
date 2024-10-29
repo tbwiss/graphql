@@ -24,106 +24,11 @@ describe("QueryDirection in relationships", () => {
     let typeDefs: string;
     let neoSchema: Neo4jGraphQL;
 
-    test("query with directed and undirected relationships with DEFAULT_UNDIRECTED", async () => {
+    test("query with a DIRECTED relationship", async () => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 name: String!
-                friends: [User!]!
-                    @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            }
-        `;
-
-        neoSchema = new Neo4jGraphQL({
-            typeDefs,
-        });
-        const query = /* GraphQL */ `
-            query {
-                users {
-                    name
-                    friends: friends {
-                        name
-                    }
-                    directedFriends: friends(directed: true) {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            CALL {
-                WITH this
-                MATCH (this)-[this0:FRIENDS_WITH]-(this1:User)
-                WITH this1 { .name } AS this1
-                RETURN collect(this1) AS var2
-            }
-            CALL {
-                WITH this
-                MATCH (this)-[this3:FRIENDS_WITH]->(this4:User)
-                WITH this4 { .name } AS this4
-                RETURN collect(this4) AS var5
-            }
-            RETURN this { .name, friends: var2, directedFriends: var5 } AS this"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
-    });
-
-    test("query with directed and undirected relationships with a DEFAULT_DIRECTED", async () => {
-        typeDefs = /* GraphQL */ `
-            type User {
-                name: String!
-                friends: [User!]! @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: DEFAULT_DIRECTED)
-            }
-        `;
-
-        neoSchema = new Neo4jGraphQL({
-            typeDefs,
-        });
-        const query = /* GraphQL */ `
-            query {
-                users {
-                    name
-                    friends: friends {
-                        name
-                    }
-                    undirectedFriends: friends(directed: false) {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            CALL {
-                WITH this
-                MATCH (this)-[this0:FRIENDS_WITH]->(this1:User)
-                WITH this1 { .name } AS this1
-                RETURN collect(this1) AS var2
-            }
-            CALL {
-                WITH this
-                MATCH (this)-[this3:FRIENDS_WITH]-(this4:User)
-                WITH this4 { .name } AS this4
-                RETURN collect(this4) AS var5
-            }
-            RETURN this { .name, friends: var2, undirectedFriends: var5 } AS this"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
-    });
-
-    test("query with a DIRECTED_ONLY relationship", async () => {
-        typeDefs = /* GraphQL */ `
-            type User {
-                name: String!
-                friends: [User!]! @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: DIRECTED_ONLY)
+                friends: [User!]! @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: DIRECTED)
             }
         `;
 
@@ -156,11 +61,12 @@ describe("QueryDirection in relationships", () => {
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
     });
-    test("query with a UNDIRECTED_ONLY relationship", async () => {
+
+    test("query with a UNDIRECTED relationship", async () => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 name: String!
-                friends: [User!]! @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: UNDIRECTED_ONLY)
+                friends: [User!]! @relationship(type: "FRIENDS_WITH", direction: OUT, queryDirection: UNDIRECTED)
             }
         `;
 

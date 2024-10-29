@@ -40,12 +40,12 @@ describe("Connections Alias", () => {
     // using totalCount as the bear minimal selection
     test("should alias top level connection field and return correct totalCount", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -59,7 +59,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actors: actorsConnection {
                         totalCount
                     }
@@ -90,12 +90,12 @@ describe("Connections Alias", () => {
 
     test("should alias totalCount", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -109,7 +109,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         count: totalCount
                     }
@@ -141,12 +141,12 @@ describe("Connections Alias", () => {
     // using hasNextPage as the bear minimal selection
     test("should alias pageInfo top level key", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -160,7 +160,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pi:pageInfo {
                             hasNextPage
@@ -193,12 +193,12 @@ describe("Connections Alias", () => {
 
     test("should alias startCursor", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -212,7 +212,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             sc:startCursor
@@ -243,12 +243,12 @@ describe("Connections Alias", () => {
 
     test("should alias endCursor", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -262,7 +262,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             ec:endCursor
@@ -293,12 +293,12 @@ describe("Connections Alias", () => {
 
     test("should alias hasPreviousPage", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -312,7 +312,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             hPP:hasPreviousPage
@@ -343,12 +343,12 @@ describe("Connections Alias", () => {
 
     test("should alias hasNextPage", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -362,7 +362,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         pageInfo {
                             hNP:hasNextPage
@@ -393,12 +393,12 @@ describe("Connections Alias", () => {
 
     test("should alias the top level edges key", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -412,7 +412,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         e:edges {
                             cursor
@@ -443,12 +443,12 @@ describe("Connections Alias", () => {
 
     test("should alias cursor", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -462,7 +462,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             c:cursor
@@ -493,12 +493,12 @@ describe("Connections Alias", () => {
 
     test("should alias the top level node key", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -512,7 +512,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             n:node {
@@ -545,12 +545,12 @@ describe("Connections Alias", () => {
 
     test("should alias a property on the node", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -564,7 +564,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             node {
@@ -597,12 +597,12 @@ describe("Connections Alias", () => {
 
     test("should alias a property on the relationship", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -620,7 +620,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                            r:properties {
@@ -653,12 +653,12 @@ describe("Connections Alias", () => {
 
     test("should alias many keys on a connection", async () => {
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
             }
 
@@ -683,7 +683,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     connection:actorsConnection {
                         tC:totalCount
@@ -737,11 +737,11 @@ describe("Connections Alias", () => {
 
     test("should allow multiple aliases on the same connection", async () => {
         const typeDefs = gql`
-            type Post {
+            type Post @node {
                 title: String!
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
-            type Comment {
+            type Comment @node {
                 flag: Boolean!
                 post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
             }
@@ -758,15 +758,15 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                posts(where: { title: "${postTitle}"}) {
-                    flagged: commentsConnection(where: { node: { flag: true } }) {
+                posts(where: { title_EQ: "${postTitle}"}) {
+                    flagged: commentsConnection(where: { node: { flag_EQ: true } }) {
                         edges {
                             node {
                                 flag
                             }
                         }
                     }
-                    unflagged: commentsConnection(where: { node: { flag: false } }) {
+                    unflagged: commentsConnection(where: { node: { flag_EQ: false } }) {
                         edges {
                             node {
                                 flag
@@ -806,12 +806,12 @@ describe("Connections Alias", () => {
         const screenTime = 120;
 
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -825,16 +825,16 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
-                    actorsConnection(where: { node: { name: "${actorName}" } }) {
+                    actorsConnection(where: { node: { name_EQ: "${actorName}" } }) {
                         edges {
                             properties {
                                 screenTime
                             }
                             node {
                                 name
-                                b: moviesConnection(where: { node: { title: "${movieTitle}"}}) {
+                                b: moviesConnection(where: { node: { title_EQ: "${movieTitle}"}}) {
                                     edges {
                                         node {
                                             title

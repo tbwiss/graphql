@@ -34,13 +34,13 @@ describe("Mass Delete", () => {
         movieType = testHelper.createUniqueType("Movie");
 
         typeDefs = gql`
-            type ${personType.name} {
+            type ${personType.name} @node {
                 name: String!
                 born: Int!
                 movies: [${movieType.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${movieType.name} {
+            type ${movieType.name} @node {
                 title: String!
                 released: Int
                 actors: [${personType.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -69,7 +69,7 @@ describe("Mass Delete", () => {
     test("Should successfully delete many nodes in the same query", async () => {
         const mutation = `
             mutation {
-                ${movieType.operations.update}(delete: { actors: { where: { node: { name_CONTAINS: "Shark" } } } }) {
+                ${movieType.operations.update}(update: { actors: { delete: { where: { node: { name_CONTAINS: "Shark" } } } } }) {
                     ${movieType.plural} {
                         title
                     }

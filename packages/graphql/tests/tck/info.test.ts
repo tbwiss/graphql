@@ -26,11 +26,11 @@ describe("info", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Actor {
+            type Actor @node {
                 name: String!
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -47,7 +47,6 @@ describe("info", () => {
             mutation {
                 createMovies(input: [{ title: "title", actors: { create: [{ node: { name: "Keanu" } }] } }]) {
                     info {
-                        bookmark
                         nodesCreated
                         relationshipsCreated
                     }
@@ -95,57 +94,6 @@ describe("info", () => {
                         }
                     }
                 ]
-            }"
-        `);
-    });
-
-    test("should return info from a delete mutation", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                deleteMovies(where: { id: "123" }) {
-                    bookmark
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:Movie)
-            WHERE this.id = $param0
-            DETACH DELETE this"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"123\\"
-            }"
-        `);
-    });
-
-    test("should return info from an update mutation", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateMovies(where: { id: "123" }) {
-                    info {
-                        bookmark
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:Movie)
-            WHERE this.id = $param0
-            RETURN \\"Query cannot conclude with CALL\\""
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"123\\",
-                \\"resolvedCallbacks\\": {}
             }"
         `);
     });

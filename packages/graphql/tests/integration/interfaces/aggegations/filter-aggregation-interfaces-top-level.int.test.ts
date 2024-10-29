@@ -36,13 +36,13 @@ describe("Top-level filter interface query fields", () => {
                 cost: Float!
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 cost: Float!
                 runtime: Int
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 cost: Float!
                 episodes: Int
@@ -69,7 +69,7 @@ describe("Top-level filter interface query fields", () => {
     test("top level count", async () => {
         const query = `
             query {
-                productionsAggregate(where: { title: "The Show" }) {
+                productionsAggregate(where: { title_EQ: "The Show" }) {
                     count
                 }
             }
@@ -88,7 +88,7 @@ describe("Top-level filter interface query fields", () => {
     test("top level count with logical operator", async () => {
         const query = `
             query {
-                productionsAggregate(where: { OR: [{title: "The Show"}, {title: "A Movie"}] }) {
+                productionsAggregate(where: { OR: [{title_EQ: "The Show"}, {title_EQ: "A Movie"}] }) {
                     count
                 }
             }

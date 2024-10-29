@@ -34,12 +34,12 @@ describe("union relationships", () => {
         typeActor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-        type ${typeMovie}  {
+        type ${typeMovie}  @node {
             title: String!
             runtime: Int!
         }
         
-        type ${typeSeries}  {
+        type ${typeSeries}  @node {
             title: String!
             episodes: Int!
         }
@@ -50,7 +50,7 @@ describe("union relationships", () => {
                 screenTime: Int!
             }
 
-            type ${typeActor} {
+            type ${typeActor} @node {
                 name: String!
                 currentlyActingIn: Production @relationship(type: "CURRENTLY_ACTING_IN", direction: OUT)
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -96,7 +96,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_SOME: { ${typeMovie}: { title: $title } } }) {
+                ${typeActor.plural}(where: { actedIn_SOME: { ${typeMovie}: { title_EQ: $title } } }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {
@@ -180,7 +180,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title: $title }} }) {
+                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title_EQ: $title }} }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {
@@ -277,7 +277,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title: $title }, ${typeSeries}: { title: $title } } }) {
+                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title_EQ: $title }, ${typeSeries}: { title_EQ: $title } } }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {
@@ -366,7 +366,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title: $title }, ${typeSeries}: { title: $title } } }) {
+                ${typeActor.plural}(where: { actedIn_ALL: { ${typeMovie}: { title_EQ: $title }, ${typeSeries}: { title_EQ: $title } } }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {
@@ -444,7 +444,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_SINGLE: { ${typeMovie}: { title: $title } } }) {
+                ${typeActor.plural}(where: { actedIn_SINGLE: { ${typeMovie}: { title_EQ: $title } } }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {
@@ -538,7 +538,7 @@ describe("union relationships", () => {
 
         const query = /* GraphQL */ `
             query Actors($title: String) {
-                ${typeActor.plural}(where: { actedIn_NONE: { ${typeMovie}:{ title: $title }, ${typeSeries}:{ title: $title } } }) {
+                ${typeActor.plural}(where: { actedIn_NONE: { ${typeMovie}:{ title_EQ: $title }, ${typeSeries}:{ title_EQ: $title } } }) {
                     name
                     actedIn {
                         ... on ${typeMovie} {

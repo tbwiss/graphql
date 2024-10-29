@@ -30,7 +30,7 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
         testType = testHelper.createUniqueType("AttribValue");
 
         const typeDefs = `
-            type ${testType} {
+            type ${testType} @node {
                 prodid: Int!
                 attribid: Int!
                 level: Int!
@@ -51,7 +51,6 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
             mutation {
                 ${testType.operations.create}(input: [{ prodid: 1, attribid: 2, level: 1, ord: 1 }]) {
                     info {
-                        bookmark
                         nodesCreated
                         relationshipsCreated
                     }
@@ -70,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
 
         const updateMutation = `
             mutation {
-                ${testType.operations.update}(where: { prodid: 1, attribid: 2 }, update: { level: null }) {
+                ${testType.operations.update}(where: { prodid_EQ: 1, attribid_EQ: 2 }, update: { level: null }) {
                     ${testType.plural} {
                         prodid
                         attribid

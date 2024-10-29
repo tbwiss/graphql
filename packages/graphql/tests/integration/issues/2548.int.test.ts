@@ -37,10 +37,10 @@ describe("https://github.com/neo4j/graphql/issues/2548", () => {
                 roles: [String!]!
             }
 
-            type ${User}
+            type ${User} @node
                 @authorization(
                     filter: [
-                        { operations: [READ], requireAuthentication: false, where: { node: { isPublic: true } } }
+                        { operations: [READ], requireAuthentication: false, where: { node: { isPublic_EQ: true } } }
                         { operations: [READ], where: { jwt: { roles_INCLUDES: "ADMIN" } } }
                     ]
                 ) {

@@ -26,11 +26,11 @@ describe("Cypher Aggregations where with count", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 name: String!
             }
 
-            type Post {
+            type Post @node {
                 content: String!
                 likes: [User!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -44,7 +44,7 @@ describe("Cypher Aggregations where with count", () => {
     test("Equality Count", async () => {
         const query = /* GraphQL */ `
             {
-                posts(where: { likesAggregate: { count: 10 } }) {
+                posts(where: { likesAggregate: { count_EQ: 10 } }) {
                     content
                 }
             }

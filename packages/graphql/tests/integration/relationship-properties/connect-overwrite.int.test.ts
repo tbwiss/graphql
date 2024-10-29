@@ -46,13 +46,13 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeMovie = testHelper.createUniqueType("Movie");
 
             typeDefs = gql`
-                type ${typeMovie.name} {
+                type ${typeMovie.name} @node {
                     title: String!
                     directors: [${typeActor.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
                     actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 }
 
-                type ${typeActor.name} {
+                type ${typeActor.name} @node {
                     name: String!
                     movies: [ ${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
                     directed: [ ${typeMovie.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: OUT)
@@ -101,18 +101,18 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!, $year: Int!, $directorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             directors: {
                                 connect: {
-                                    where: { node: { name: $directorName } },
+                                    where: { node: { name_EQ: $directorName } },
                                     edge: { year: $year }
                                 }
                             },
                             actors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { screenTime: $screenTime },
                                     overwrite: false
                                 }
@@ -192,19 +192,19 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!, $year: Int!, $directorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             directors: {
                                 connect: {
-                                    where: { node: { name: $directorName } },
+                                    where: { node: { name_EQ: $directorName } },
                                     edge: { year: $year },
                                     overwrite: false
                                 }
                             },
                             actors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { screenTime: $screenTime },
                                     overwrite: false
                                 }
@@ -284,12 +284,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeMovie = testHelper.createUniqueType("Movie");
 
             typeDefs = gql`
-                type ${typeMovie.name} {
+                type ${typeMovie.name} @node {
                     title: String!
                     actors: ${typeActor.name}! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 }
 
-                type ${typeActor.name} {
+                type ${typeActor.name} @node {
                     name: String!
                     movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
                 }
@@ -324,12 +324,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             actors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { screenTime: $screenTime },
                                 }
                             }
@@ -392,12 +392,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             actors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { screenTime: $screenTime },
                                     overwrite: false
                                 }
@@ -451,13 +451,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
+                        update: {
                             actors: {
-                                    where: { node: { name: $actorName } },
+                                connect:{
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { screenTime: $screenTime },
                                     overwrite: false
+                                    }
                                 }
                         }
                         
@@ -507,13 +509,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
+                        update: {
                             actors: {
-                                    where: { node: { name: $actorName } },
-                                    edge: { screenTime: $screenTime },
-                                    overwrite: true
+                                connect: {
+                                        where: { node: { name_EQ: $actorName } },
+                                        edge: { screenTime: $screenTime },
+                                        overwrite: true
+                                    }
                                 }
                         }
                         
@@ -570,14 +574,16 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeActor.operations.update}(
                         where: {
-                            name: $actorName 
+                            name_EQ: $actorName 
                         },
-                        connect: {
+                        update: {
                             movies: {
-                                    where: { node: { title: $movieTitle } },
+                                connect: {
+                                    where: { node: { title_EQ: $movieTitle } },
                                     edge: { screenTime: $screenTime },
                                     overwrite: false
                                 }
+                            }
                         }
                         
                     ) {
@@ -628,13 +634,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeActor.operations.update}(
                         where: {
-                            name: $actorName 
+                            name_EQ: $actorName 
                         },
-                        connect: {
+                        update: {
                             movies: {
-                                    where: { node: { title: $movieTitle } },
+                                connect: {
+                                    where: { node: { title_EQ: $movieTitle } },
                                     edge: { screenTime: $screenTime },
                                 }
+                            }
                         }
                         
                     ) {
@@ -687,7 +695,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                 name: $actorName,
                                 movies: {
                                     connect: {
-                                        where: { node: { title: $movieTitle } },
+                                        where: { node: { title_EQ: $movieTitle } },
                                         edge: { screenTime: $screenTime },
                                         overwrite: false
                                     }
@@ -745,11 +753,11 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                 title: $movieOtherTitle,
                                 actors: {
                                     connect: {
-                                        where: { node: { name: $actorName  } },
+                                        where: { node: { name_EQ: $actorName  } },
                                         edge: { screenTime: $screenTime },
                                         connect: {
                                             movies: [{
-                                                where: { node: { title: $movieTitle  } },
+                                                where: { node: { title_EQ: $movieTitle  } },
                                                 edge: { screenTime: $screenTime },
                                                 overwrite: false
                                             }]
@@ -810,11 +818,11 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                 title: $movieOtherTitle,
                                 actors: {
                                     connect: {
-                                        where: { node: { name: $actorName  } },
+                                        where: { node: { name_EQ: $actorName  } },
                                         edge: { screenTime: $screenTime },
                                         connect: {
                                             movies: [{
-                                                where: { node: { title: $movieTitle  } },
+                                                where: { node: { title_EQ: $movieTitle  } },
                                                 edge: { screenTime: $screenTime },
                                             }]
                                         }
@@ -871,15 +879,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                 title: $movieOtherTitle,
                                 actors: {
                                     connect: {
-                                        where: { node: { name: $actorName  } },
+                                        where: { node: { name_EQ: $actorName  } },
                                         edge: { screenTime: $screenTime },
                                         connect: {
                                             movies: [{
-                                                where: { node: { title: $movieTitle  } },
+                                                where: { node: { title_EQ: $movieTitle  } },
                                                 edge: { screenTime: $screenTime },
                                                 connect: {
                                                     actors: {
-                                                        where: { node: { name: $actorName  } },
+                                                        where: { node: { name_EQ: $actorName  } },
                                                         edge: { screenTime: $screenTime },
                                                     }
                                                 }
@@ -938,15 +946,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                             title: $movieOtherTitle,
                             actors: {
                                 connect: {
-                                    where: { node: { name: $actorName  } },
+                                    where: { node: { name_EQ: $actorName  } },
                                     edge: { screenTime: $screenTime },
                                     connect: {
                                         movies: [{
-                                            where: { node: { title: $movieTitle  } },
+                                            where: { node: { title_EQ: $movieTitle  } },
                                             edge: { screenTime: $screenTime },
                                             connect: {
                                                 actors: {
-                                                    where: { node: { name: $actorName  } },
+                                                    where: { node: { name_EQ: $actorName  } },
                                                     edge: { screenTime: $screenTime },
                                                     overwrite: false
                                                 }
@@ -1004,17 +1012,19 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($screenTimeOther: Int!, $movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
+                        update: {
                             actors: {
-                                where: { node: { name: $actorName  } },
-                                edge: { screenTime: $screenTime },
                                 connect: {
-                                    movies: [{
-                                        where: { node: { title: $movieTitle  } },
-                                        edge: { screenTime: $screenTimeOther },
-                                    }]
+                                    where: { node: { name_EQ: $actorName  } },
+                                    edge: { screenTime: $screenTime },
+                                    connect: {
+                                        movies: [{
+                                            where: { node: { title_EQ: $movieTitle  } },
+                                            edge: { screenTime: $screenTimeOther },
+                                        }]
+                                    }
                                 }
                             }
                         }  
@@ -1069,18 +1079,20 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($screenTimeOther: Int!, $movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
+                        update: {
                             actors: {
-                                where: { node: { name: $actorName  } },
-                                edge: { screenTime: $screenTime },
                                 connect: {
-                                    movies: [{
-                                        where: { node: { title: $movieTitle  } },
-                                        edge: { screenTime: $screenTimeOther },
-                                        overwrite: false
-                                    }]
+                                    where: { node: { name_EQ: $actorName  } },
+                                    edge: { screenTime: $screenTime },
+                                    connect: {
+                                        movies: [{
+                                            where: { node: { title_EQ: $movieTitle  } },
+                                            edge: { screenTime: $screenTimeOther },
+                                            overwrite: false
+                                        }]
+                                    }
                                 }
                             }
                         }  
@@ -1139,21 +1151,22 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($screenTimeOther: Int!, $movieTitle: String!, $movieOtherTitle: String!, $screenTime: Int!, $actorName: String!) {
                     ${typeActor.operations.update}(
                         where: {
-                            name: $actorName
+                            name_EQ: $actorName
                         },
-                        create: {
-                            movies: [
+                        update: {
+                            movies: {
+                                create:[
                                 {
                                     edge: { screenTime: $screenTime },
                                     node: {
                                         title: $movieOtherTitle
                                         actors: {
                                             connect: {
-                                                where: { node: { name: $actorName  } },
+                                                where: { node: { name_EQ: $actorName  } },
                                                 edge: { screenTime: $screenTimeOther },
                                                 connect: {
                                                     movies: [{
-                                                        where: { node: { title: $movieTitle  } },
+                                                        where: { node: { title_EQ: $movieTitle  } },
                                                         edge: { screenTime: $screenTimeOther },
                                                         overwrite: false
                                                     }]
@@ -1162,7 +1175,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                         }
                                     }  
                                 }
-                            ]
+                            ]}
                         }  
                     ) {
                         ${typeActor.plural} {
@@ -1225,12 +1238,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeMovie = testHelper.createUniqueType("Movie");
 
             typeDefs = gql`
-                        type ${typeMovie.name} {
+                        type ${typeMovie.name} @node {
                             title: String!
                             actors: ${typeActor.name}! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                         }
         
-                        type ${typeActor.name} {
+                        type ${typeActor.name} @node {
                             name: String!
                             id: Int! @unique
                             movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
@@ -1273,12 +1286,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                         mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!, $actorId: Int!) {
                             ${typeMovie.operations.update}(
                                 where: {
-                                    title: $movieTitle
+                                    title_EQ: $movieTitle
                                 },
                                 update: {
                                     actors: {
                                         connectOrCreate: {
-                                            where: { node: { id: $actorId } },
+                                            where: { node: { id_EQ: $actorId } },
                                             onCreate: { edge: { screenTime: $screenTime }, node: { name: $actorName, id: $actorId } },
                                         }
                                     }
@@ -1345,12 +1358,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeMovie = testHelper.createUniqueType("Movie");
 
             typeDefs = gql`
-                type ${typeMovie.name} {
+                type ${typeMovie.name} @node {
                     title: String!
                     directors: [${typeActor.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
                 }
 
-                type ${typeActor.name} {
+                type ${typeActor.name} @node {
                     name: String!
                     directed: [${typeMovie.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: OUT)
                 }
@@ -1385,12 +1398,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $actorName: String!, $year: Int!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             directors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { year: $year },
                                     overwrite: false
                                 }
@@ -1452,12 +1465,12 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $actorName: String!, $year: Int!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
                         update: {
                             directors: {
                                 connect: {
-                                    where: { node: { name: $actorName } },
+                                    where: { node: { name_EQ: $actorName } },
                                     edge: { year: $year }
                                 }
                             }
@@ -1516,12 +1529,14 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $actorName: String!, $year: Int!) {
                     ${typeActor.operations.update}(
                         where: {
-                            name: $actorName 
+                            name_EQ: $actorName 
                         },
-                        connect: {
+                        update: {
                             directed: {
-                                where: { node: { title: $movieTitle } },
-                                edge: { year: $year }
+                                connect: {
+                                    where: { node: { title_EQ: $movieTitle } },
+                                    edge: { year: $year }
+                                }
                             }
                         }  
                     ) {
@@ -1577,13 +1592,16 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($movieTitle: String!, $actorName: String!, $year: Int!) {
                     ${typeActor.operations.update}(
                         where: {
-                            name: $actorName 
+                            name_EQ: $actorName 
                         },
-                        connect: {
+                        update: {
                             directed: {
-                                where: { node: { title: $movieTitle } },
-                                edge: { year: $year },
-                                overwrite: false
+                                connect: {
+
+                                    where: { node: { title_EQ: $movieTitle } },
+                                    edge: { year: $year },
+                                    overwrite: false
+                                }
                             }
                         }  
                     ) {
@@ -1647,11 +1665,11 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                     name: $actorName 
                                     directed: {
                                         connect: {
-                                            where: { node: { title: $movieTitle } },
+                                            where: { node: { title_EQ: $movieTitle } },
                                             edge: { year: $year },
                                             connect: {
                                                 directors: {
-                                                    where: { node: { name: $actorName } },
+                                                    where: { node: { name_EQ: $actorName } },
                                                     edge: { year: $yearOther },
                                                     overwrite: false
                                                 }
@@ -1720,11 +1738,11 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                     name: $actorName 
                                     directed: {
                                         connect: {
-                                            where: { node: { title: $movieTitle } },
+                                            where: { node: { title_EQ: $movieTitle } },
                                             edge: { year: $year },
                                             connect: {
                                                 directors: {
-                                                    where: { node: { name: $actorName } },
+                                                    where: { node: { name_EQ: $actorName } },
                                                     edge: { year: $yearOther }
                                                 }
                                             }
@@ -1794,15 +1812,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                 title: $movieOtherTitle,
                                 directors: {
                                     connect: [{
-                                        where: { node: { name: $actorName  } },
+                                        where: { node: { name_EQ: $actorName  } },
                                         edge: { year: $year },
                                         connect: {
                                             directed: [{
-                                                where: { node: { title: $movieTitle  } },
+                                                where: { node: { title_EQ: $movieTitle  } },
                                                 edge: { year: $year },
                                                 connect: {
                                                     directors: [{
-                                                        where: { node: { name: $actorName  } },
+                                                        where: { node: { name_EQ: $actorName  } },
                                                         edge: { year: $year },
                                                         overwrite: false
                                                     }]
@@ -1873,15 +1891,15 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                                     title: $movieOtherTitle,
                                     directors: {
                                         connect: [{
-                                            where: { node: { name: $actorName  } },
+                                            where: { node: { name_EQ: $actorName  } },
                                             edge: { year: $year },
                                             connect: {
                                                 directed: [{
-                                                    where: { node: { title: $movieTitle  } },
+                                                    where: { node: { title_EQ: $movieTitle  } },
                                                     edge: { year: $year },
                                                     connect: {
                                                         directors: [{
-                                                            where: { node: { name: $actorName  } },
+                                                            where: { node: { name_EQ: $actorName  } },
                                                             edge: { year: $year }
                                                         }]
                                                     }
@@ -1945,20 +1963,20 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($yearOther: Int!, $movieTitle: String!, $year: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
-                            directors: [{
-                                where: { node: { name: $actorName  } },
+                        update: {
+                            directors: { connect: [{
+                                where: { node: { name_EQ: $actorName  } },
                                 edge: { year: $year },
                                 connect: {
                                     directed: [{
-                                        where: { node: { title: $movieTitle  } },
+                                        where: { node: { title_EQ: $movieTitle  } },
                                         edge: { year: $yearOther },
                                         overwrite: false
                                     }]
                                 }
-                            }]
+                            }]}
                         }  
                     ) {
                         ${typeMovie.plural} {
@@ -2016,20 +2034,20 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($yearOther: Int!, $movieTitle: String!, $year: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
-                            directors: [{
-                                where: { node: { name: $actorName  } },
+                        update: {
+                            directors: { connect: [{
+                                where: { node: { name_EQ: $actorName  } },
                                 edge: { year: $year },
                                 overwrite: false
                                 connect: {
                                     directed: [{
-                                        where: { node: { title: $movieTitle  } },
+                                        where: { node: { title_EQ: $movieTitle  } },
                                         edge: { year: $yearOther },
                                     }]
                                 }
-                            }]
+                            }]}
                         }  
                     ) {
                         ${typeMovie.plural} {
@@ -2087,19 +2105,19 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                 mutation($yearOther: Int!, $movieTitle: String!, $year: Int!, $actorName: String!) {
                     ${typeMovie.operations.update}(
                         where: {
-                            title: $movieTitle
+                            title_EQ: $movieTitle
                         },
-                        connect: {
-                            directors: [{
-                                where: { node: { name: $actorName  } },
+                        update: {
+                            directors: { connect: [{
+                                where: { node: { name_EQ: $actorName  } },
                                 edge: { year: $year },
                                 connect: {
                                     directed: [{
-                                        where: { node: { title: $movieTitle  } },
+                                        where: { node: { title_EQ: $movieTitle  } },
                                         edge: { year: $yearOther },
                                     }]
                                 }
-                            }]
+                            }]}
                         }  
                     ) {
                         ${typeMovie.plural} {

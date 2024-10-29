@@ -18,16 +18,9 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, formatParams, setTestEnvVars, translateQuery, unsetTestEnvVars } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("Cypher coalesce()", () => {
-    beforeAll(() => {
-        setTestEnvVars("NEO4J_GRAPHQL_ENABLE_REGEX=1");
-    });
-
-    afterAll(() => {
-        unsetTestEnvVars(undefined);
-    });
     test("Simple coalesce", async () => {
         const typeDefs = /* GraphQL */ `
             interface UserInterface {
@@ -35,7 +28,7 @@ describe("Cypher coalesce()", () => {
                 toBeOverridden: String!
             }
 
-            type User implements UserInterface {
+            type User implements UserInterface @node {
                 id: ID! @coalesce(value: "00000000-00000000-00000000-00000000")
                 name: String! @coalesce(value: "Jane Smith")
                 verified: Boolean! @coalesce(value: false)
@@ -69,13 +62,13 @@ describe("Cypher coalesce()", () => {
             ) {
                 users(
                     where: {
-                        id: $id
+                        id_EQ: $id
                         name_MATCHES: $name
-                        verified_NOT: $verified
+                        NOT: { verified_EQ: $verified }
                         numberOfFriends_GT: $numberOfFriends
                         rating_LT: $rating
-                        fromInterface: $fromInterface
-                        toBeOverridden: $toBeOverridden
+                        fromInterface_EQ: $fromInterface
+                        toBeOverridden_EQ: $toBeOverridden
                     }
                 ) {
                     name
@@ -97,7 +90,7 @@ describe("Cypher coalesce()", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:User)
-            WHERE (coalesce(this.id, \\"00000000-00000000-00000000-00000000\\") = $param0 AND coalesce(this.name, \\"Jane Smith\\") =~ $param1 AND NOT (coalesce(this.verified, false) = $param2) AND coalesce(this.numberOfFriends, 0) > $param3 AND coalesce(this.rating, 2.5) < $param4 AND this.fromInterface = $param5 AND coalesce(this.toBeOverridden, \\"Overridden\\") = $param6)
+            WHERE (coalesce(this.id, \\"00000000-00000000-00000000-00000000\\") = $param0 AND coalesce(this.name, \\"Jane Smith\\") =~ $param1 AND coalesce(this.numberOfFriends, 0) > $param2 AND coalesce(this.rating, 2.5) < $param3 AND this.fromInterface = $param4 AND coalesce(this.toBeOverridden, \\"Overridden\\") = $param5 AND NOT (coalesce(this.verified, false) = $param6))
             RETURN this { .name } AS this"
         `);
 
@@ -105,14 +98,14 @@ describe("Cypher coalesce()", () => {
             "{
                 \\"param0\\": \\"Some ID\\",
                 \\"param1\\": \\"Some name\\",
-                \\"param2\\": true,
-                \\"param3\\": {
+                \\"param2\\": {
                     \\"low\\": 10,
                     \\"high\\": 0
                 },
-                \\"param4\\": 3.5,
+                \\"param3\\": 3.5,
+                \\"param4\\": \\"Some string\\",
                 \\"param5\\": \\"Some string\\",
-                \\"param6\\": \\"Some string\\"
+                \\"param6\\": true
             }"
         `);
     });
@@ -123,7 +116,7 @@ describe("Cypher coalesce()", () => {
                 ACTIVE
                 INACTIVE
             }
-            type Movie {
+            type Movie @node {
                 id: ID
                 status: Status @coalesce(value: ACTIVE)
             }
@@ -142,7 +135,7 @@ describe("Cypher coalesce()", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { status: ACTIVE }) {
+                movies(where: { status_EQ: ACTIVE }) {
                     id
                     status
                 }
@@ -170,12 +163,12 @@ describe("Cypher coalesce()", () => {
                 ACTIVE
                 INACTIVE
             }
-            type Movie {
+            type Movie @node {
                 id: ID
                 status: Status @coalesce(value: ACTIVE)
             }
 
-            type Actor {
+            type Actor @node {
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
@@ -194,7 +187,7 @@ describe("Cypher coalesce()", () => {
         const query = /* GraphQL */ `
             query Actors {
                 actors {
-                    moviesConnection(where: { node: { status: ACTIVE } }) {
+                    moviesConnection(where: { node: { status_EQ: ACTIVE } }) {
                         edges {
                             node {
                                 id
@@ -240,12 +233,12 @@ describe("Cypher coalesce()", () => {
                 ACTIVE
                 INACTIVE
             }
-            type Movie {
+            type Movie @node {
                 id: ID
                 statuses: [Status!]! @coalesce(value: [ACTIVE, INACTIVE])
             }
 
-            type Actor {
+            type Actor @node {
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
@@ -257,7 +250,7 @@ describe("Cypher coalesce()", () => {
         const query = /* GraphQL */ `
             query Actors {
                 actors {
-                    moviesConnection(where: { node: { statuses: [ACTIVE, INACTIVE] } }) {
+                    moviesConnection(where: { node: { statuses_EQ: [ACTIVE, INACTIVE] } }) {
                         edges {
                             node {
                                 id

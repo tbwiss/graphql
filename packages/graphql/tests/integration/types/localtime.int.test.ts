@@ -31,7 +31,7 @@ describe("LocalTime", () => {
         Movie = testHelper.createUniqueType("Movie");
 
         const typeDefs = /* GraphQL */ `
-        type ${Movie} {
+        type ${Movie} @node {
             id: ID!
             time: LocalTime
             times: [LocalTime!]
@@ -166,7 +166,7 @@ describe("LocalTime", () => {
 
             const mutation = /* GraphQL */ `
                     mutation ($id: ID!, $time: LocalTime) {
-                        ${Movie.operations.update}(where: { id: $id }, update: { time: $time }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { time: $time }) {
                             ${Movie.plural} {
                                 id
                                 time
@@ -222,7 +222,7 @@ describe("LocalTime", () => {
 
             const query = /* GraphQL */ `
                     query ($time: LocalTime!) {
-                        ${Movie.plural}(where: { time: $time }) {
+                        ${Movie.plural}(where: { time_EQ: $time }) {
                             id
                             time
                         }
@@ -291,7 +291,7 @@ describe("LocalTime", () => {
 
                 const query = /* GraphQL */ `
                             query ($where: ${Movie.name}Where!) {
-                                ${Movie.plural}(where: $where, options: { sort: [{ time: ASC }] }) {
+                                ${Movie.plural}(where: $where, sort: [{ time: ASC }]) {
                                     id
                                     time
                                 }
@@ -396,7 +396,7 @@ describe("LocalTime", () => {
                             query ($futureId: ID!, $presentId: ID!, $pastId: ID!, $sort: SortDirection!) {
                                 ${Movie.plural}(
                                     where: { id_IN: [$futureId, $presentId, $pastId] }
-                                    options: { sort: [{ time: $sort }] }
+                                    sort: [{ time: $sort }]
                                 ) {
                                     id
                                     time

@@ -26,12 +26,12 @@ describe("Cypher Create", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -302,7 +302,7 @@ describe("Cypher Create", () => {
     test("Simple create and connect", async () => {
         const query = /* GraphQL */ `
             mutation {
-                createMovies(input: [{ id: 1, actors: { connect: [{ where: { node: { name: "Dan" } } }] } }]) {
+                createMovies(input: [{ id: 1, actors: { connect: [{ where: { node: { name_EQ: "Dan" } } }] } }]) {
                     movies {
                         id
                     }
@@ -355,11 +355,11 @@ describe("Cypher Create", () => {
     test("Simple create -> relationship field -> connection(where)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                createActors(input: { name: "Dan", movies: { connect: { where: { node: { id: 1 } } } } }) {
+                createActors(input: { name: "Dan", movies: { connect: { where: { node: { id_EQ: 1 } } } } }) {
                     actors {
                         name
                         movies {
-                            actorsConnection(where: { node: { name: "Dan" } }) {
+                            actorsConnection(where: { node: { name_EQ: "Dan" } }) {
                                 totalCount
                                 edges {
                                     node {

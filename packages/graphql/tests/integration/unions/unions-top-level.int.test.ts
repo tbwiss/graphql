@@ -34,11 +34,11 @@ describe("Top-level union query fields", () => {
         typeDefs = `
         union Search = ${GenreType} | ${MovieType}
 
-        type ${GenreType} {
+        type ${GenreType} @node {
             name: String
         }
 
-        type ${MovieType} {
+        type ${MovieType} @node {
             title: String
             search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
         }
@@ -91,9 +91,9 @@ describe("Top-level union query fields", () => {
     });
 
     test("should read top-level simple query on union with filters", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                searches(where: {${MovieType.name}: {title_NOT: "The Matrix"}, ${GenreType.name}: {}}) {
+                searches(where: {${MovieType.name}: { NOT: { title_EQ: "The Matrix" } }, ${GenreType.name}: {}}) {
                     ... on ${GenreType} {
                         name
                     }
@@ -117,9 +117,9 @@ describe("Top-level union query fields", () => {
     });
 
     test("should read top-level simple query on union with filters - only specifying a filter for one constituent automatically filters-out the other constituents from the return data", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                searches(where: {${MovieType.name}: {title_NOT: "The Matrix"}}) {
+                searches(where: {${MovieType.name}:  { NOT: { title_EQ: "The Matrix" } } }) {
                     ... on ${GenreType} {
                         name
                     }
@@ -143,9 +143,9 @@ describe("Top-level union query fields", () => {
     });
 
     test("should read top-level simple query on union with filters on relationship field", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                searches(where: {${MovieType.name}: {searchConnection: {${GenreType.name}: {node: { name: "Action"} }}}}) {
+                searches(where: {${MovieType.name}: {searchConnection_SOME: {${GenreType.name}: {node: { name_EQ: "Action"} }}}}) {
                     ... on ${GenreType} {
                         name
                     }
@@ -171,9 +171,9 @@ describe("Top-level union query fields", () => {
     });
 
     test("should read top-level simple query on union sorted", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                searches(options: {limit: 1, offset: 1}) {
+                searches(limit: 1, offset: 1) {
                     ... on ${GenreType} {
                         name
                     }
@@ -213,11 +213,11 @@ describe("add authorization", () => {
         typeDefs = `
         union Search = ${GenreType} | ${MovieType}
 
-        type ${GenreType} {
+        type ${GenreType} @node {
             name: String
         }
 
-        type ${MovieType} {
+        type ${MovieType} @node {
             title: String
             search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
         }
@@ -239,7 +239,7 @@ describe("add authorization", () => {
             }
             extend type ${GenreType.name} @authorization(
                 validate: [
-                    { when: [BEFORE], operations: [READ], where: { node: { name: "$jwt.jwtAllowedNamesExample" } } }
+                    { when: [BEFORE], operations: [READ], where: { node: { name_EQ: "$jwt.jwtAllowedNamesExample" } } }
                 ])
             extend type ${MovieType.name} @authorization(
                 filter: [
@@ -325,7 +325,7 @@ describe("add authorization", () => {
     test("should not throw forbidden when jwt incorrect if filtering-out the authorized constituent", async () => {
         const query = `
             query {
-                searches(where: {${MovieType.name}: {title: "The Matrix"}}) {
+                searches(where: {${MovieType.name}: {title_EQ: "The Matrix"}}) {
                     ... on ${GenreType} {
                         name
                     }
@@ -360,9 +360,9 @@ describe("add authorization", () => {
             query {
                 searches(where: {
                     ${MovieType.name}: {
-                        searchConnection: {
+                        searchConnection_SOME: {
                             ${GenreType.name}: {
-                                node: { name: "Action"} 
+                                node: { name_EQ: "Action"} 
                             }
                         }
                     }, 
@@ -412,11 +412,11 @@ describe("add schema configuration", () => {
         typeDefs = `
         union Search = ${GenreType} | ${MovieType}
 
-        type ${GenreType} {
+        type ${GenreType} @node {
             name: String
         }
 
-        type ${MovieType} {
+        type ${MovieType} @node {
             title: String
             search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
         }

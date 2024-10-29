@@ -41,12 +41,12 @@ describe("Relationship properties - delete", () => {
 
     test("should delete a related node for a relationship that has properties", async () => {
         const typeDefs = gql`
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -64,8 +64,8 @@ describe("Relationship properties - delete", () => {
         const source = /* GraphQL */ `
             mutation ($movieTitle: String!, $actorName1: String!) {
                 ${Movie.operations.update}(
-                    where: { title: $movieTitle }
-                    delete: { actors: { where: { node: { name: $actorName1 } } } }
+                    where: { title_EQ: $movieTitle }
+                    update: { actors: { delete: { where: { node: { name_EQ: $actorName1 } } } } }
                 ) {
                     ${Movie.plural} {
                         title
@@ -107,15 +107,15 @@ describe("Relationship properties - delete", () => {
 
     test("should delete a related node for a relationship that has properties (with Union)", async () => {
         const typeDefs = gql`
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
             }
 
-            type ${Show} {
+            type ${Show} @node {
                 name: String!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [ActedInUnion!]!
                     @relationship(type: "ACTED_IN", properties: "ActedInInterface", direction: OUT)
@@ -136,8 +136,8 @@ describe("Relationship properties - delete", () => {
         const source = /* GraphQL */ `
             mutation ($screenTime: Int!, $actorName: String!) {
                 ${Actor.operations.update}(
-                    where: { name: $actorName }
-                    delete: { actedIn: { ${Movie}: { where: { edge: { screenTime: $screenTime } } } } }
+                    where: { name_EQ: $actorName }
+                    update: { actedIn: { ${Movie}: { delete: { where: { edge: { screenTime_EQ: $screenTime } } } } } }
                 ) {
                     ${Actor.plural} {
                         name

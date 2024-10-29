@@ -22,7 +22,7 @@ import { validateSchema } from "graphql";
 import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
-import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
+import { TestCDCEngine } from "../../utils/builders/TestCDCEngine";
 
 describe("https://github.com/neo4j/graphql/issues/3439", () => {
     test("Type definitions implementing multiple interfaces", async () => {
@@ -38,28 +38,27 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
                 genre: Genre!
             }
 
-            type Movie implements INode & IProduct {
+            type Movie implements INode & IProduct @node {
                 id: String!
 
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type Series implements INode & IProduct {
+            type Series implements INode & IProduct @node {
                 id: String!
 
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type Genre {
+            type Genre @node {
                 name: String! @unique
                 product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
         `;
 
-        const subscriptionsEngine = new TestSubscriptionsEngine();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: subscriptionsEngine } });
+        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: new TestCDCEngine() } });
 
         const schema = await neoSchema.getSchema();
         const errors = validateSchema(schema);
@@ -83,7 +82,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -102,7 +100,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -117,9 +114,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true, options: IProductOptions, where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true, where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -137,10 +134,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreConnectWhere {
               node: GenreWhere!
-            }
-
-            type GenreConnectedRelationships {
-              product: GenreProductConnectedRelationship
             }
 
             input GenreCreateInput {
@@ -204,7 +197,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -214,10 +208,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreProductConnectFieldInput {
               where: IProductConnectWhere
-            }
-
-            type GenreProductConnectedRelationship {
-              node: IProductEventPayload!
             }
 
             type GenreProductConnection {
@@ -235,7 +225,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: GenreProductConnectionWhere
               OR: [GenreProductConnectionWhere!]
               node: IProductWhere
-              node_NOT: IProductWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input GenreProductCreateFieldInput {
@@ -259,85 +248,41 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductNodeAggregationWhereInput!]
               NOT: GenreProductNodeAggregationWhereInput
               OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_AVERAGE_LENGTH_EQUAL: Float
               id_AVERAGE_LENGTH_GT: Float
               id_AVERAGE_LENGTH_GTE: Float
               id_AVERAGE_LENGTH_LT: Float
               id_AVERAGE_LENGTH_LTE: Float
-              id_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_LONGEST_LENGTH_EQUAL: Int
               id_LONGEST_LENGTH_GT: Int
               id_LONGEST_LENGTH_GTE: Int
               id_LONGEST_LENGTH_LT: Int
               id_LONGEST_LENGTH_LTE: Int
-              id_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_SHORTEST_LENGTH_EQUAL: Int
               id_SHORTEST_LENGTH_GT: Int
               id_SHORTEST_LENGTH_GTE: Int
               id_SHORTEST_LENGTH_LT: Int
               id_SHORTEST_LENGTH_LTE: Int
-              id_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type GenreProductRelationship {
               cursor: String!
               node: IProduct!
-            }
-
-            input GenreProductRelationshipSubscriptionWhere {
-              node: IProductSubscriptionWhere
             }
 
             input GenreProductUpdateConnectionInput {
@@ -353,46 +298,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               where: GenreProductConnectionWhere
             }
 
-            input GenreRelationInput {
-              product: [GenreProductCreateFieldInput!]
-            }
-
-            type GenreRelationshipCreatedEvent {
-              createdRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipCreatedSubscriptionWhere {
-              AND: [GenreRelationshipCreatedSubscriptionWhere!]
-              NOT: GenreRelationshipCreatedSubscriptionWhere
-              OR: [GenreRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            type GenreRelationshipDeletedEvent {
-              deletedRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipDeletedSubscriptionWhere {
-              AND: [GenreRelationshipDeletedSubscriptionWhere!]
-              NOT: GenreRelationshipDeletedSubscriptionWhere
-              OR: [GenreRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            input GenreRelationshipsSubscriptionWhere {
-              product: GenreProductRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
             \\"\\"\\"
@@ -404,20 +309,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             input GenreUniqueWhere {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              name_EQ: String
             }
 
             input GenreUpdateInput {
@@ -436,19 +338,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              product: IProductWhere @deprecated(reason: \\"Use \`product_SOME\` instead.\\")
               productAggregate: GenreProductAggregateInput
-              productConnection: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Genres where all of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -457,7 +353,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               Return Genres where none of the related GenreProductConnections match this filter
               \\"\\"\\"
               productConnection_NONE: GenreProductConnectionWhere
-              productConnection_NOT: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Genres where one of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -470,7 +365,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               product_ALL: IProductWhere
               \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
               product_NONE: IProductWhere
-              product_NOT: IProductWhere @deprecated(reason: \\"Use \`product_NONE\` instead.\\")
               \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
               product_SINGLE: IProductWhere
               \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
@@ -508,7 +402,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Specify one or more INodeSort objects to sort INodes by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [INodeSort]
+              sort: [INodeSort!]
             }
 
             \\"\\"\\"
@@ -522,15 +416,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [INodeWhere!]
               NOT: INodeWhere
               OR: [INodeWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
               typename_IN: [INodeImplementation!]
             }
@@ -567,11 +457,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: IProduct!
             }
 
-            interface IProductEventPayload {
-              id: String!
-              name: String!
-            }
-
             enum IProductImplementation {
               Movie
               Series
@@ -583,7 +468,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [IProductSort]
+              sort: [IProductSort!]
             }
 
             \\"\\"\\"
@@ -592,33 +477,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input IProductSort {
               id: SortDirection
               name: SortDirection
-            }
-
-            input IProductSubscriptionWhere {
-              AND: [IProductSubscriptionWhere!]
-              NOT: IProductSubscriptionWhere
-              OR: [IProductSubscriptionWhere!]
-              id: String
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_STARTS_WITH: String
-              name: String
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
             }
 
             input IProductUpdateInput {
@@ -630,25 +488,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductWhere!]
               NOT: IProductWhere
               OR: [IProductWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
               typename_IN: [IProductImplementation!]
             }
@@ -660,9 +510,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Movie implements INode & IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
               id: String!
               name: String!
             }
@@ -671,18 +521,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input MovieConnectInput {
-              genre: MovieGenreConnectFieldInput
-            }
-
-            input MovieConnectOrCreateInput {
-              genre: MovieGenreConnectOrCreateFieldInput
-            }
-
-            type MovieConnectedRelationships {
-              genre: MovieGenreConnectedRelationship
             }
 
             input MovieCreateInput {
@@ -707,16 +545,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input MovieDisconnectInput {
-              genre: MovieGenreDisconnectFieldInput
-            }
-
             type MovieEdge {
               cursor: String!
               node: Movie!
             }
 
-            type MovieEventPayload implements IProductEventPayload {
+            type MovieEventPayload {
               id: String!
               name: String!
             }
@@ -725,7 +559,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -751,10 +586,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: GenreOnCreateInput!
             }
 
-            type MovieGenreConnectedRelationship {
-              node: GenreEventPayload!
-            }
-
             type MovieGenreConnection {
               edges: [MovieGenreRelationship!]!
               pageInfo: PageInfo!
@@ -770,7 +601,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: MovieGenreConnectionWhere
               OR: [MovieGenreConnectionWhere!]
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input MovieGenreCreateFieldInput {
@@ -806,50 +636,26 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreNodeAggregationWhereInput!]
               NOT: MovieGenreNodeAggregationWhereInput
               OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type MovieGenreRelationship {
               cursor: String!
               node: Genre!
-            }
-
-            input MovieGenreRelationshipSubscriptionWhere {
-              node: GenreSubscriptionWhere
             }
 
             input MovieGenreUpdateConnectionInput {
@@ -875,46 +681,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               sort: [MovieSort!]
             }
 
-            input MovieRelationInput {
-              genre: MovieGenreCreateFieldInput
-            }
-
-            type MovieRelationshipCreatedEvent {
-              createdRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipCreatedSubscriptionWhere {
-              AND: [MovieRelationshipCreatedSubscriptionWhere!]
-              NOT: MovieRelationshipCreatedSubscriptionWhere
-              OR: [MovieRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            type MovieRelationshipDeletedEvent {
-              deletedRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipDeletedSubscriptionWhere {
-              AND: [MovieRelationshipDeletedSubscriptionWhere!]
-              NOT: MovieRelationshipDeletedSubscriptionWhere
-              OR: [MovieRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            input MovieRelationshipsSubscriptionWhere {
-              genre: MovieGenreRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -927,25 +693,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -969,27 +727,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: MovieGenreConnectionWhere
-              genreConnection_NOT: MovieGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -1006,9 +754,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               deleteGenres(delete: GenreDeleteInput, where: GenreWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateGenres(connect: GenreConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: GenreRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: GenreDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: GenreDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: MovieConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: SeriesConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1020,27 +768,27 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Query {
-              genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-              iNodes(options: INodeOptions, where: INodeWhere): [INode!]!
+              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+              iNodes(limit: Int, offset: Int, options: INodeOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [INodeSort!], where: INodeWhere): [INode!]!
               iNodesAggregate(where: INodeWhere): INodeAggregateSelection!
-              iNodesConnection(after: String, first: Int, sort: [INodeSort], where: INodeWhere): INodesConnection!
-              iProducts(options: IProductOptions, where: IProductWhere): [IProduct!]!
+              iNodesConnection(after: String, first: Int, sort: [INodeSort!], where: INodeWhere): INodesConnection!
+              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
               iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort], where: IProductWhere): IProductsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements INode & IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): SeriesGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [SeriesGenreConnectionSort!], where: SeriesGenreConnectionWhere): SeriesGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): SeriesGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [SeriesGenreConnectionSort!], where: SeriesGenreConnectionWhere): SeriesGenreConnection!
               id: String!
               name: String!
             }
@@ -1049,18 +797,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input SeriesConnectInput {
-              genre: SeriesGenreConnectFieldInput
-            }
-
-            input SeriesConnectOrCreateInput {
-              genre: SeriesGenreConnectOrCreateFieldInput
-            }
-
-            type SeriesConnectedRelationships {
-              genre: SeriesGenreConnectedRelationship
             }
 
             type SeriesConnection {
@@ -1091,16 +827,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input SeriesDisconnectInput {
-              genre: SeriesGenreDisconnectFieldInput
-            }
-
             type SeriesEdge {
               cursor: String!
               node: Series!
             }
 
-            type SeriesEventPayload implements IProductEventPayload {
+            type SeriesEventPayload {
               id: String!
               name: String!
             }
@@ -1109,7 +841,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1135,10 +868,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: GenreOnCreateInput!
             }
 
-            type SeriesGenreConnectedRelationship {
-              node: GenreEventPayload!
-            }
-
             type SeriesGenreConnection {
               edges: [SeriesGenreRelationship!]!
               pageInfo: PageInfo!
@@ -1154,7 +883,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: SeriesGenreConnectionWhere
               OR: [SeriesGenreConnectionWhere!]
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input SeriesGenreCreateFieldInput {
@@ -1190,50 +918,26 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreNodeAggregationWhereInput!]
               NOT: SeriesGenreNodeAggregationWhereInput
               OR: [SeriesGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type SeriesGenreRelationship {
               cursor: String!
               node: Genre!
-            }
-
-            input SeriesGenreRelationshipSubscriptionWhere {
-              node: GenreSubscriptionWhere
             }
 
             input SeriesGenreUpdateConnectionInput {
@@ -1259,46 +963,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               sort: [SeriesSort!]
             }
 
-            input SeriesRelationInput {
-              genre: SeriesGenreCreateFieldInput
-            }
-
-            type SeriesRelationshipCreatedEvent {
-              createdRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipCreatedSubscriptionWhere {
-              AND: [SeriesRelationshipCreatedSubscriptionWhere!]
-              NOT: SeriesRelationshipCreatedSubscriptionWhere
-              OR: [SeriesRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            type SeriesRelationshipDeletedEvent {
-              deletedRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipDeletedSubscriptionWhere {
-              AND: [SeriesRelationshipDeletedSubscriptionWhere!]
-              NOT: SeriesRelationshipDeletedSubscriptionWhere
-              OR: [SeriesRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            input SeriesRelationshipsSubscriptionWhere {
-              genre: SeriesGenreRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Series by. The order in which sorts are applied is not guaranteed when specifying many fields in one SeriesSort object.
             \\"\\"\\"
@@ -1311,25 +975,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -1353,27 +1009,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: SeriesGenreConnectionWhere
-              genreConnection_NOT: SeriesGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -1393,18 +1039,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             type Subscription {
               genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
               genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreRelationshipCreated(where: GenreRelationshipCreatedSubscriptionWhere): GenreRelationshipCreatedEvent!
-              genreRelationshipDeleted(where: GenreRelationshipDeletedSubscriptionWhere): GenreRelationshipDeletedEvent!
               genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
               movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
               movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-              movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
               movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
               seriesCreated(where: SeriesSubscriptionWhere): SeriesCreatedEvent!
               seriesDeleted(where: SeriesSubscriptionWhere): SeriesDeletedEvent!
-              seriesRelationshipCreated(where: SeriesRelationshipCreatedSubscriptionWhere): SeriesRelationshipCreatedEvent!
-              seriesRelationshipDeleted(where: SeriesRelationshipDeletedSubscriptionWhere): SeriesRelationshipDeletedEvent!
               seriesUpdated(where: SeriesSubscriptionWhere): SeriesUpdatedEvent!
             }
 
@@ -1417,7 +1057,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -1445,28 +1084,27 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
                 genre: Genre!
             }
 
-            type Movie implements IProduct {
+            type Movie implements IProduct @node {
                 id: String!
 
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type Series implements IProduct {
+            type Series implements IProduct @node {
                 id: String!
 
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type Genre {
+            type Genre @node {
                 name: String! @unique
                 product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
         `;
 
-        const subscriptionsEngine = new TestSubscriptionsEngine();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: subscriptionsEngine } });
+        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: new TestCDCEngine() } });
 
         const schema = await neoSchema.getSchema();
         const errors = validateSchema(schema);
@@ -1490,7 +1128,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -1509,7 +1146,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -1524,9 +1160,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true, options: IProductOptions, where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true, where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -1544,10 +1180,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreConnectWhere {
               node: GenreWhere!
-            }
-
-            type GenreConnectedRelationships {
-              product: GenreProductConnectedRelationship
             }
 
             input GenreCreateInput {
@@ -1611,7 +1243,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -1621,10 +1254,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreProductConnectFieldInput {
               where: IProductConnectWhere
-            }
-
-            type GenreProductConnectedRelationship {
-              node: IProductEventPayload!
             }
 
             type GenreProductConnection {
@@ -1642,7 +1271,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: GenreProductConnectionWhere
               OR: [GenreProductConnectionWhere!]
               node: IProductWhere
-              node_NOT: IProductWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input GenreProductCreateFieldInput {
@@ -1666,85 +1294,41 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductNodeAggregationWhereInput!]
               NOT: GenreProductNodeAggregationWhereInput
               OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_AVERAGE_LENGTH_EQUAL: Float
               id_AVERAGE_LENGTH_GT: Float
               id_AVERAGE_LENGTH_GTE: Float
               id_AVERAGE_LENGTH_LT: Float
               id_AVERAGE_LENGTH_LTE: Float
-              id_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_LONGEST_LENGTH_EQUAL: Int
               id_LONGEST_LENGTH_GT: Int
               id_LONGEST_LENGTH_GTE: Int
               id_LONGEST_LENGTH_LT: Int
               id_LONGEST_LENGTH_LTE: Int
-              id_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_SHORTEST_LENGTH_EQUAL: Int
               id_SHORTEST_LENGTH_GT: Int
               id_SHORTEST_LENGTH_GTE: Int
               id_SHORTEST_LENGTH_LT: Int
               id_SHORTEST_LENGTH_LTE: Int
-              id_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type GenreProductRelationship {
               cursor: String!
               node: IProduct!
-            }
-
-            input GenreProductRelationshipSubscriptionWhere {
-              node: IProductSubscriptionWhere
             }
 
             input GenreProductUpdateConnectionInput {
@@ -1760,46 +1344,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               where: GenreProductConnectionWhere
             }
 
-            input GenreRelationInput {
-              product: [GenreProductCreateFieldInput!]
-            }
-
-            type GenreRelationshipCreatedEvent {
-              createdRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipCreatedSubscriptionWhere {
-              AND: [GenreRelationshipCreatedSubscriptionWhere!]
-              NOT: GenreRelationshipCreatedSubscriptionWhere
-              OR: [GenreRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            type GenreRelationshipDeletedEvent {
-              deletedRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipDeletedSubscriptionWhere {
-              AND: [GenreRelationshipDeletedSubscriptionWhere!]
-              NOT: GenreRelationshipDeletedSubscriptionWhere
-              OR: [GenreRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            input GenreRelationshipsSubscriptionWhere {
-              product: GenreProductRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
             \\"\\"\\"
@@ -1811,20 +1355,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             input GenreUniqueWhere {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              name_EQ: String
             }
 
             input GenreUpdateInput {
@@ -1843,19 +1384,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              product: IProductWhere @deprecated(reason: \\"Use \`product_SOME\` instead.\\")
               productAggregate: GenreProductAggregateInput
-              productConnection: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Genres where all of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -1864,7 +1399,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               Return Genres where none of the related GenreProductConnections match this filter
               \\"\\"\\"
               productConnection_NONE: GenreProductConnectionWhere
-              productConnection_NOT: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Genres where one of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -1877,7 +1411,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               product_ALL: IProductWhere
               \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
               product_NONE: IProductWhere
-              product_NOT: IProductWhere @deprecated(reason: \\"Use \`product_NONE\` instead.\\")
               \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
               product_SINGLE: IProductWhere
               \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
@@ -1916,11 +1449,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: IProduct!
             }
 
-            interface IProductEventPayload {
-              id: String!
-              name: String!
-            }
-
             enum IProductImplementation {
               Movie
               Series
@@ -1932,7 +1460,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [IProductSort]
+              sort: [IProductSort!]
             }
 
             \\"\\"\\"
@@ -1941,33 +1469,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input IProductSort {
               id: SortDirection
               name: SortDirection
-            }
-
-            input IProductSubscriptionWhere {
-              AND: [IProductSubscriptionWhere!]
-              NOT: IProductSubscriptionWhere
-              OR: [IProductSubscriptionWhere!]
-              id: String
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_STARTS_WITH: String
-              name: String
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
             }
 
             input IProductUpdateInput {
@@ -1979,25 +1480,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductWhere!]
               NOT: IProductWhere
               OR: [IProductWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
               typename_IN: [IProductImplementation!]
             }
@@ -2009,9 +1502,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
               id: String!
               name: String!
             }
@@ -2020,18 +1513,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input MovieConnectInput {
-              genre: MovieGenreConnectFieldInput
-            }
-
-            input MovieConnectOrCreateInput {
-              genre: MovieGenreConnectOrCreateFieldInput
-            }
-
-            type MovieConnectedRelationships {
-              genre: MovieGenreConnectedRelationship
             }
 
             input MovieCreateInput {
@@ -2056,16 +1537,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input MovieDisconnectInput {
-              genre: MovieGenreDisconnectFieldInput
-            }
-
             type MovieEdge {
               cursor: String!
               node: Movie!
             }
 
-            type MovieEventPayload implements IProductEventPayload {
+            type MovieEventPayload {
               id: String!
               name: String!
             }
@@ -2074,7 +1551,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2100,10 +1578,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: GenreOnCreateInput!
             }
 
-            type MovieGenreConnectedRelationship {
-              node: GenreEventPayload!
-            }
-
             type MovieGenreConnection {
               edges: [MovieGenreRelationship!]!
               pageInfo: PageInfo!
@@ -2119,7 +1593,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: MovieGenreConnectionWhere
               OR: [MovieGenreConnectionWhere!]
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input MovieGenreCreateFieldInput {
@@ -2155,50 +1628,26 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreNodeAggregationWhereInput!]
               NOT: MovieGenreNodeAggregationWhereInput
               OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type MovieGenreRelationship {
               cursor: String!
               node: Genre!
-            }
-
-            input MovieGenreRelationshipSubscriptionWhere {
-              node: GenreSubscriptionWhere
             }
 
             input MovieGenreUpdateConnectionInput {
@@ -2224,46 +1673,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               sort: [MovieSort!]
             }
 
-            input MovieRelationInput {
-              genre: MovieGenreCreateFieldInput
-            }
-
-            type MovieRelationshipCreatedEvent {
-              createdRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipCreatedSubscriptionWhere {
-              AND: [MovieRelationshipCreatedSubscriptionWhere!]
-              NOT: MovieRelationshipCreatedSubscriptionWhere
-              OR: [MovieRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            type MovieRelationshipDeletedEvent {
-              deletedRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipDeletedSubscriptionWhere {
-              AND: [MovieRelationshipDeletedSubscriptionWhere!]
-              NOT: MovieRelationshipDeletedSubscriptionWhere
-              OR: [MovieRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            input MovieRelationshipsSubscriptionWhere {
-              genre: MovieGenreRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -2276,25 +1685,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -2318,27 +1719,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: MovieGenreConnectionWhere
-              genreConnection_NOT: MovieGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -2355,9 +1746,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               deleteGenres(delete: GenreDeleteInput, where: GenreWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateGenres(connect: GenreConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: GenreRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: GenreDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: GenreDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: MovieConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: SeriesConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -2369,24 +1760,24 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Query {
-              genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-              iProducts(options: IProductOptions, where: IProductWhere): [IProduct!]!
+              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
               iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort], where: IProductWhere): IProductsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): SeriesGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [SeriesGenreConnectionSort!], where: SeriesGenreConnectionWhere): SeriesGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): SeriesGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [SeriesGenreConnectionSort!], where: SeriesGenreConnectionWhere): SeriesGenreConnection!
               id: String!
               name: String!
             }
@@ -2395,18 +1786,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input SeriesConnectInput {
-              genre: SeriesGenreConnectFieldInput
-            }
-
-            input SeriesConnectOrCreateInput {
-              genre: SeriesGenreConnectOrCreateFieldInput
-            }
-
-            type SeriesConnectedRelationships {
-              genre: SeriesGenreConnectedRelationship
             }
 
             type SeriesConnection {
@@ -2437,16 +1816,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input SeriesDisconnectInput {
-              genre: SeriesGenreDisconnectFieldInput
-            }
-
             type SeriesEdge {
               cursor: String!
               node: Series!
             }
 
-            type SeriesEventPayload implements IProductEventPayload {
+            type SeriesEventPayload {
               id: String!
               name: String!
             }
@@ -2455,7 +1830,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2481,10 +1857,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: GenreOnCreateInput!
             }
 
-            type SeriesGenreConnectedRelationship {
-              node: GenreEventPayload!
-            }
-
             type SeriesGenreConnection {
               edges: [SeriesGenreRelationship!]!
               pageInfo: PageInfo!
@@ -2500,7 +1872,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: SeriesGenreConnectionWhere
               OR: [SeriesGenreConnectionWhere!]
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input SeriesGenreCreateFieldInput {
@@ -2536,50 +1907,26 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreNodeAggregationWhereInput!]
               NOT: SeriesGenreNodeAggregationWhereInput
               OR: [SeriesGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type SeriesGenreRelationship {
               cursor: String!
               node: Genre!
-            }
-
-            input SeriesGenreRelationshipSubscriptionWhere {
-              node: GenreSubscriptionWhere
             }
 
             input SeriesGenreUpdateConnectionInput {
@@ -2605,46 +1952,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               sort: [SeriesSort!]
             }
 
-            input SeriesRelationInput {
-              genre: SeriesGenreCreateFieldInput
-            }
-
-            type SeriesRelationshipCreatedEvent {
-              createdRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipCreatedSubscriptionWhere {
-              AND: [SeriesRelationshipCreatedSubscriptionWhere!]
-              NOT: SeriesRelationshipCreatedSubscriptionWhere
-              OR: [SeriesRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            type SeriesRelationshipDeletedEvent {
-              deletedRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipDeletedSubscriptionWhere {
-              AND: [SeriesRelationshipDeletedSubscriptionWhere!]
-              NOT: SeriesRelationshipDeletedSubscriptionWhere
-              OR: [SeriesRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            input SeriesRelationshipsSubscriptionWhere {
-              genre: SeriesGenreRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Series by. The order in which sorts are applied is not guaranteed when specifying many fields in one SeriesSort object.
             \\"\\"\\"
@@ -2657,25 +1964,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -2699,27 +1998,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: SeriesGenreConnectionWhere
-              genreConnection_NOT: SeriesGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -2739,18 +2028,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             type Subscription {
               genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
               genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreRelationshipCreated(where: GenreRelationshipCreatedSubscriptionWhere): GenreRelationshipCreatedEvent!
-              genreRelationshipDeleted(where: GenreRelationshipDeletedSubscriptionWhere): GenreRelationshipDeletedEvent!
               genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
               movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
               movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-              movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
               movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
               seriesCreated(where: SeriesSubscriptionWhere): SeriesCreatedEvent!
               seriesDeleted(where: SeriesSubscriptionWhere): SeriesDeletedEvent!
-              seriesRelationshipCreated(where: SeriesRelationshipCreatedSubscriptionWhere): SeriesRelationshipCreatedEvent!
-              seriesRelationshipDeleted(where: SeriesRelationshipDeletedSubscriptionWhere): SeriesRelationshipDeletedEvent!
               seriesUpdated(where: SeriesSubscriptionWhere): SeriesUpdatedEvent!
             }
 
@@ -2763,7 +2046,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -2791,14 +2073,14 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
                 genre: Genre! @declareRelationship
             }
 
-            type Movie implements IProduct {
+            type Movie implements IProduct @node {
                 id: String!
 
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT, properties: "MovieProps")
             }
 
-            type Series implements IProduct {
+            type Series implements IProduct @node {
                 id: String!
 
                 name: String!
@@ -2813,14 +2095,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
                 episodes: Int
             }
 
-            type Genre {
+            type Genre @node {
                 name: String! @unique
                 product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
         `;
 
-        const subscriptionsEngine = new TestSubscriptionsEngine();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: subscriptionsEngine } });
+        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: new TestCDCEngine() } });
 
         const schema = await neoSchema.getSchema();
         const errors = validateSchema(schema);
@@ -2844,7 +2125,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -2863,7 +2143,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -2878,9 +2157,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true, options: IProductOptions, where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true, where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -2898,10 +2177,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreConnectWhere {
               node: GenreWhere!
-            }
-
-            type GenreConnectedRelationships {
-              product: GenreProductConnectedRelationship
             }
 
             input GenreCreateInput {
@@ -2965,7 +2240,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -2976,10 +2252,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input GenreProductConnectFieldInput {
               connect: IProductConnectInput
               where: IProductConnectWhere
-            }
-
-            type GenreProductConnectedRelationship {
-              node: IProductEventPayload!
             }
 
             type GenreProductConnection {
@@ -2997,7 +2269,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: GenreProductConnectionWhere
               OR: [GenreProductConnectionWhere!]
               node: IProductWhere
-              node_NOT: IProductWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input GenreProductCreateFieldInput {
@@ -3023,85 +2294,41 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductNodeAggregationWhereInput!]
               NOT: GenreProductNodeAggregationWhereInput
               OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_AVERAGE_LENGTH_EQUAL: Float
               id_AVERAGE_LENGTH_GT: Float
               id_AVERAGE_LENGTH_GTE: Float
               id_AVERAGE_LENGTH_LT: Float
               id_AVERAGE_LENGTH_LTE: Float
-              id_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_LONGEST_LENGTH_EQUAL: Int
               id_LONGEST_LENGTH_GT: Int
               id_LONGEST_LENGTH_GTE: Int
               id_LONGEST_LENGTH_LT: Int
               id_LONGEST_LENGTH_LTE: Int
-              id_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_SHORTEST_LENGTH_EQUAL: Int
               id_SHORTEST_LENGTH_GT: Int
               id_SHORTEST_LENGTH_GTE: Int
               id_SHORTEST_LENGTH_LT: Int
               id_SHORTEST_LENGTH_LTE: Int
-              id_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type GenreProductRelationship {
               cursor: String!
               node: IProduct!
-            }
-
-            input GenreProductRelationshipSubscriptionWhere {
-              node: IProductSubscriptionWhere
             }
 
             input GenreProductUpdateConnectionInput {
@@ -3117,46 +2344,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               where: GenreProductConnectionWhere
             }
 
-            input GenreRelationInput {
-              product: [GenreProductCreateFieldInput!]
-            }
-
-            type GenreRelationshipCreatedEvent {
-              createdRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipCreatedSubscriptionWhere {
-              AND: [GenreRelationshipCreatedSubscriptionWhere!]
-              NOT: GenreRelationshipCreatedSubscriptionWhere
-              OR: [GenreRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            type GenreRelationshipDeletedEvent {
-              deletedRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipDeletedSubscriptionWhere {
-              AND: [GenreRelationshipDeletedSubscriptionWhere!]
-              NOT: GenreRelationshipDeletedSubscriptionWhere
-              OR: [GenreRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            input GenreRelationshipsSubscriptionWhere {
-              product: GenreProductRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
             \\"\\"\\"
@@ -3168,20 +2355,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             input GenreUniqueWhere {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              name_EQ: String
             }
 
             input GenreUpdateInput {
@@ -3200,19 +2384,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              product: IProductWhere @deprecated(reason: \\"Use \`product_SOME\` instead.\\")
               productAggregate: GenreProductAggregateInput
-              productConnection: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Genres where all of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -3221,7 +2399,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               Return Genres where none of the related GenreProductConnections match this filter
               \\"\\"\\"
               productConnection_NONE: GenreProductConnectionWhere
-              productConnection_NOT: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Genres where one of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -3234,7 +2411,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               product_ALL: IProductWhere
               \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
               product_NONE: IProductWhere
-              product_NOT: IProductWhere @deprecated(reason: \\"Use \`product_NONE\` instead.\\")
               \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
               product_SINGLE: IProductWhere
               \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
@@ -3248,7 +2424,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             interface IProduct {
-              genre(options: GenreOptions, where: GenreWhere): Genre!
+              genre(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
               genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
@@ -3286,16 +2462,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               node: IProduct!
             }
 
-            interface IProductEventPayload {
-              id: String!
-              name: String!
-            }
-
             input IProductGenreAggregateInput {
               AND: [IProductGenreAggregateInput!]
               NOT: IProductGenreAggregateInput
               OR: [IProductGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3340,9 +2512,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: IProductGenreConnectionWhere
               OR: [IProductGenreConnectionWhere!]
               edge: IProductGenreEdgeWhere
-              edge_NOT: IProductGenreEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input IProductGenreCreateFieldInput {
@@ -3429,41 +2599,21 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductGenreNodeAggregationWhereInput!]
               NOT: IProductGenreNodeAggregationWhereInput
               OR: [IProductGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type IProductGenreRelationship {
@@ -3500,7 +2650,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [IProductSort]
+              sort: [IProductSort!]
             }
 
             \\"\\"\\"
@@ -3509,33 +2659,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input IProductSort {
               id: SortDirection
               name: SortDirection
-            }
-
-            input IProductSubscriptionWhere {
-              AND: [IProductSubscriptionWhere!]
-              NOT: IProductSubscriptionWhere
-              OR: [IProductSubscriptionWhere!]
-              id: String
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_STARTS_WITH: String
-              name: String
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
             }
 
             input IProductUpdateInput {
@@ -3551,27 +2674,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: IProductGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
               typename_IN: [IProductImplementation!]
             }
@@ -3590,9 +2703,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
             }
@@ -3601,18 +2714,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input MovieConnectInput {
-              genre: MovieGenreConnectFieldInput
-            }
-
-            input MovieConnectOrCreateInput {
-              genre: MovieGenreConnectOrCreateFieldInput
-            }
-
-            type MovieConnectedRelationships {
-              genre: MovieGenreConnectedRelationship
             }
 
             input MovieCreateInput {
@@ -3637,16 +2738,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input MovieDisconnectInput {
-              genre: IProductGenreDisconnectFieldInput
-            }
-
             type MovieEdge {
               cursor: String!
               node: Movie!
             }
 
-            type MovieEventPayload implements IProductEventPayload {
+            type MovieEventPayload {
               id: String!
               name: String!
             }
@@ -3655,7 +2752,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -3682,11 +2780,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input MovieGenreConnectOrCreateFieldInputOnCreate {
               edge: MoviePropsCreateInput!
               node: GenreOnCreateInput!
-            }
-
-            type MovieGenreConnectedRelationship {
-              node: GenreEventPayload!
-              year: Int!
             }
 
             input MovieGenreCreateFieldInput {
@@ -3718,46 +2811,21 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreNodeAggregationWhereInput!]
               NOT: MovieGenreNodeAggregationWhereInput
               OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-            }
-
-            input MovieGenreRelationshipSubscriptionWhere {
-              edge: MoviePropsSubscriptionWhere
-              node: GenreSubscriptionWhere
             }
 
             input MovieGenreUpdateConnectionInput {
@@ -3801,11 +2869,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               year_AVERAGE_GTE: Float
               year_AVERAGE_LT: Float
               year_AVERAGE_LTE: Float
-              year_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              year_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              year_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              year_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              year_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               year_MAX_EQUAL: Int
               year_MAX_GT: Int
               year_MAX_GTE: Int
@@ -3831,20 +2894,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               year: SortDirection
             }
 
-            input MoviePropsSubscriptionWhere {
-              AND: [MoviePropsSubscriptionWhere!]
-              NOT: MoviePropsSubscriptionWhere
-              OR: [MoviePropsSubscriptionWhere!]
-              year: Int
-              year_GT: Int
-              year_GTE: Int
-              year_IN: [Int!]
-              year_LT: Int
-              year_LTE: Int
-              year_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              year_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
             input MoviePropsUpdateInput {
               year: Int
               year_DECREMENT: Int
@@ -3855,54 +2904,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MoviePropsWhere!]
               NOT: MoviePropsWhere
               OR: [MoviePropsWhere!]
-              year: Int
+              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              year_EQ: Int
               year_GT: Int
               year_GTE: Int
               year_IN: [Int!]
               year_LT: Int
               year_LTE: Int
-              year_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              year_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
-            input MovieRelationInput {
-              genre: MovieGenreCreateFieldInput
-            }
-
-            type MovieRelationshipCreatedEvent {
-              createdRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipCreatedSubscriptionWhere {
-              AND: [MovieRelationshipCreatedSubscriptionWhere!]
-              NOT: MovieRelationshipCreatedSubscriptionWhere
-              OR: [MovieRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            type MovieRelationshipDeletedEvent {
-              deletedRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipDeletedSubscriptionWhere {
-              AND: [MovieRelationshipDeletedSubscriptionWhere!]
-              NOT: MovieRelationshipDeletedSubscriptionWhere
-              OR: [MovieRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            input MovieRelationshipsSubscriptionWhere {
-              genre: MovieGenreRelationshipSubscriptionWhere
             }
 
             \\"\\"\\"
@@ -3917,25 +2925,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -3959,27 +2959,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -3996,9 +2986,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               deleteGenres(delete: GenreDeleteInput, where: GenreWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateGenres(connect: GenreConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: GenreRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: GenreDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: GenreDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: MovieConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: SeriesConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -4010,24 +3000,24 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Query {
-              genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-              iProducts(options: IProductOptions, where: IProductWhere): [IProduct!]!
+              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
               iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort], where: IProductWhere): IProductsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements IProduct {
-              genre(directed: Boolean = true, options: GenreOptions, where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true, where: GenreWhere): SeriesGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): SeriesGenreGenreAggregationSelection
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
             }
@@ -4036,18 +3026,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input SeriesConnectInput {
-              genre: SeriesGenreConnectFieldInput
-            }
-
-            input SeriesConnectOrCreateInput {
-              genre: SeriesGenreConnectOrCreateFieldInput
-            }
-
-            type SeriesConnectedRelationships {
-              genre: SeriesGenreConnectedRelationship
             }
 
             type SeriesConnection {
@@ -4078,16 +3056,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input SeriesDisconnectInput {
-              genre: IProductGenreDisconnectFieldInput
-            }
-
             type SeriesEdge {
               cursor: String!
               node: Series!
             }
 
-            type SeriesEventPayload implements IProductEventPayload {
+            type SeriesEventPayload {
               id: String!
               name: String!
             }
@@ -4096,7 +3070,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -4123,11 +3098,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input SeriesGenreConnectOrCreateFieldInputOnCreate {
               edge: SeriesPropsCreateInput
               node: GenreOnCreateInput!
-            }
-
-            type SeriesGenreConnectedRelationship {
-              episodes: Int
-              node: GenreEventPayload!
             }
 
             input SeriesGenreCreateFieldInput {
@@ -4159,46 +3129,21 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreNodeAggregationWhereInput!]
               NOT: SeriesGenreNodeAggregationWhereInput
               OR: [SeriesGenreNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-            }
-
-            input SeriesGenreRelationshipSubscriptionWhere {
-              edge: SeriesPropsSubscriptionWhere
-              node: GenreSubscriptionWhere
             }
 
             input SeriesGenreUpdateConnectionInput {
@@ -4242,11 +3187,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               episodes_AVERAGE_GTE: Float
               episodes_AVERAGE_LT: Float
               episodes_AVERAGE_LTE: Float
-              episodes_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodes_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodes_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodes_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              episodes_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               episodes_MAX_EQUAL: Int
               episodes_MAX_GT: Int
               episodes_MAX_GTE: Int
@@ -4272,20 +3212,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               episodes: SortDirection
             }
 
-            input SeriesPropsSubscriptionWhere {
-              AND: [SeriesPropsSubscriptionWhere!]
-              NOT: SeriesPropsSubscriptionWhere
-              OR: [SeriesPropsSubscriptionWhere!]
-              episodes: Int
-              episodes_GT: Int
-              episodes_GTE: Int
-              episodes_IN: [Int]
-              episodes_LT: Int
-              episodes_LTE: Int
-              episodes_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
             input SeriesPropsUpdateInput {
               episodes: Int
               episodes_DECREMENT: Int
@@ -4296,54 +3222,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesPropsWhere!]
               NOT: SeriesPropsWhere
               OR: [SeriesPropsWhere!]
-              episodes: Int
+              episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodes_EQ: Int
               episodes_GT: Int
               episodes_GTE: Int
               episodes_IN: [Int]
               episodes_LT: Int
               episodes_LTE: Int
-              episodes_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
-            input SeriesRelationInput {
-              genre: SeriesGenreCreateFieldInput
-            }
-
-            type SeriesRelationshipCreatedEvent {
-              createdRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipCreatedSubscriptionWhere {
-              AND: [SeriesRelationshipCreatedSubscriptionWhere!]
-              NOT: SeriesRelationshipCreatedSubscriptionWhere
-              OR: [SeriesRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            type SeriesRelationshipDeletedEvent {
-              deletedRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipDeletedSubscriptionWhere {
-              AND: [SeriesRelationshipDeletedSubscriptionWhere!]
-              NOT: SeriesRelationshipDeletedSubscriptionWhere
-              OR: [SeriesRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            input SeriesRelationshipsSubscriptionWhere {
-              genre: SeriesGenreRelationshipSubscriptionWhere
             }
 
             \\"\\"\\"
@@ -4358,25 +3243,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -4400,27 +3277,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: GenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -4440,18 +3307,12 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             type Subscription {
               genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
               genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreRelationshipCreated(where: GenreRelationshipCreatedSubscriptionWhere): GenreRelationshipCreatedEvent!
-              genreRelationshipDeleted(where: GenreRelationshipDeletedSubscriptionWhere): GenreRelationshipDeletedEvent!
               genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
               movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
               movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-              movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
               movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
               seriesCreated(where: SeriesSubscriptionWhere): SeriesCreatedEvent!
               seriesDeleted(where: SeriesSubscriptionWhere): SeriesDeletedEvent!
-              seriesRelationshipCreated(where: SeriesRelationshipCreatedSubscriptionWhere): SeriesRelationshipCreatedEvent!
-              seriesRelationshipDeleted(where: SeriesRelationshipDeletedSubscriptionWhere): SeriesRelationshipDeletedEvent!
               seriesUpdated(where: SeriesSubscriptionWhere): SeriesUpdatedEvent!
             }
 
@@ -4464,7 +3325,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -4492,14 +3352,14 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
                 genre: UGenre! @declareRelationship
             }
 
-            type Movie implements IProduct {
+            type Movie implements IProduct @node {
                 id: String!
 
                 name: String!
                 genre: UGenre! @relationship(type: "HAS_GENRE", direction: OUT, properties: "MovieProps")
             }
 
-            type Series implements IProduct {
+            type Series implements IProduct @node {
                 id: String!
 
                 name: String!
@@ -4516,19 +3376,18 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             union UGenre = Genre | Rating
 
-            type Genre {
+            type Genre @node {
                 name: String! @unique
                 product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
 
-            type Rating {
+            type Rating @node {
                 number: Int! @unique
                 product: [IProduct!]! @relationship(type: "HAS_RATING", direction: IN)
             }
         `;
 
-        const subscriptionsEngine = new TestSubscriptionsEngine();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: subscriptionsEngine } });
+        const neoSchema = new Neo4jGraphQL({ typeDefs, features: { subscriptions: new TestCDCEngine() } });
 
         const schema = await neoSchema.getSchema();
         const errors = validateSchema(schema);
@@ -4552,7 +3411,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -4576,7 +3434,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -4591,9 +3448,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true, options: IProductOptions, where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true, where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -4611,10 +3468,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input GenreConnectWhere {
               node: GenreWhere!
-            }
-
-            type GenreConnectedRelationships {
-              product: GenreProductConnectedRelationship
             }
 
             input GenreCreateInput {
@@ -4678,7 +3531,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -4689,10 +3543,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input GenreProductConnectFieldInput {
               connect: IProductConnectInput
               where: IProductConnectWhere
-            }
-
-            type GenreProductConnectedRelationship {
-              node: IProductEventPayload!
             }
 
             type GenreProductConnection {
@@ -4710,7 +3560,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: GenreProductConnectionWhere
               OR: [GenreProductConnectionWhere!]
               node: IProductWhere
-              node_NOT: IProductWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input GenreProductCreateFieldInput {
@@ -4736,85 +3585,41 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductNodeAggregationWhereInput!]
               NOT: GenreProductNodeAggregationWhereInput
               OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_AVERAGE_LENGTH_EQUAL: Float
               id_AVERAGE_LENGTH_GT: Float
               id_AVERAGE_LENGTH_GTE: Float
               id_AVERAGE_LENGTH_LT: Float
               id_AVERAGE_LENGTH_LTE: Float
-              id_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_LONGEST_LENGTH_EQUAL: Int
               id_LONGEST_LENGTH_GT: Int
               id_LONGEST_LENGTH_GTE: Int
               id_LONGEST_LENGTH_LT: Int
               id_LONGEST_LENGTH_LTE: Int
-              id_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_SHORTEST_LENGTH_EQUAL: Int
               id_SHORTEST_LENGTH_GT: Int
               id_SHORTEST_LENGTH_GTE: Int
               id_SHORTEST_LENGTH_LT: Int
               id_SHORTEST_LENGTH_LTE: Int
-              id_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type GenreProductRelationship {
               cursor: String!
               node: IProduct!
-            }
-
-            input GenreProductRelationshipSubscriptionWhere {
-              node: IProductSubscriptionWhere
             }
 
             input GenreProductUpdateConnectionInput {
@@ -4830,46 +3635,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               where: GenreProductConnectionWhere
             }
 
-            input GenreRelationInput {
-              product: [GenreProductCreateFieldInput!]
-            }
-
-            type GenreRelationshipCreatedEvent {
-              createdRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipCreatedSubscriptionWhere {
-              AND: [GenreRelationshipCreatedSubscriptionWhere!]
-              NOT: GenreRelationshipCreatedSubscriptionWhere
-              OR: [GenreRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            type GenreRelationshipDeletedEvent {
-              deletedRelationship: GenreConnectedRelationships!
-              event: EventType!
-              genre: GenreEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input GenreRelationshipDeletedSubscriptionWhere {
-              AND: [GenreRelationshipDeletedSubscriptionWhere!]
-              NOT: GenreRelationshipDeletedSubscriptionWhere
-              OR: [GenreRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: GenreRelationshipsSubscriptionWhere
-              genre: GenreSubscriptionWhere
-            }
-
-            input GenreRelationshipsSubscriptionWhere {
-              product: GenreProductRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
             \\"\\"\\"
@@ -4881,20 +3646,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
             input GenreUniqueWhere {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              name_EQ: String
             }
 
             input GenreUpdateInput {
@@ -4913,19 +3675,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              product: IProductWhere @deprecated(reason: \\"Use \`product_SOME\` instead.\\")
               productAggregate: GenreProductAggregateInput
-              productConnection: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Genres where all of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -4934,7 +3690,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               Return Genres where none of the related GenreProductConnections match this filter
               \\"\\"\\"
               productConnection_NONE: GenreProductConnectionWhere
-              productConnection_NOT: GenreProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Genres where one of the related GenreProductConnections match this filter
               \\"\\"\\"
@@ -4947,7 +3702,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               product_ALL: IProductWhere
               \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
               product_NONE: IProductWhere
-              product_NOT: IProductWhere @deprecated(reason: \\"Use \`product_NONE\` instead.\\")
               \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
               product_SINGLE: IProductWhere
               \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
@@ -4961,7 +3715,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             interface IProduct {
-              genre(options: QueryOptions, where: UGenreWhere): UGenre!
+              genre(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: UGenreWhere): UGenre!
               genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
@@ -4997,11 +3751,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             type IProductEdge {
               cursor: String!
               node: IProduct!
-            }
-
-            interface IProductEventPayload {
-              id: String!
-              name: String!
             }
 
             input IProductGenreConnectInput {
@@ -5107,9 +3856,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: IProductGenreGenreConnectionWhere
               OR: [IProductGenreGenreConnectionWhere!]
               edge: IProductGenreEdgeWhere
-              edge_NOT: IProductGenreEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: GenreWhere
-              node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input IProductGenreGenreCreateFieldInput {
@@ -5163,9 +3910,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: IProductGenreRatingConnectionWhere
               OR: [IProductGenreRatingConnectionWhere!]
               edge: IProductGenreEdgeWhere
-              edge_NOT: IProductGenreEdgeWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: RatingWhere
-              node_NOT: RatingWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input IProductGenreRatingCreateFieldInput {
@@ -5222,7 +3967,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [IProductSort]
+              sort: [IProductSort!]
             }
 
             \\"\\"\\"
@@ -5231,33 +3976,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input IProductSort {
               id: SortDirection
               name: SortDirection
-            }
-
-            input IProductSubscriptionWhere {
-              AND: [IProductSubscriptionWhere!]
-              NOT: IProductSubscriptionWhere
-              OR: [IProductSubscriptionWhere!]
-              id: String
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_STARTS_WITH: String
-              name: String
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
             }
 
             input IProductUpdateInput {
@@ -5272,27 +3990,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [IProductWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: UGenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
               typename_IN: [IProductImplementation!]
             }
@@ -5311,8 +4019,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true, options: QueryOptions, where: UGenreWhere): UGenre!
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: UGenreWhere): UGenre!
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
             }
@@ -5321,18 +4029,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input MovieConnectInput {
-              genre: MovieGenreConnectInput
-            }
-
-            input MovieConnectOrCreateInput {
-              genre: MovieGenreConnectOrCreateInput
-            }
-
-            type MovieConnectedRelationships {
-              genre: MovieGenreConnectedRelationship
             }
 
             input MovieCreateInput {
@@ -5357,38 +4053,14 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input MovieDisconnectInput {
-              genre: MovieGenreDisconnectInput
-            }
-
             type MovieEdge {
               cursor: String!
               node: Movie!
             }
 
-            type MovieEventPayload implements IProductEventPayload {
+            type MovieEventPayload {
               id: String!
               name: String!
-            }
-
-            input MovieGenreConnectInput {
-              Genre: MovieGenreGenreConnectFieldInput
-              Rating: MovieGenreRatingConnectFieldInput
-            }
-
-            input MovieGenreConnectOrCreateInput {
-              Genre: MovieGenreGenreConnectOrCreateFieldInput
-              Rating: MovieGenreRatingConnectOrCreateFieldInput
-            }
-
-            type MovieGenreConnectedRelationship {
-              node: UGenreEventPayload!
-              year: Int!
-            }
-
-            input MovieGenreCreateFieldInput {
-              Genre: MovieGenreGenreCreateFieldInput
-              Rating: MovieGenreRatingCreateFieldInput
             }
 
             input MovieGenreCreateInput {
@@ -5399,11 +4071,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input MovieGenreDeleteInput {
               Genre: IProductGenreGenreDeleteFieldInput
               Rating: IProductGenreRatingDeleteFieldInput
-            }
-
-            input MovieGenreDisconnectInput {
-              Genre: IProductGenreGenreDisconnectFieldInput
-              Rating: IProductGenreRatingDisconnectFieldInput
             }
 
             input MovieGenreGenreConnectFieldInput {
@@ -5431,11 +4098,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               connect: MovieGenreGenreConnectFieldInput
               connectOrCreate: MovieGenreGenreConnectOrCreateFieldInput
               create: MovieGenreGenreCreateFieldInput
-            }
-
-            input MovieGenreGenreSubscriptionWhere {
-              edge: MoviePropsSubscriptionWhere
-              node: GenreSubscriptionWhere
             }
 
             input MovieGenreGenreUpdateConnectionInput {
@@ -5480,11 +4142,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               create: MovieGenreRatingCreateFieldInput
             }
 
-            input MovieGenreRatingSubscriptionWhere {
-              edge: MoviePropsSubscriptionWhere
-              node: RatingSubscriptionWhere
-            }
-
             input MovieGenreRatingUpdateConnectionInput {
               edge: MoviePropsUpdateInput
               node: RatingUpdateInput
@@ -5498,11 +4155,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               disconnect: IProductGenreRatingDisconnectFieldInput
               update: MovieGenreRatingUpdateConnectionInput
               where: IProductGenreRatingConnectionWhere
-            }
-
-            input MovieGenreRelationshipSubscriptionWhere {
-              Genre: MovieGenreGenreSubscriptionWhere
-              Rating: MovieGenreRatingSubscriptionWhere
             }
 
             input MovieGenreUpdateInput {
@@ -5535,20 +4187,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               year: SortDirection
             }
 
-            input MoviePropsSubscriptionWhere {
-              AND: [MoviePropsSubscriptionWhere!]
-              NOT: MoviePropsSubscriptionWhere
-              OR: [MoviePropsSubscriptionWhere!]
-              year: Int
-              year_GT: Int
-              year_GTE: Int
-              year_IN: [Int!]
-              year_LT: Int
-              year_LTE: Int
-              year_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              year_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
             input MoviePropsUpdateInput {
               year: Int
               year_DECREMENT: Int
@@ -5559,54 +4197,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MoviePropsWhere!]
               NOT: MoviePropsWhere
               OR: [MoviePropsWhere!]
-              year: Int
+              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              year_EQ: Int
               year_GT: Int
               year_GTE: Int
               year_IN: [Int!]
               year_LT: Int
               year_LTE: Int
-              year_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              year_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
-            input MovieRelationInput {
-              genre: MovieGenreCreateFieldInput
-            }
-
-            type MovieRelationshipCreatedEvent {
-              createdRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipCreatedSubscriptionWhere {
-              AND: [MovieRelationshipCreatedSubscriptionWhere!]
-              NOT: MovieRelationshipCreatedSubscriptionWhere
-              OR: [MovieRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            type MovieRelationshipDeletedEvent {
-              deletedRelationship: MovieConnectedRelationships!
-              event: EventType!
-              movie: MovieEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input MovieRelationshipDeletedSubscriptionWhere {
-              AND: [MovieRelationshipDeletedSubscriptionWhere!]
-              NOT: MovieRelationshipDeletedSubscriptionWhere
-              OR: [MovieRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: MovieRelationshipsSubscriptionWhere
-              movie: MovieSubscriptionWhere
-            }
-
-            input MovieRelationshipsSubscriptionWhere {
-              genre: MovieGenreRelationshipSubscriptionWhere
             }
 
             \\"\\"\\"
@@ -5621,25 +4218,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -5662,27 +4251,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [MovieWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: UGenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -5701,10 +4280,10 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               deleteRatings(delete: RatingDeleteInput, where: RatingWhere): DeleteInfo!
               deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateGenres(connect: GenreConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: GenreRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: GenreDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: GenreDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: MovieConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateRatings(connect: RatingConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: RatingRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: RatingDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: RatingDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: RatingUpdateInput, where: RatingWhere): UpdateRatingsMutationResponse!
-              updateSeries(connect: SeriesConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), connectOrCreate: SeriesConnectOrCreateInput @deprecated(reason: \\"Top level connectOrCreate input argument in update is deprecated. Use the nested connectOrCreate field in the relationship within the update argument\\"), create: SeriesRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: SeriesDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: SeriesDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
+              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateRatings(update: RatingUpdateInput, where: RatingWhere): UpdateRatingsMutationResponse!
+              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -5716,22 +4295,22 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Query {
-              genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-              iProducts(options: IProductOptions, where: IProductWhere): [IProduct!]!
+              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
               iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort], where: IProductWhere): IProductsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              ratings(options: RatingOptions, where: RatingWhere): [Rating!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              ratings(limit: Int, offset: Int, options: RatingOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [RatingSort!], where: RatingWhere): [Rating!]!
               ratingsAggregate(where: RatingWhere): RatingAggregateSelection!
-              ratingsConnection(after: String, first: Int, sort: [RatingSort], where: RatingWhere): RatingsConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              ratingsConnection(after: String, first: Int, sort: [RatingSort!], where: RatingWhere): RatingsConnection!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
-              uGenres(options: QueryOptions, where: UGenreWhere): [UGenre!]!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
+              uGenres(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: UGenreWhere): [UGenre!]!
             }
 
             \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
@@ -5742,9 +4321,9 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             type Rating {
               number: Int!
-              product(directed: Boolean = true, options: IProductOptions, where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true, where: IProductWhere): RatingIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true, first: Int, sort: [RatingProductConnectionSort!], where: RatingProductConnectionWhere): RatingProductConnection!
+              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): RatingIProductProductAggregationSelection
+              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [RatingProductConnectionSort!], where: RatingProductConnectionWhere): RatingProductConnection!
             }
 
             type RatingAggregateSelection {
@@ -5762,10 +4341,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
 
             input RatingConnectWhere {
               node: RatingWhere!
-            }
-
-            type RatingConnectedRelationships {
-              product: RatingProductConnectedRelationship
             }
 
             input RatingCreateInput {
@@ -5829,7 +4404,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingProductAggregateInput!]
               NOT: RatingProductAggregateInput
               OR: [RatingProductAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -5840,10 +4416,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input RatingProductConnectFieldInput {
               connect: IProductConnectInput
               where: IProductConnectWhere
-            }
-
-            type RatingProductConnectedRelationship {
-              node: IProductEventPayload!
             }
 
             type RatingProductConnection {
@@ -5861,7 +4433,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               NOT: RatingProductConnectionWhere
               OR: [RatingProductConnectionWhere!]
               node: IProductWhere
-              node_NOT: IProductWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input RatingProductCreateFieldInput {
@@ -5887,85 +4458,41 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingProductNodeAggregationWhereInput!]
               NOT: RatingProductNodeAggregationWhereInput
               OR: [RatingProductNodeAggregationWhereInput!]
-              id_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_AVERAGE_LENGTH_EQUAL: Float
               id_AVERAGE_LENGTH_GT: Float
               id_AVERAGE_LENGTH_GTE: Float
               id_AVERAGE_LENGTH_LT: Float
               id_AVERAGE_LENGTH_LTE: Float
-              id_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_LONGEST_LENGTH_EQUAL: Int
               id_LONGEST_LENGTH_GT: Int
               id_LONGEST_LENGTH_GTE: Int
               id_LONGEST_LENGTH_LT: Int
               id_LONGEST_LENGTH_LTE: Int
-              id_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              id_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               id_SHORTEST_LENGTH_EQUAL: Int
               id_SHORTEST_LENGTH_GT: Int
               id_SHORTEST_LENGTH_GTE: Int
               id_SHORTEST_LENGTH_LT: Int
               id_SHORTEST_LENGTH_LTE: Int
-              id_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              id_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type RatingProductRelationship {
               cursor: String!
               node: IProduct!
-            }
-
-            input RatingProductRelationshipSubscriptionWhere {
-              node: IProductSubscriptionWhere
             }
 
             input RatingProductUpdateConnectionInput {
@@ -5981,46 +4508,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               where: RatingProductConnectionWhere
             }
 
-            input RatingRelationInput {
-              product: [RatingProductCreateFieldInput!]
-            }
-
-            type RatingRelationshipCreatedEvent {
-              createdRelationship: RatingConnectedRelationships!
-              event: EventType!
-              rating: RatingEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input RatingRelationshipCreatedSubscriptionWhere {
-              AND: [RatingRelationshipCreatedSubscriptionWhere!]
-              NOT: RatingRelationshipCreatedSubscriptionWhere
-              OR: [RatingRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: RatingRelationshipsSubscriptionWhere
-              rating: RatingSubscriptionWhere
-            }
-
-            type RatingRelationshipDeletedEvent {
-              deletedRelationship: RatingConnectedRelationships!
-              event: EventType!
-              rating: RatingEventPayload!
-              relationshipFieldName: String!
-              timestamp: Float!
-            }
-
-            input RatingRelationshipDeletedSubscriptionWhere {
-              AND: [RatingRelationshipDeletedSubscriptionWhere!]
-              NOT: RatingRelationshipDeletedSubscriptionWhere
-              OR: [RatingRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: RatingRelationshipsSubscriptionWhere
-              rating: RatingSubscriptionWhere
-            }
-
-            input RatingRelationshipsSubscriptionWhere {
-              product: RatingProductRelationshipSubscriptionWhere
-            }
-
             \\"\\"\\"
             Fields to sort Ratings by. The order in which sorts are applied is not guaranteed when specifying many fields in one RatingSort object.
             \\"\\"\\"
@@ -6032,18 +4519,18 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingSubscriptionWhere!]
               NOT: RatingSubscriptionWhere
               OR: [RatingSubscriptionWhere!]
-              number: Int
+              number: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              number_EQ: Int
               number_GT: Int
               number_GTE: Int
               number_IN: [Int!]
               number_LT: Int
               number_LTE: Int
-              number_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              number_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input RatingUniqueWhere {
-              number: Int
+              number: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              number_EQ: Int
             }
 
             input RatingUpdateInput {
@@ -6064,17 +4551,14 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingWhere!]
               NOT: RatingWhere
               OR: [RatingWhere!]
-              number: Int
+              number: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              number_EQ: Int
               number_GT: Int
               number_GTE: Int
               number_IN: [Int!]
               number_LT: Int
               number_LTE: Int
-              number_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              number_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              product: IProductWhere @deprecated(reason: \\"Use \`product_SOME\` instead.\\")
               productAggregate: RatingProductAggregateInput
-              productConnection: RatingProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Ratings where all of the related RatingProductConnections match this filter
               \\"\\"\\"
@@ -6083,7 +4567,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               Return Ratings where none of the related RatingProductConnections match this filter
               \\"\\"\\"
               productConnection_NONE: RatingProductConnectionWhere
-              productConnection_NOT: RatingProductConnectionWhere @deprecated(reason: \\"Use \`productConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Ratings where one of the related RatingProductConnections match this filter
               \\"\\"\\"
@@ -6096,7 +4579,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               product_ALL: IProductWhere
               \\"\\"\\"Return Ratings where none of the related IProducts match this filter\\"\\"\\"
               product_NONE: IProductWhere
-              product_NOT: IProductWhere @deprecated(reason: \\"Use \`product_NONE\` instead.\\")
               \\"\\"\\"Return Ratings where one of the related IProducts match this filter\\"\\"\\"
               product_SINGLE: IProductWhere
               \\"\\"\\"Return Ratings where some of the related IProducts match this filter\\"\\"\\"
@@ -6110,8 +4592,8 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             }
 
             type Series implements IProduct {
-              genre(directed: Boolean = true, options: QueryOptions, where: UGenreWhere): UGenre!
-              genreConnection(after: String, directed: Boolean = true, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: UGenreWhere): UGenre!
+              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               name: String!
             }
@@ -6120,18 +4602,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               count: Int!
               id: StringAggregateSelection!
               name: StringAggregateSelection!
-            }
-
-            input SeriesConnectInput {
-              genre: SeriesGenreConnectInput
-            }
-
-            input SeriesConnectOrCreateInput {
-              genre: SeriesGenreConnectOrCreateInput
-            }
-
-            type SeriesConnectedRelationships {
-              genre: SeriesGenreConnectedRelationship
             }
 
             type SeriesConnection {
@@ -6162,38 +4632,14 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               timestamp: Float!
             }
 
-            input SeriesDisconnectInput {
-              genre: SeriesGenreDisconnectInput
-            }
-
             type SeriesEdge {
               cursor: String!
               node: Series!
             }
 
-            type SeriesEventPayload implements IProductEventPayload {
+            type SeriesEventPayload {
               id: String!
               name: String!
-            }
-
-            input SeriesGenreConnectInput {
-              Genre: SeriesGenreGenreConnectFieldInput
-              Rating: SeriesGenreRatingConnectFieldInput
-            }
-
-            input SeriesGenreConnectOrCreateInput {
-              Genre: SeriesGenreGenreConnectOrCreateFieldInput
-              Rating: SeriesGenreRatingConnectOrCreateFieldInput
-            }
-
-            type SeriesGenreConnectedRelationship {
-              episodes: Int
-              node: UGenreEventPayload!
-            }
-
-            input SeriesGenreCreateFieldInput {
-              Genre: SeriesGenreGenreCreateFieldInput
-              Rating: SeriesGenreRatingCreateFieldInput
             }
 
             input SeriesGenreCreateInput {
@@ -6204,11 +4650,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             input SeriesGenreDeleteInput {
               Genre: IProductGenreGenreDeleteFieldInput
               Rating: IProductGenreRatingDeleteFieldInput
-            }
-
-            input SeriesGenreDisconnectInput {
-              Genre: IProductGenreGenreDisconnectFieldInput
-              Rating: IProductGenreRatingDisconnectFieldInput
             }
 
             input SeriesGenreGenreConnectFieldInput {
@@ -6236,11 +4677,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               connect: SeriesGenreGenreConnectFieldInput
               connectOrCreate: SeriesGenreGenreConnectOrCreateFieldInput
               create: SeriesGenreGenreCreateFieldInput
-            }
-
-            input SeriesGenreGenreSubscriptionWhere {
-              edge: SeriesPropsSubscriptionWhere
-              node: GenreSubscriptionWhere
             }
 
             input SeriesGenreGenreUpdateConnectionInput {
@@ -6285,11 +4721,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               create: SeriesGenreRatingCreateFieldInput
             }
 
-            input SeriesGenreRatingSubscriptionWhere {
-              edge: SeriesPropsSubscriptionWhere
-              node: RatingSubscriptionWhere
-            }
-
             input SeriesGenreRatingUpdateConnectionInput {
               edge: SeriesPropsUpdateInput
               node: RatingUpdateInput
@@ -6303,11 +4734,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               disconnect: IProductGenreRatingDisconnectFieldInput
               update: SeriesGenreRatingUpdateConnectionInput
               where: IProductGenreRatingConnectionWhere
-            }
-
-            input SeriesGenreRelationshipSubscriptionWhere {
-              Genre: SeriesGenreGenreSubscriptionWhere
-              Rating: SeriesGenreRatingSubscriptionWhere
             }
 
             input SeriesGenreUpdateInput {
@@ -6340,20 +4766,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               episodes: SortDirection
             }
 
-            input SeriesPropsSubscriptionWhere {
-              AND: [SeriesPropsSubscriptionWhere!]
-              NOT: SeriesPropsSubscriptionWhere
-              OR: [SeriesPropsSubscriptionWhere!]
-              episodes: Int
-              episodes_GT: Int
-              episodes_GTE: Int
-              episodes_IN: [Int]
-              episodes_LT: Int
-              episodes_LTE: Int
-              episodes_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
             input SeriesPropsUpdateInput {
               episodes: Int
               episodes_DECREMENT: Int
@@ -6364,54 +4776,13 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesPropsWhere!]
               NOT: SeriesPropsWhere
               OR: [SeriesPropsWhere!]
-              episodes: Int
+              episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              episodes_EQ: Int
               episodes_GT: Int
               episodes_GTE: Int
               episodes_IN: [Int]
               episodes_LT: Int
               episodes_LTE: Int
-              episodes_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              episodes_NOT_IN: [Int] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-            }
-
-            input SeriesRelationInput {
-              genre: SeriesGenreCreateFieldInput
-            }
-
-            type SeriesRelationshipCreatedEvent {
-              createdRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipCreatedSubscriptionWhere {
-              AND: [SeriesRelationshipCreatedSubscriptionWhere!]
-              NOT: SeriesRelationshipCreatedSubscriptionWhere
-              OR: [SeriesRelationshipCreatedSubscriptionWhere!]
-              createdRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            type SeriesRelationshipDeletedEvent {
-              deletedRelationship: SeriesConnectedRelationships!
-              event: EventType!
-              relationshipFieldName: String!
-              series: SeriesEventPayload!
-              timestamp: Float!
-            }
-
-            input SeriesRelationshipDeletedSubscriptionWhere {
-              AND: [SeriesRelationshipDeletedSubscriptionWhere!]
-              NOT: SeriesRelationshipDeletedSubscriptionWhere
-              OR: [SeriesRelationshipDeletedSubscriptionWhere!]
-              deletedRelationship: SeriesRelationshipsSubscriptionWhere
-              series: SeriesSubscriptionWhere
-            }
-
-            input SeriesRelationshipsSubscriptionWhere {
-              genre: SeriesGenreRelationshipSubscriptionWhere
             }
 
             \\"\\"\\"
@@ -6426,25 +4797,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -6467,27 +4830,17 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [SeriesWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              genreConnection_NOT: IProductGenreConnectionWhere
-              genre_NOT: UGenreWhere
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
+              id_EQ: String
               id_IN: [String!]
-              id_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
             }
 
@@ -6507,29 +4860,19 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             type Subscription {
               genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
               genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreRelationshipCreated(where: GenreRelationshipCreatedSubscriptionWhere): GenreRelationshipCreatedEvent!
-              genreRelationshipDeleted(where: GenreRelationshipDeletedSubscriptionWhere): GenreRelationshipDeletedEvent!
               genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
               movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
               movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieRelationshipCreated(where: MovieRelationshipCreatedSubscriptionWhere): MovieRelationshipCreatedEvent!
-              movieRelationshipDeleted(where: MovieRelationshipDeletedSubscriptionWhere): MovieRelationshipDeletedEvent!
               movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
               ratingCreated(where: RatingSubscriptionWhere): RatingCreatedEvent!
               ratingDeleted(where: RatingSubscriptionWhere): RatingDeletedEvent!
-              ratingRelationshipCreated(where: RatingRelationshipCreatedSubscriptionWhere): RatingRelationshipCreatedEvent!
-              ratingRelationshipDeleted(where: RatingRelationshipDeletedSubscriptionWhere): RatingRelationshipDeletedEvent!
               ratingUpdated(where: RatingSubscriptionWhere): RatingUpdatedEvent!
               seriesCreated(where: SeriesSubscriptionWhere): SeriesCreatedEvent!
               seriesDeleted(where: SeriesSubscriptionWhere): SeriesDeletedEvent!
-              seriesRelationshipCreated(where: SeriesRelationshipCreatedSubscriptionWhere): SeriesRelationshipCreatedEvent!
-              seriesRelationshipDeleted(where: SeriesRelationshipDeletedSubscriptionWhere): SeriesRelationshipDeletedEvent!
               seriesUpdated(where: SeriesSubscriptionWhere): SeriesUpdatedEvent!
             }
 
             union UGenre = Genre | Rating
-
-            union UGenreEventPayload = GenreEventPayload | RatingEventPayload
 
             input UGenreWhere {
               Genre: GenreWhere
@@ -6545,7 +4888,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

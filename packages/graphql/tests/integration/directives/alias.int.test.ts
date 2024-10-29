@@ -46,14 +46,14 @@ describe("@alias directive", () => {
                 name: String! 
             }
 
-            type ${AliasDirectiveTestUser} implements AliasInterface {
+            type ${AliasDirectiveTestUser} implements AliasInterface @node {
                 id: ID! @id @unique  @alias(property: "dbId")
                 name: String! @alias(property: "dbName")
                 likes: [${AliasDirectiveTestMovie}!]! @relationship(direction: OUT, type: "LIKES", properties: "AliasDirectiveTestLikesProps")
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @alias(property: "dbCreatedAt")
             }
 
-            type ${AliasDirectiveTestMovie} {
+            type ${AliasDirectiveTestMovie} @node {
                 title: String! @alias(property: "dbTitle")
                 titleAuth: String @alias(property: "dbTitle") @authorization(validate: [{ where: { jwt: { roles_INCLUDES: "reader" } } }])
                 year: Int
@@ -65,7 +65,7 @@ describe("@alias directive", () => {
                 relationshipCreatedAt: DateTime! @timestamp(operations: [CREATE]) @alias(property: "dbCreatedAt")
             }
 
-            type ${ProtectedUser} @authorization(validate: [{ when: [BEFORE], where: { node: { name: "$jwt.sub" } } }]) {
+            type ${ProtectedUser} @node @authorization(validate: [{ when: [BEFORE], where: { node: { name_EQ: "$jwt.sub" } } }]) {
                 name: String! @alias(property: "dbName")
             }
         `;
@@ -287,7 +287,7 @@ describe("@alias directive", () => {
         const userMutation = `
         mutation CreateUserConnectMovie {
             ${AliasDirectiveTestUser.operations.create}(
-                input: [{ name: "${name}", likes: { connect: { where: {node: {title: "${title}"}}, edge: {comment: "${comment}"} } } }]
+                input: [{ name: "${name}", likes: { connect: { where: { node: {title_EQ: "${title}" }}, edge: {comment: "${comment}"} } } }]
             ) {
                 ${AliasDirectiveTestUser.plural} {
                     id
@@ -355,9 +355,6 @@ describe("@alias directive", () => {
             ) {
                 ${AliasDirectiveTestUser.plural} {
                     id
-                }
-                info {
-                    bookmark
                 }
 
             }

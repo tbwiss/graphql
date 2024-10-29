@@ -26,7 +26,7 @@ describe("#582", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Entity {
+            type Entity @node {
                 children: [Entity!]! @relationship(type: "EDGE", properties: "Edge", direction: OUT)
                 parents: [Entity!]! @relationship(type: "EDGE", properties: "Edge", direction: IN)
                 type: String!
@@ -54,13 +54,13 @@ describe("#582", () => {
         const result = await translateQuery(neoSchema, query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
+                                    type_EQ: "Bird",
                                 },
                             },
                         },
@@ -102,16 +102,16 @@ describe("#582", () => {
         const result = await translateQuery(neoSchema, query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
-                                    childrenConnection: {
+                                    type_EQ: "Bird",
+                                    childrenConnection_SOME: {
                                         node: {
-                                            type: "Fish",
+                                            type_EQ: "Fish",
                                         },
                                     },
                                 },

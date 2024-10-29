@@ -34,17 +34,17 @@ describe("field-filtering", () => {
         const Genre = testHelper.createUniqueType("Genre");
 
         const typeDefs = gql`
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 genres: [${Genre}!]! @relationship(type: "IN_GENRE", direction: OUT)
             }
 
-            type ${Genre} {
+            type ${Genre} @node {
                 name: String!
                 series: [${Series}!]! @relationship(type: "IN_SERIES", direction: OUT)
             }
 
-            type ${Series} {
+            type ${Series} @node {
                 name: String!
             }
         `;
@@ -68,9 +68,9 @@ describe("field-filtering", () => {
 
         const query = `
             {
-                ${Movie.plural}(where: { title: "${movieTitle}" }) {
+                ${Movie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
-                    genres(where: { seriesConnection: { node: { name: "${seriesName}" } } }) {
+                    genres(where: { seriesConnection_SOME: { node: { name_EQ: "${seriesName}" } } }) {
                         name
                         series {
                             name

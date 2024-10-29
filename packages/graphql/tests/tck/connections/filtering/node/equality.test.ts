@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Filtering -> Node -> Equality", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -51,7 +51,7 @@ describe("Cypher -> Connections -> Filtering -> Node -> Equality", () => {
             query {
                 movies {
                     title
-                    actorsConnection(where: { node: { name: "Tom Hanks" } }) {
+                    actorsConnection(where: { node: { name_EQ: "Tom Hanks" } }) {
                         edges {
                             properties {
                                 screenTime
@@ -98,7 +98,7 @@ describe("Cypher -> Connections -> Filtering -> Node -> Equality", () => {
             query {
                 movies {
                     title
-                    actorsConnection(where: { node: { name_NOT: "Tom Hanks" } }) {
+                    actorsConnection(where: { node: { NOT: { name_EQ: "Tom Hanks" } } }) {
                         edges {
                             properties {
                                 screenTime

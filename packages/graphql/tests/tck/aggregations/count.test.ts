@@ -26,7 +26,7 @@ describe("Cypher Aggregations Count", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
             }
         `;
@@ -61,7 +61,7 @@ describe("Cypher Aggregations Count", () => {
     test("Count with WHERE", async () => {
         const query = /* GraphQL */ `
             {
-                moviesAggregate(where: { title: "some-title" }) {
+                moviesAggregate(where: { title_EQ: "some-title" }) {
                     count
                 }
             }

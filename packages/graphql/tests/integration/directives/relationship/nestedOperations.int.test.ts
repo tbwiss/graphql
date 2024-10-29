@@ -59,7 +59,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             createMutationWithNestedConnect = `#graphql
                 mutation {
-                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                         }
@@ -73,7 +73,7 @@ describe("@relationhip - nestedOperations", () => {
                             id: "1"
                             actors: {
                                 connectOrCreate: {
-                                    where: { node: { id: "1" } }
+                                    where: { node: { id_EQ: "1" } }
                                     onCreate: { node: { name: "someName" } }
                                 }
                             }
@@ -98,7 +98,7 @@ describe("@relationhip - nestedOperations", () => {
             updateMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
-                        update: { actors: { connect: { where: { node: { name: "someName" } } } } }
+                        update: { actors: { connect: { where: { node: { name_EQ: "someName" } } } } }
                     ) {
                         info {
                             nodesCreated
@@ -113,7 +113,7 @@ describe("@relationhip - nestedOperations", () => {
                         update: {
                             actors: {
                                 connectOrCreate: {
-                                    where: { node: { id: "1" } }
+                                    where: { node: { id_EQ: "1" } }
                                     onCreate: { node: { name: "someName" } }
                                 }
                             }
@@ -130,7 +130,7 @@ describe("@relationhip - nestedOperations", () => {
                 mutation {
                     ${Movie.operations.update}(
                         update: {
-                            actors: { disconnect: { where: { node: { name: "someName" } } } }
+                            actors: { disconnect: { where: { node: { name_EQ: "someName" } } } }
                         }
                     ) {
                         info {
@@ -152,7 +152,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             updateMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -162,7 +162,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             deleteMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name: "someName" } } } }) {
+                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name_EQ: "someName" } } } }) {
                         nodesDeleted
                     }
                 }
@@ -171,11 +171,11 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the create nested op when CREATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CREATE])
                 }
@@ -237,11 +237,11 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the connect nested op when CONNECT is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-            type ${Person} {
+            type ${Person} @node {
                 name: String
             }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CONNECT])
                 }
@@ -303,12 +303,12 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the connectOrCreate nested op when CONNECT_OR_CREATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     id: ID! @id @unique
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CONNECT_OR_CREATE])
                 }
@@ -370,11 +370,11 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the update nested op when UPDATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [UPDATE])
                 }
@@ -439,11 +439,11 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the disconnect nested op when DISCONNECT is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT])
                 }
@@ -508,11 +508,11 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the delete nested op when DELETE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DELETE])
                 }
@@ -603,7 +603,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             createMutationWithNestedConnect = `#graphql
                 mutation {
-                    ${Movie.operations.create}(input: { id: "1", actors: { ${PersonOne}: { connect: { where: { node: { name: "someName" } } } } } }) {
+                    ${Movie.operations.create}(input: { id: "1", actors: { ${PersonOne}: { connect: { where: { node: { name_EQ: "someName" } } } } } }) {
                         info {
                             nodesCreated
                         }
@@ -618,7 +618,7 @@ describe("@relationhip - nestedOperations", () => {
                             actors: {
                                 ${PersonOne}: {
                                     connectOrCreate: {
-                                        where: { node: { id: "1" } }
+                                        where: { node: { id_EQ: "1" } }
                                         onCreate: { node: { name: "someName" } }
                                     }
                                 }
@@ -644,7 +644,7 @@ describe("@relationhip - nestedOperations", () => {
             updateMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
-                        update: { actors: { ${PersonOne}: { connect: { where: { node: { name: "someName" } } } } } }
+                        update: { actors: { ${PersonOne}: { connect: { where: { node: { name_EQ: "someName" } } } } } }
                     ) {
                         info {
                             nodesCreated
@@ -660,7 +660,7 @@ describe("@relationhip - nestedOperations", () => {
                             actors: {
                                 ${PersonOne}: {
                                     connectOrCreate: {
-                                        where: { node: { id: "1" } }
+                                        where: { node: { id_EQ: "1" } }
                                         onCreate: { node: { name: "someName" } }
                                     }
                                 }
@@ -678,7 +678,7 @@ describe("@relationhip - nestedOperations", () => {
                 mutation {
                     ${Movie.operations.update}(
                         update: {
-                            actors: { ${PersonOne}: { disconnect: { where: { node: { name: "someName" } } } } }
+                            actors: { ${PersonOne}: { disconnect: { where: { node: { name_EQ: "someName" } } } } }
                         }
                     ) {
                         info {
@@ -700,7 +700,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             updateMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.update}(delete: { actors: { ${PersonOne}: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { ${PersonOne}: { delete: { where: { node: { name_EQ: "someName" } } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -710,7 +710,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             deleteMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.delete}(delete: { actors: { ${PersonOne}: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.delete}(delete: { actors: { ${PersonOne}: { where: { node: { name_EQ: "someName" } } } } }) {
                         nodesDeleted
                     }
                 }
@@ -718,17 +718,17 @@ describe("@relationhip - nestedOperations", () => {
         });
         test("Should only be able to perform the create nested op when CREATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CREATE])
                 }
@@ -780,7 +780,7 @@ describe("@relationhip - nestedOperations", () => {
             );
             expect(updateWithNestedDeleteResult.errors).toBeDefined();
             expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
+                'Field "delete" is not defined by type'
             );
             expect(deleteWithNestedDeleteResult.errors).toBeDefined();
             expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
@@ -790,17 +790,17 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the connect nested op when CONNECT is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CONNECT])
                 }
@@ -852,7 +852,7 @@ describe("@relationhip - nestedOperations", () => {
             );
             expect(updateWithNestedDeleteResult.errors).toBeDefined();
             expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
+                'Field "delete" is not defined by type'
             );
             expect(deleteWithNestedDeleteResult.errors).toBeDefined();
             expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
@@ -862,18 +862,18 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the connectOrCreate nested op when CONNECT_OR_CREATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     id: ID! @id @unique
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CONNECT_OR_CREATE])
                 }
@@ -925,7 +925,7 @@ describe("@relationhip - nestedOperations", () => {
             );
             expect(updateWithNestedDeleteResult.errors).toBeDefined();
             expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
+                'Field "delete" is not defined by type'
             );
             expect(deleteWithNestedDeleteResult.errors).toBeDefined();
             expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
@@ -935,17 +935,17 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the update nested op when UPDATE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [UPDATE])
                 }
@@ -1000,7 +1000,7 @@ describe("@relationhip - nestedOperations", () => {
             );
             expect(updateWithNestedDeleteResult.errors).toBeDefined();
             expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
+                'Field "delete" is not defined by type'
             );
             expect(deleteWithNestedDeleteResult.errors).toBeDefined();
             expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
@@ -1010,17 +1010,17 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the disconnect nested op when DISCONNECT is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT])
                 }
@@ -1075,7 +1075,7 @@ describe("@relationhip - nestedOperations", () => {
             expect(updateWithNestedDisconnectResult.errors).toBeFalsy();
             expect(updateWithNestedDeleteResult.errors).toBeDefined();
             expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
+                'Field "delete" is not defined by type'
             );
             expect(deleteWithNestedDeleteResult.errors).toBeDefined();
             expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
@@ -1085,17 +1085,17 @@ describe("@relationhip - nestedOperations", () => {
 
         test("Should only be able to perform the delete nested op when DELETE is the only nestedOperation specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DELETE])
                 }
@@ -1185,7 +1185,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             createMutationWithNestedConnect = `#graphql
                 mutation {
-                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                         }
@@ -1205,7 +1205,7 @@ describe("@relationhip - nestedOperations", () => {
             updateMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
-                        update: { actors: { connect: { where: { node: { name: "someName" } } } } }
+                        update: { actors: { connect: { where: { node: { name_EQ: "someName" } } } } }
                     ) {
                         info {
                             nodesCreated
@@ -1218,7 +1218,7 @@ describe("@relationhip - nestedOperations", () => {
                 mutation {
                     ${Movie.operations.update}(
                         update: {
-                            actors: { disconnect: { where: { node: { name: "someName" } } } }
+                            actors: { disconnect: { where: { node: { name_EQ: "someName" } } } }
                         }
                     ) {
                         info {
@@ -1240,7 +1240,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             updateMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -1250,7 +1250,7 @@ describe("@relationhip - nestedOperations", () => {
             `;
             deleteMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name: "someName" } } } }) {
+                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name_EQ: "someName" } } } }) {
                         nodesDeleted
                     }
                 }
@@ -1262,16 +1262,16 @@ describe("@relationhip - nestedOperations", () => {
                     name: String
                 }
 
-                type ${PersonOne} implements ${Person} {
+                type ${PersonOne} implements ${Person} @node {
                     name: String
                 }
 
-                type ${PersonTwo} implements ${Person} {
+                type ${PersonTwo} implements ${Person} @node {
                     name: String
                     someOtherProperty: Int!
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CREATE])
                 }
@@ -1323,16 +1323,16 @@ describe("@relationhip - nestedOperations", () => {
                     name: String
                 }
 
-                type ${PersonOne} implements ${Person} {
+                type ${PersonOne} implements ${Person} @node {
                     name: String
                 }
 
-                type ${PersonTwo} implements ${Person} {
+                type ${PersonTwo} implements ${Person} @node {
                     name: String
                     someOtherProperty: Int!
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [CONNECT])
                 }
@@ -1383,16 +1383,16 @@ describe("@relationhip - nestedOperations", () => {
                     name: String
                 }
 
-                type ${PersonOne} implements ${Person} {
+                type ${PersonOne} implements ${Person} @node {
                     name: String
                 }
 
-                type ${PersonTwo} implements ${Person} {
+                type ${PersonTwo} implements ${Person} @node {
                     name: String
                     someOtherProperty: Int!
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [UPDATE])
                 }
@@ -1447,16 +1447,16 @@ describe("@relationhip - nestedOperations", () => {
                     name: String
                 }
 
-                type ${PersonOne} implements ${Person} {
+                type ${PersonOne} implements ${Person} @node {
                     name: String
                 }
 
-                type ${PersonTwo} implements ${Person} {
+                type ${PersonTwo} implements ${Person} @node {
                     name: String
                     someOtherProperty: Int!
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT])
                 }
@@ -1511,16 +1511,16 @@ describe("@relationhip - nestedOperations", () => {
                     name: String
                 }
 
-                type ${PersonOne} implements ${Person} {
+                type ${PersonOne} implements ${Person} @node {
                     name: String
                 }
 
-                type ${PersonTwo} implements ${Person} {
+                type ${PersonTwo} implements ${Person} @node {
                     name: String
                     someOtherProperty: Int!
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DELETE])
                 }

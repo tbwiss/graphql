@@ -39,7 +39,7 @@ describe("Time", () => {
     describe("create", () => {
         test("should create a movie (with a Time)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     time: Time!
                 }
@@ -90,7 +90,7 @@ describe("Time", () => {
 
         test("should create a movie (with many Times)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     times: [Time!]!
                 }
@@ -157,7 +157,7 @@ describe("Time", () => {
     describe("update", () => {
         test("should update a movie (with a Time)", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     time: Time
                 }
@@ -179,7 +179,7 @@ describe("Time", () => {
 
             const mutation = `
                     mutation ($id: ID!, $time: Time) {
-                        ${Movie.operations.update}(where: { id: $id }, update: { time: $time }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { time: $time }) {
                             ${Movie.plural} {
                                 id
                                 time
@@ -218,7 +218,7 @@ describe("Time", () => {
     describe("filter", () => {
         test("should filter based on time equality", async () => {
             const typeDefs = /* GraphQL */ `
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID!
                     time: Time!
                 }
@@ -242,7 +242,7 @@ describe("Time", () => {
 
             const query = /* GraphQL */ `
                     query ($time: Time!) {
-                        ${Movie.plural}(where: { time: $time }) {
+                        ${Movie.plural}(where: { time_EQ: $time }) {
                             id
                             time
                         }
@@ -263,7 +263,7 @@ describe("Time", () => {
             "should filter based on time comparison for filter: %s",
             async (filter) => {
                 const typeDefs = /* GraphQL */ `
-                        type ${Movie} {
+                        type ${Movie} @node {
                             id: ID!
                             time: Time!
                         }
@@ -321,16 +321,16 @@ describe("Time", () => {
                 );
 
                 const query = /* GraphQL */ `
-                            query ($where: ${Movie.name}Where!) {
-                                ${Movie.plural}(
-                                    where: $where
-                                    options: { sort: [{ time: ASC }]}
-                                ) {
-                                    id
-                                    time
-                                }
-                            }
-                        `;
+                    query ($where: ${Movie.name}Where!) {
+                        ${Movie.plural}(
+                            where: $where
+                            sort: [{ time: ASC }]
+                        ) {
+                            id
+                            time
+                        }
+                    }
+                `;
 
                 const graphqlResult = await testHelper.executeGraphQL(query, {
                     variableValues: {
@@ -381,7 +381,7 @@ describe("Time", () => {
     describe("sorting", () => {
         test.each(["ASC", "DESC"])("should sort based on time, sorted by: %s", async (sort) => {
             const typeDefs = /* GraphQL */ `
-                        type ${Movie} {
+                        type ${Movie} @node {
                             id: ID!
                             time: Time!
                         }
@@ -439,7 +439,7 @@ describe("Time", () => {
 
             const query = /* GraphQL */ `
                 query ($futureId: ID!, $presentId: ID!, $pastId: ID!, $sort: SortDirection!) {
-                    ${Movie.plural}(where: { id_IN: [$futureId, $presentId, $pastId] }, options: { sort: [{ time: $sort }] }) {
+                    ${Movie.plural}(where: { id_IN: [$futureId, $presentId, $pastId] }, sort: [{ time: $sort }]) {
                         id
                         time
                     }

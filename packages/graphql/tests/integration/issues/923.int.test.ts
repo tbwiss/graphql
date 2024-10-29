@@ -34,11 +34,11 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
         // driver = await neo4j.getDriver();
 
         const typeDefs = gql`
-            type ${testBlogpost.name} @fulltext(indexes: [{ name: "BlogTitle", fields: ["title"] }]) {
+            type ${testBlogpost.name} @fulltext(indexes: [{ name: "BlogTitle", fields: ["title"] }]) @node {
                 title: String!
                 slug: String! @unique
             }
-            type ${testCategory.name} {
+            type ${testCategory.name} @node {
                 name: String! @unique
                 blogs: [${testBlogpost.name}!]! @relationship(type: "IN_CATEGORY", direction: IN)
             }
@@ -59,7 +59,7 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
                             blogs: {
                                 connectOrCreate: [
                                     {
-                                        where: { node: { slug: "dsa" } }
+                                        where: { node: { slug_EQ: "dsa" } }
                                         onCreate: { node: { title: "mytitle", slug: "myslug" } }
                                     }
                                 ]

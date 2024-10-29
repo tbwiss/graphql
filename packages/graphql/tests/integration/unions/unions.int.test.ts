@@ -42,10 +42,10 @@ describe("unions", () => {
     test("read Unions with missing types", async () => {
         const typeDefs = `
             union Search = ${GenreType} | ${MovieType}
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -95,11 +95,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${GenreType} | ${MovieType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -120,7 +120,7 @@ describe("unions", () => {
 
         const query = `
             {
-                ${MovieType.plural} (where: {title: "${movieTitle}"}) {
+                ${MovieType.plural} (where: {title_EQ: "${movieTitle}"}) {
                     search {
                         __typename
                         ... on ${MovieType} {
@@ -156,11 +156,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -185,8 +185,8 @@ describe("unions", () => {
 
         const query = `
             {
-                ${MovieType.plural} (where: {title: "${movieTitle}"}) {
-                    search(where: { ${GenreType}: { name: "${genreName1}" }}) {
+                ${MovieType.plural} (where: {title_EQ: "${movieTitle}"}) {
+                    search(where: { ${GenreType}: { name_EQ: "${genreName1}" }}) {
                         __typename
                         ... on ${MovieType} {
                             title
@@ -220,11 +220,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -235,12 +235,10 @@ describe("unions", () => {
             resolvers: {},
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         {
-            ${MovieType.plural}(where: { title:"originalMovie" }) {
-                search(
-                    options: { offset: 1, limit: 3 }
-                ) {
+            ${MovieType.plural}(where: { title_EQ:"originalMovie" }) {
+                search(offset: 1, limit: 3) {
                     ... on ${MovieType} {
                         title
                     }
@@ -274,11 +272,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -337,11 +335,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -421,11 +419,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -451,7 +449,7 @@ describe("unions", () => {
                     search: {
                         ${GenreType}: {
                             connect: [{
-                                where: { node: { name: "${genreName}" } }
+                                where: { node: { name_EQ: "${genreName}" } }
                             }]
                         }
                     }
@@ -486,11 +484,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -516,11 +514,11 @@ describe("unions", () => {
         const mutation = `
             mutation {
                 ${MovieType.operations.update}(
-                    where: { title: "${movieTitle}" },
+                    where: { title_EQ: "${movieTitle}" },
                     update: {
                         search: {
                             ${GenreType}: {
-                                where: { node: { name: "${genreName}" } },
+                                where: { node: { name_EQ: "${genreName}" } },
                                 update: {
                                     node: { name: "${newGenreName}" }
                                 }
@@ -558,11 +556,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search = ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -596,17 +594,17 @@ describe("unions", () => {
         const mutation = `
             mutation {
                 ${MovieType.operations.update}(
-                    where: { title: "${movieTitle}" },
+                    where: { title_EQ: "${movieTitle}" },
                     update: {
                         search: {
                             ${GenreType}: {
-                                where: { node: { name: "${genreName}" } },
+                                where: { node: { name_EQ: "${genreName}" } },
                                 update: {
                                     node: { name: "${newGenreName}" }
                                 }
                             }
                             ${MovieType}: {
-                                where: { node: { title: "${nestedMovieTitle}" } },
+                                where: { node: { title_EQ: "${nestedMovieTitle}" } },
                                 update: {
                                     node: { title: "${newNestedMovieTitle}" }
                                 }
@@ -654,11 +652,11 @@ describe("unions", () => {
         const typeDefs = `
             union Search =  ${MovieType} | ${GenreType}
 
-            type ${GenreType} {
+            type ${GenreType} @node {
                 name: String
             }
 
-            type ${MovieType} {
+            type ${MovieType} @node {
                 title: String
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
             }
@@ -680,12 +678,12 @@ describe("unions", () => {
         const mutation = `
             mutation {
                 ${MovieType.operations.update}(
-                    where: { title: "${movieTitle}" },
+                    where: { title_EQ: "${movieTitle}" },
                     update: {
                         search: {
                             ${GenreType}: {
                                 disconnect: [{
-                                    where: { node: { name: "${genreName}" } }
+                                    where: { node: { name_EQ: "${genreName}" } }
                                 }]
                             }
                         }
@@ -726,11 +724,11 @@ describe("unions", () => {
                 union Search = ${MovieType} | ${GenreType}
 
 
-                type ${GenreType} @authorization(validate: [{ operations: [READ], when: BEFORE, where: { node: { name: "$jwt.jwtAllowedNamesExample" } } }]) {
+                type ${GenreType} @authorization(validate: [{ operations: [READ], when: BEFORE, where: { node: { name_EQ: "$jwt.jwtAllowedNamesExample" } } }]) @node {
                     name: String
                 }
 
-                type ${MovieType} {
+                type ${MovieType} @node {
                     title: String
                     search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
                 }
@@ -754,10 +752,10 @@ describe("unions", () => {
 
             const query = `
                 {
-                    ${MovieType.plural}(where: { title: "some title" }) {
+                    ${MovieType.plural}(where: { title_EQ: "some title" }) {
                         title
                         search(
-                            where: { ${MovieType}: { title: "The Matrix" }, ${GenreType}: { name: "Romance" } }
+                            where: { ${MovieType}: { title_EQ: "The Matrix" }, ${GenreType}: { name_EQ: "Romance" } }
                         ) {
                             ... on ${MovieType} {
                                 title
@@ -784,10 +782,10 @@ describe("unions", () => {
 
             const query = `
                 {
-                    ${MovieType.plural}(where: { title: "another title" }) {
+                    ${MovieType.plural}(where: { title_EQ: "another title" }) {
                         title
                         search(
-                            where: { ${MovieType}: { title: "The Matrix" }, ${GenreType}: { name: "Romance" } }
+                            where: { ${MovieType}: { title_EQ: "The Matrix" }, ${GenreType}: { name_EQ: "Romance" } }
                         ) {
                             ... on ${MovieType} {
                                 title

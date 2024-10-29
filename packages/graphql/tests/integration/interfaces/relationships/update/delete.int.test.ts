@@ -35,7 +35,7 @@ describe("interface relationships", () => {
         Series = testHelper.createUniqueType("Series");
 
         const typeDefs = /* GraphQL */ `
-            type ${Episode} {
+            type ${Episode} @node {
                 runtime: Int!
                 series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -45,13 +45,13 @@ describe("interface relationships", () => {
                 actors: [${Actor}!]! @declareRelationship
             }
 
-            type ${Movie} implements Production {
+            type ${Movie} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episodes: [${Episode}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +61,7 @@ describe("interface relationships", () => {
                 screenTime: Int!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -97,7 +97,7 @@ describe("interface relationships", () => {
 
         const query = `
             mutation DeleteMovie($name: String, $title: String) {
-                ${Actor.operations.update}(where: { name: $name }, delete: { actedIn: { where: { node: { title: $title } } } }) {
+                ${Actor.operations.update}(where: { name_EQ: $name }, update: { actedIn: { delete: { where: { node: { title_EQ: $title } } } } }) {
                     ${Actor.plural} {
                         name
                         actedIn {
@@ -175,11 +175,13 @@ describe("interface relationships", () => {
         const query = `
             mutation DeleteMovie($name1: String, $name2: String, $title: String) {
                 ${Actor.operations.update}(
-                    where: { name: $name1 }
-                    delete: {
+                    where: { name_EQ: $name1 }
+                    update: {
                         actedIn: {
-                            where: { node: { title: $title } }
-                            delete: { actors: { where: { node: { name: $name2 } } } }
+                            delete: {
+                                where: { node: { title_EQ: $title } }
+                                delete: { actors: { where: { node: { name_EQ: $name2 } } } }
+                            }
                         }
                     }
                 ) {

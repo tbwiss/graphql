@@ -38,12 +38,12 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
 
     test("should return the correct number of results following connect", async () => {
         const typeDefs = gql`
-           type ${Movie} {
+           type ${Movie} @node {
                 title: String!
                 owners: [${User}!]! @relationship(type: "OWNS", direction: IN)
             }
 
-            type ${User} {
+            type ${User} @node {
                 name: String!
                 movies: [${Movie}!]! @relationship(type: "OWNS", direction: OUT)
             }
@@ -80,8 +80,14 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
         const connect = `
             mutation Connect($name: String, $title2: String!, $title3: String!) {
                 ${User.operations.update}(
-                    where: { name: $name }
-                    connect: { movies: [{ where: { node: { title_IN: [$title2, $title3] } } }] }
+                    where: { name_EQ: $name }
+                    update: {
+                        movies: {
+                            connect: {
+                                where: { node: { title_IN: [$title2, $title3] } }
+                            }
+                        }
+                    }
                 ) {
                     ${User.plural} {
                         name

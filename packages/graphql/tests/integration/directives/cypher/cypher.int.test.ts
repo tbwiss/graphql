@@ -50,12 +50,12 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
@@ -115,12 +115,12 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
@@ -141,7 +141,7 @@ describe("cypher directive", () => {
                     query($title: String!, $name: String) {
                         customMovies(title: $title) {
                             title
-                            actors(where: {name: $name}) {
+                            actors(where: {name_EQ: $name}) {
                                 name
                             }
                         }
@@ -182,7 +182,7 @@ describe("cypher directive", () => {
                         roles: [String!]!
                     }
 
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
@@ -212,7 +212,7 @@ describe("cypher directive", () => {
                     query($title: String!, $name: String) {
                         customMovies(title: $title) {
                             title
-                            actors(where: {name: $name}) {
+                            actors(where: {name_EQ: $name}) {
                                 name
                             }
                         }
@@ -254,12 +254,12 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
@@ -336,18 +336,18 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                         directors: [${Director}!]! @relationship(type: "DIRECTED", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
 
-                    type ${Director} {
+                    type ${Director} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "DIRECTED", direction: OUT)
                     }
@@ -437,12 +437,12 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
@@ -502,12 +502,12 @@ describe("cypher directive", () => {
                 });
 
                 const typeDefs = `
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
 
-                    type ${Actor} {
+                    type ${Actor} @node {
                         name: String!
                         movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                     }
@@ -527,7 +527,7 @@ describe("cypher directive", () => {
                     mutation($title: String!, $name: String) {
                         customMovies(title: $title) {
                             title
-                            actors(where: {name: $name}) {
+                            actors(where: {name_EQ: $name}) {
                                 name
                             }
                         }
@@ -568,7 +568,7 @@ describe("cypher directive", () => {
                         roles: [String!]!
                     }
 
-                    type ${Movie} {
+                    type ${Movie} @node {
                         title: String!
                         actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                     }
@@ -596,7 +596,7 @@ describe("cypher directive", () => {
                     mutation($title: String!, $name: String) {
                         customMovies(title: $title) {
                             title
-                            actors(where: {name: $name}) {
+                            actors(where: {name_EQ: $name}) {
                                 name
                             }
                         }
@@ -638,7 +638,7 @@ describe("cypher directive", () => {
                 Town = testHelper.createUniqueType("Town");
 
                 const typeDefs = `
-                type ${Destination} {
+                type ${Destination} @node {
                     id: ID!
                     preposition(caseName: String = null): String! @cypher(statement: "RETURN coalesce($caseName, '${defaultPreposition}') as result", columnName: "result")
                 }
@@ -732,7 +732,7 @@ describe("cypher directive", () => {
                 Town = testHelper.createUniqueType("Town");
 
                 const typeDefs = `
-                type ${Destination} {
+                type ${Destination} @node {
                     id: ID!
                     preposition(caseName: String): String! @cypher(statement: "RETURN coalesce($caseName, '${defaultPreposition}') as result", columnName: "result")
                 }
@@ -829,15 +829,15 @@ describe("cypher directive", () => {
                 const typeDefs = `
                 union PostMovieUser = ${Post} | ${Movie} | ${User}
 
-                type ${Post} {
+                type ${Post} @node {
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     name: String
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID @id @unique
                     updates: [PostMovieUser!]!
                         @cypher(
@@ -870,7 +870,7 @@ describe("cypher directive", () => {
             test("should return __typename", async () => {
                 const source = `
                         query {
-                            ${User.plural} (where: { id: "${userId}" }) {
+                            ${User.plural} (where: { id_EQ: "${userId}" }) {
                                 updates {
                                     __typename
                                 }

@@ -26,12 +26,12 @@ describe("Cypher -> Connections -> Projections -> Update", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -49,7 +49,7 @@ describe("Cypher -> Connections -> Projections -> Update", () => {
     test("Connection can be selected following update Mutation", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { title: "Forrest Gump" }) {
+                updateMovies(where: { title_EQ: "Forrest Gump" }) {
                     movies {
                         title
                         actorsConnection {

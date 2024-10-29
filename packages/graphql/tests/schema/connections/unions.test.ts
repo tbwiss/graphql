@@ -27,17 +27,17 @@ describe("Unions", () => {
         const typeDefs = gql`
             union Publication = Book | Journal
 
-            type Author {
+            type Author @node {
                 name: String!
                 publications: [Publication!]! @relationship(type: "WROTE", direction: OUT, properties: "Wrote")
             }
 
-            type Book {
+            type Book @node {
                 title: String!
                 author: [Author!]! @relationship(type: "WROTE", direction: IN, properties: "Wrote")
             }
 
-            type Journal {
+            type Journal @node {
                 subject: String!
                 author: [Author!]! @relationship(type: "WROTE", direction: IN, properties: "Wrote")
             }
@@ -57,8 +57,8 @@ describe("Unions", () => {
 
             type Author {
               name: String!
-              publications(directed: Boolean = true, options: QueryOptions, where: PublicationWhere): [Publication!]!
-              publicationsConnection(after: String, directed: Boolean = true, first: Int, sort: [AuthorPublicationsConnectionSort!], where: AuthorPublicationsConnectionWhere): AuthorPublicationsConnection!
+              publications(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PublicationWhere): [Publication!]!
+              publicationsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AuthorPublicationsConnectionSort!], where: AuthorPublicationsConnectionWhere): AuthorPublicationsConnection!
             }
 
             type AuthorAggregateSelection {
@@ -112,9 +112,7 @@ describe("Unions", () => {
               NOT: AuthorPublicationsBookConnectionWhere
               OR: [AuthorPublicationsBookConnectionWhere!]
               edge: WroteWhere
-              edge_NOT: WroteWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: BookWhere
-              node_NOT: BookWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input AuthorPublicationsBookCreateFieldInput {
@@ -171,11 +169,6 @@ describe("Unions", () => {
               Journal: AuthorPublicationsJournalConnectionWhere
             }
 
-            input AuthorPublicationsCreateFieldInput {
-              Book: [AuthorPublicationsBookCreateFieldInput!]
-              Journal: [AuthorPublicationsJournalCreateFieldInput!]
-            }
-
             input AuthorPublicationsCreateInput {
               Book: AuthorPublicationsBookFieldInput
               Journal: AuthorPublicationsJournalFieldInput
@@ -202,9 +195,7 @@ describe("Unions", () => {
               NOT: AuthorPublicationsJournalConnectionWhere
               OR: [AuthorPublicationsJournalConnectionWhere!]
               edge: WroteWhere
-              edge_NOT: WroteWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: JournalWhere
-              node_NOT: JournalWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input AuthorPublicationsJournalCreateFieldInput {
@@ -252,10 +243,6 @@ describe("Unions", () => {
               Journal: [AuthorPublicationsJournalUpdateFieldInput!]
             }
 
-            input AuthorRelationInput {
-              publications: AuthorPublicationsCreateFieldInput
-            }
-
             \\"\\"\\"
             Fields to sort Authors by. The order in which sorts are applied is not guaranteed when specifying many fields in one AuthorSort object.
             \\"\\"\\"
@@ -272,18 +259,12 @@ describe("Unions", () => {
               AND: [AuthorWhere!]
               NOT: AuthorWhere
               OR: [AuthorWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              publications: PublicationWhere @deprecated(reason: \\"Use \`publications_SOME\` instead.\\")
-              publicationsConnection: AuthorPublicationsConnectionWhere @deprecated(reason: \\"Use \`publicationsConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Authors where all of the related AuthorPublicationsConnections match this filter
               \\"\\"\\"
@@ -292,7 +273,6 @@ describe("Unions", () => {
               Return Authors where none of the related AuthorPublicationsConnections match this filter
               \\"\\"\\"
               publicationsConnection_NONE: AuthorPublicationsConnectionWhere
-              publicationsConnection_NOT: AuthorPublicationsConnectionWhere @deprecated(reason: \\"Use \`publicationsConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Authors where one of the related AuthorPublicationsConnections match this filter
               \\"\\"\\"
@@ -307,7 +287,6 @@ describe("Unions", () => {
               Return Authors where none of the related Publications match this filter
               \\"\\"\\"
               publications_NONE: PublicationWhere
-              publications_NOT: PublicationWhere @deprecated(reason: \\"Use \`publications_NONE\` instead.\\")
               \\"\\"\\"Return Authors where one of the related Publications match this filter\\"\\"\\"
               publications_SINGLE: PublicationWhere
               \\"\\"\\"
@@ -323,9 +302,9 @@ describe("Unions", () => {
             }
 
             type Book {
-              author(directed: Boolean = true, options: AuthorOptions, where: AuthorWhere): [Author!]!
-              authorAggregate(directed: Boolean = true, where: AuthorWhere): BookAuthorAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true, first: Int, sort: [BookAuthorConnectionSort!], where: BookAuthorConnectionWhere): BookAuthorConnection!
+              author(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: AuthorWhere): BookAuthorAuthorAggregationSelection
+              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [BookAuthorConnectionSort!], where: BookAuthorConnectionWhere): BookAuthorConnection!
               title: String!
             }
 
@@ -338,7 +317,8 @@ describe("Unions", () => {
               AND: [BookAuthorAggregateInput!]
               NOT: BookAuthorAggregateInput
               OR: [BookAuthorAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -387,9 +367,7 @@ describe("Unions", () => {
               NOT: BookAuthorConnectionWhere
               OR: [BookAuthorConnectionWhere!]
               edge: WroteWhere
-              edge_NOT: WroteWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: AuthorWhere
-              node_NOT: AuthorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input BookAuthorCreateFieldInput {
@@ -416,41 +394,21 @@ describe("Unions", () => {
               AND: [BookAuthorNodeAggregationWhereInput!]
               NOT: BookAuthorNodeAggregationWhereInput
               OR: [BookAuthorNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type BookAuthorRelationship {
@@ -508,10 +466,6 @@ describe("Unions", () => {
               sort: [BookSort!]
             }
 
-            input BookRelationInput {
-              author: [BookAuthorCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Books by. The order in which sorts are applied is not guaranteed when specifying many fields in one BookSort object.
             \\"\\"\\"
@@ -528,9 +482,7 @@ describe("Unions", () => {
               AND: [BookWhere!]
               NOT: BookWhere
               OR: [BookWhere!]
-              author: AuthorWhere @deprecated(reason: \\"Use \`author_SOME\` instead.\\")
               authorAggregate: BookAuthorAggregateInput
-              authorConnection: BookAuthorConnectionWhere @deprecated(reason: \\"Use \`authorConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Books where all of the related BookAuthorConnections match this filter
               \\"\\"\\"
@@ -539,7 +491,6 @@ describe("Unions", () => {
               Return Books where none of the related BookAuthorConnections match this filter
               \\"\\"\\"
               authorConnection_NONE: BookAuthorConnectionWhere
-              authorConnection_NOT: BookAuthorConnectionWhere @deprecated(reason: \\"Use \`authorConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Books where one of the related BookAuthorConnections match this filter
               \\"\\"\\"
@@ -552,20 +503,15 @@ describe("Unions", () => {
               author_ALL: AuthorWhere
               \\"\\"\\"Return Books where none of the related Authors match this filter\\"\\"\\"
               author_NONE: AuthorWhere
-              author_NOT: AuthorWhere @deprecated(reason: \\"Use \`author_NONE\` instead.\\")
               \\"\\"\\"Return Books where one of the related Authors match this filter\\"\\"\\"
               author_SINGLE: AuthorWhere
               \\"\\"\\"Return Books where some of the related Authors match this filter\\"\\"\\"
               author_SOME: AuthorWhere
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              title_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               title_STARTS_WITH: String
             }
 
@@ -589,7 +535,6 @@ describe("Unions", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -603,7 +548,6 @@ describe("Unions", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -616,9 +560,9 @@ describe("Unions", () => {
             }
 
             type Journal {
-              author(directed: Boolean = true, options: AuthorOptions, where: AuthorWhere): [Author!]!
-              authorAggregate(directed: Boolean = true, where: AuthorWhere): JournalAuthorAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true, first: Int, sort: [JournalAuthorConnectionSort!], where: JournalAuthorConnectionWhere): JournalAuthorConnection!
+              author(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: AuthorWhere): JournalAuthorAuthorAggregationSelection
+              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [JournalAuthorConnectionSort!], where: JournalAuthorConnectionWhere): JournalAuthorConnection!
               subject: String!
             }
 
@@ -631,7 +575,8 @@ describe("Unions", () => {
               AND: [JournalAuthorAggregateInput!]
               NOT: JournalAuthorAggregateInput
               OR: [JournalAuthorAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -680,9 +625,7 @@ describe("Unions", () => {
               NOT: JournalAuthorConnectionWhere
               OR: [JournalAuthorConnectionWhere!]
               edge: WroteWhere
-              edge_NOT: WroteWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: AuthorWhere
-              node_NOT: AuthorWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input JournalAuthorCreateFieldInput {
@@ -709,41 +652,21 @@ describe("Unions", () => {
               AND: [JournalAuthorNodeAggregationWhereInput!]
               NOT: JournalAuthorNodeAggregationWhereInput
               OR: [JournalAuthorNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
               name_AVERAGE_LENGTH_LT: Float
               name_AVERAGE_LENGTH_LTE: Float
-              name_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_LONGEST_LENGTH_EQUAL: Int
               name_LONGEST_LENGTH_GT: Int
               name_LONGEST_LENGTH_GTE: Int
               name_LONGEST_LENGTH_LT: Int
               name_LONGEST_LENGTH_LTE: Int
-              name_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              name_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               name_SHORTEST_LENGTH_EQUAL: Int
               name_SHORTEST_LENGTH_GT: Int
               name_SHORTEST_LENGTH_GTE: Int
               name_SHORTEST_LENGTH_LT: Int
               name_SHORTEST_LENGTH_LTE: Int
-              name_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              name_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type JournalAuthorRelationship {
@@ -801,10 +724,6 @@ describe("Unions", () => {
               sort: [JournalSort!]
             }
 
-            input JournalRelationInput {
-              author: [JournalAuthorCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Journals by. The order in which sorts are applied is not guaranteed when specifying many fields in one JournalSort object.
             \\"\\"\\"
@@ -821,9 +740,7 @@ describe("Unions", () => {
               AND: [JournalWhere!]
               NOT: JournalWhere
               OR: [JournalWhere!]
-              author: AuthorWhere @deprecated(reason: \\"Use \`author_SOME\` instead.\\")
               authorAggregate: JournalAuthorAggregateInput
-              authorConnection: JournalAuthorConnectionWhere @deprecated(reason: \\"Use \`authorConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Journals where all of the related JournalAuthorConnections match this filter
               \\"\\"\\"
@@ -832,7 +749,6 @@ describe("Unions", () => {
               Return Journals where none of the related JournalAuthorConnections match this filter
               \\"\\"\\"
               authorConnection_NONE: JournalAuthorConnectionWhere
-              authorConnection_NOT: JournalAuthorConnectionWhere @deprecated(reason: \\"Use \`authorConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Journals where one of the related JournalAuthorConnections match this filter
               \\"\\"\\"
@@ -845,20 +761,15 @@ describe("Unions", () => {
               author_ALL: AuthorWhere
               \\"\\"\\"Return Journals where none of the related Authors match this filter\\"\\"\\"
               author_NONE: AuthorWhere
-              author_NOT: AuthorWhere @deprecated(reason: \\"Use \`author_NONE\` instead.\\")
               \\"\\"\\"Return Journals where one of the related Authors match this filter\\"\\"\\"
               author_SINGLE: AuthorWhere
               \\"\\"\\"Return Journals where some of the related Authors match this filter\\"\\"\\"
               author_SOME: AuthorWhere
-              subject: String
+              subject: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               subject_CONTAINS: String
               subject_ENDS_WITH: String
+              subject_EQ: String
               subject_IN: [String!]
-              subject_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              subject_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              subject_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              subject_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              subject_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               subject_STARTS_WITH: String
             }
 
@@ -875,9 +786,9 @@ describe("Unions", () => {
               deleteAuthors(delete: AuthorDeleteInput, where: AuthorWhere): DeleteInfo!
               deleteBooks(delete: BookDeleteInput, where: BookWhere): DeleteInfo!
               deleteJournals(delete: JournalDeleteInput, where: JournalWhere): DeleteInfo!
-              updateAuthors(connect: AuthorConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: AuthorRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: AuthorDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: AuthorDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: AuthorUpdateInput, where: AuthorWhere): UpdateAuthorsMutationResponse!
-              updateBooks(connect: BookConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: BookRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: BookDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: BookDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: BookUpdateInput, where: BookWhere): UpdateBooksMutationResponse!
-              updateJournals(connect: JournalConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: JournalRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: JournalDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: JournalDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: JournalUpdateInput, where: JournalWhere): UpdateJournalsMutationResponse!
+              updateAuthors(update: AuthorUpdateInput, where: AuthorWhere): UpdateAuthorsMutationResponse!
+              updateBooks(update: BookUpdateInput, where: BookWhere): UpdateBooksMutationResponse!
+              updateJournals(update: JournalUpdateInput, where: JournalWhere): UpdateJournalsMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -896,16 +807,16 @@ describe("Unions", () => {
             }
 
             type Query {
-              authors(options: AuthorOptions, where: AuthorWhere): [Author!]!
+              authors(limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
               authorsAggregate(where: AuthorWhere): AuthorAggregateSelection!
-              authorsConnection(after: String, first: Int, sort: [AuthorSort], where: AuthorWhere): AuthorsConnection!
-              books(options: BookOptions, where: BookWhere): [Book!]!
+              authorsConnection(after: String, first: Int, sort: [AuthorSort!], where: AuthorWhere): AuthorsConnection!
+              books(limit: Int, offset: Int, options: BookOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookSort!], where: BookWhere): [Book!]!
               booksAggregate(where: BookWhere): BookAggregateSelection!
-              booksConnection(after: String, first: Int, sort: [BookSort], where: BookWhere): BooksConnection!
-              journals(options: JournalOptions, where: JournalWhere): [Journal!]!
+              booksConnection(after: String, first: Int, sort: [BookSort!], where: BookWhere): BooksConnection!
+              journals(limit: Int, offset: Int, options: JournalOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [JournalSort!], where: JournalWhere): [Journal!]!
               journalsAggregate(where: JournalWhere): JournalAggregateSelection!
-              journalsConnection(after: String, first: Int, sort: [JournalSort], where: JournalWhere): JournalsConnection!
-              publications(options: QueryOptions, where: PublicationWhere): [Publication!]!
+              journalsConnection(after: String, first: Int, sort: [JournalSort!], where: JournalWhere): JournalsConnection!
+              publications(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PublicationWhere): [Publication!]!
             }
 
             \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
@@ -941,7 +852,6 @@ describe("Unions", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -972,11 +882,6 @@ describe("Unions", () => {
               words_AVERAGE_GTE: Float
               words_AVERAGE_LT: Float
               words_AVERAGE_LTE: Float
-              words_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              words_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              words_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              words_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              words_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               words_MAX_EQUAL: Int
               words_MAX_GT: Int
               words_MAX_GTE: Int
@@ -1012,14 +917,13 @@ describe("Unions", () => {
               AND: [WroteWhere!]
               NOT: WroteWhere
               OR: [WroteWhere!]
-              words: Int
+              words: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              words_EQ: Int
               words_GT: Int
               words_GTE: Int
               words_IN: [Int!]
               words_LT: Int
               words_LTE: Int
-              words_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              words_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }"
         `);
     });

@@ -43,7 +43,7 @@ describe("aggregations-top_level-string", () => {
 
     test("should return the shortest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -70,7 +70,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             shortest
                         }
@@ -95,7 +95,7 @@ describe("aggregations-top_level-string", () => {
 
     test("should return the longest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -122,7 +122,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             longest
                         }
@@ -147,7 +147,7 @@ describe("aggregations-top_level-string", () => {
 
     test("should return the shortest and longest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -174,7 +174,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             shortest
                             longest

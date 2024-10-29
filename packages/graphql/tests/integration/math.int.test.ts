@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import type { GraphQLError } from "graphql";
+import { GraphQLError } from "graphql";
 import { int } from "neo4j-driver";
 import { generate } from "randomstring";
 import { TestHelper } from "../utils/tests-helper";
@@ -48,7 +48,7 @@ describe("Mathematical operations tests", () => {
             const movie = testHelper.createUniqueType("Movie");
 
             const typeDefs = `
-            type ${movie.name} {
+            type ${movie.name} @node {
                 id: ID!
                 viewers: ${type}!
             }
@@ -62,7 +62,7 @@ describe("Mathematical operations tests", () => {
 
             const query = `
             mutation($id: ID, $value: ${type}) {
-                ${movie.operations.update}(where: { id: $id }, update: {viewers_${operation}: $value}) {
+                ${movie.operations.update}(where: { id_EQ: $id }, update: {viewers_${operation}: $value}) {
                     ${movie.plural} {
                         id
                         viewers
@@ -121,7 +121,7 @@ describe("Mathematical operations tests", () => {
         async ({ initialValue, type, value, operation, expectedError }) => {
             const movie = testHelper.createUniqueType("Movie");
             const typeDefs = `
-            type ${movie.name} {
+            type ${movie.name} @node {
                 id: ID!
                 viewers: ${type}!
             }
@@ -135,7 +135,7 @@ describe("Mathematical operations tests", () => {
 
             const query = `
             mutation($id: ID, $value: ${type}) {
-                ${movie.operations.update}(where: { id: $id }, update: {viewers_${operation}: $value}) {
+                ${movie.operations.update}(where: { id_EQ: $id }, update: {viewers_${operation}: $value}) {
                     ${movie.plural} {
                         id
                         viewers
@@ -178,7 +178,7 @@ describe("Mathematical operations tests", () => {
         const initialViewers = int(100);
         const movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             id: ID!
             viewers: Int!
         }
@@ -192,7 +192,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation($id: ID, $value: Int) {
-            ${movie.operations.update}(where: { id: $id }, update: {viewers: $value, viewers_INCREMENT: $value}) {
+            ${movie.operations.update}(where: { id_EQ: $id }, update: {viewers: $value, viewers_INCREMENT: $value}) {
                 ${movie.plural} {
                     id
                     viewers
@@ -215,12 +215,9 @@ describe("Mathematical operations tests", () => {
         const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { id, value: 10 },
         });
-        expect(gqlResult.errors).toBeDefined();
-        expect(
-            (gqlResult.errors as GraphQLError[]).some((el) =>
-                el.message.includes("Cannot mutate the same field multiple times in one Mutation")
-            )
-        ).toBeTruthy();
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[viewers]], [[viewers_INCREMENT]] on type ${movie}`),
+        ]);
         const storedValue = await testHelper.executeCypher(
             `
                 MATCH (n:${movie.name} {id: $id}) RETURN n.viewers AS viewers
@@ -237,7 +234,7 @@ describe("Mathematical operations tests", () => {
         const initialLength = int(100);
         const movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             id: ID!
             viewers: Int!
             length: Int!
@@ -252,7 +249,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation($id: ID, $value: Int) {
-            ${movie.operations.update}(where: { id: $id }, update: {length_DECREMENT: $value, viewers_INCREMENT: $value}) {
+            ${movie.operations.update}(where: { id_EQ: $id }, update: {length_DECREMENT: $value, viewers_INCREMENT: $value}) {
                 ${movie.plural} {
                     id
                     viewers
@@ -297,11 +294,11 @@ describe("Mathematical operations tests", () => {
         const movie = testHelper.createUniqueType("Movie");
         const actor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             viewers: Int!
             workers: [${actor.name}!]! @relationship(type: "WORKED_IN", direction: IN)
         }
-        type ${actor.name} {
+        type ${actor.name} @node {
             id: ID!
             name: String!
             worksInMovies: [${movie.name}!]! @relationship(type: "WORKED_IN", direction: OUT)
@@ -316,7 +313,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation($id: ID, $value: Int) {
-            ${actor.operations.update}(where: { id: $id }, 
+            ${actor.operations.update}(where: { id_EQ: $id }, 
                 update: {
                     worksInMovies: [
                     {
@@ -379,11 +376,11 @@ describe("Mathematical operations tests", () => {
         interface ${production.name} {
             viewers: Int!
         }
-        type ${movie.name} implements ${production.name} {
+        type ${movie.name} implements ${production.name} @node {
             viewers: Int!
             workers: [${actor.name}!]! @relationship(type: "WORKED_IN", direction: IN)
         }
-        type ${actor.name} {
+        type ${actor.name} @node {
             id: ID!
             name: String!
             worksInProductions: [${production.name}!]! @relationship(type: "WORKED_IN", direction: OUT)
@@ -398,7 +395,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation($id: ID, $value: Int) {
-            ${actor.operations.update}(where: { id: $id }, 
+            ${actor.operations.update}(where: { id_EQ: $id }, 
                 update: {
                   worksInProductions: [
                     {
@@ -454,7 +451,7 @@ describe("Mathematical operations tests", () => {
         const increment = 10;
         const movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             id: ID!
             viewers: Int
         }
@@ -468,7 +465,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation($id: ID, $value: Int) {
-            ${movie.operations.update}(where: { id: $id }, update: {viewers_INCREMENT: $value}) {
+            ${movie.operations.update}(where: { id_EQ: $id }, update: {viewers_INCREMENT: $value}) {
                 ${movie.plural} {
                     id
                     viewers
@@ -514,12 +511,12 @@ describe("Mathematical operations tests", () => {
         const movie = testHelper.createUniqueType("Movie");
         const actor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             title: String
             actors: [${actor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
         }
         
-        type ${actor.name} {
+        type ${actor.name} @node {
             id: ID!
             name: String!
             actedIn: [${movie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
@@ -538,7 +535,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation Mutation($id: ID, $payIncrement: Float) {
-            ${actor.operations.update}(where: { id: $id }, update: {
+            ${actor.operations.update}(where: { id_EQ: $id }, update: {
                   actedIn: [
                     {
                       update: {
@@ -599,13 +596,13 @@ describe("Mathematical operations tests", () => {
         const movie = testHelper.createUniqueType("Movie");
         const actor = testHelper.createUniqueType("Actor");
         const typeDefs = `
-        type ${movie.name} {
+        type ${movie.name} @node {
             title: String
             viewers: Int
             actors: [${actor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
         }
         
-        type ${actor.name} {
+        type ${actor.name} @node {
             id: ID!
             name: String!
             actedIn: [${movie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
@@ -624,7 +621,7 @@ describe("Mathematical operations tests", () => {
 
         const query = `
         mutation Mutation($id: ID, $payIncrement: Float) {
-            ${actor.operations.update}(where: { id: $id }, update: {
+            ${actor.operations.update}(where: { id_EQ: $id }, update: {
                   actedIn: [
                     {
                       update: {

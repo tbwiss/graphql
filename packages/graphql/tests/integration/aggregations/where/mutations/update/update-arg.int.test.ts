@@ -41,12 +41,12 @@ describe("Update using aggregate where", () => {
         postType = testHelper.createUniqueType("Post");
         likeInterface = testHelper.createUniqueType("LikeEdge");
         typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
     
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID
                 content: String!
                 likes: [${userType.name}!]! @relationship(type: "LIKES", direction: IN, properties: "${likeInterface.name}")
@@ -82,13 +82,13 @@ describe("Update using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: {
                             where: { 
                                 node: {
                                     likesAggregate: {
-                                        count: 2
+                                        count_EQ: 2
                                     }
                                 } 
                             } 
@@ -153,7 +153,7 @@ describe("Update using aggregate where", () => {
         const query = `
              mutation {
                  ${userType.operations.update}(
-                     where: { name: "${userName}" }
+                     where: { name_EQ: "${userName}" }
                      update: { 
                          likedPosts: {
                             where: { 
@@ -161,12 +161,12 @@ describe("Update using aggregate where", () => {
                                     likesAggregate: {
                                        OR: [
                                        {
-                                           count: 2
+                                           count_EQ: 2
                                            
                                        },
                                        {
                                            node: {
-                                               name_SHORTEST_LT: 10 
+                                               name_SHORTEST_LENGTH_LT: 10 
                                            }
                                         }
                                        ]
@@ -224,84 +224,6 @@ describe("Update using aggregate where", () => {
                 {
                     post: expect.objectContaining({
                         properties: { id: postId2, content: expectedContent },
-                    }),
-                },
-            ])
-        );
-    });
-
-    test("should update when filtering using count, edge and node", async () => {
-        const query = `
-            mutation {
-                ${userType.operations.update}(
-                    where: { name: "${userName}" }
-                    update: { 
-                        likedPosts: {
-                            where: { 
-                                node: {
-                                    likesAggregate: {
-                                        edge: {
-                                            likedAt_LT: "${date2.toISOString()}" 
-                                        }
-                                        node: {
-                                            name_SHORTEST_LT: 10 
-                                        }
-                                        count: 1
-                                    }
-                                }
-                            }
-                            update: {
-                                node: {
-                                    content: "${expectedContent}"
-                                }
-                            } 
-                        } 
-                    }
-                ) {
-                    ${userType.plural} {
-                        name
-                        likedPosts {
-                            id
-                            content
-                        }
-                    }
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-        const users = (gqlResult.data as any)[userType.operations.update][userType.plural] as any[];
-        expect(users).toEqual([
-            {
-                name: userName,
-                likedPosts: expect.toIncludeSameMembers([
-                    { id: postId1, content: expectedContent },
-                    { id: postId2, content: originalContent },
-                ]),
-            },
-        ]);
-        const storedValue = await testHelper.executeCypher(
-            `
-             MATCH (u:${userType.name})-[r:LIKES]->(post:${postType.name}) 
-             WHERE u.name = "${userName}" 
-             RETURN post
-             `,
-            {}
-        );
-        expect(storedValue.records).toHaveLength(2);
-        const results = storedValue.records.map((record) => record.toObject());
-        expect(results).toEqual(
-            expect.toIncludeSameMembers([
-                {
-                    post: expect.objectContaining({
-                        properties: { id: postId1, content: expectedContent },
-                    }),
-                },
-                {
-                    post: expect.objectContaining({
-                        properties: { id: postId2, content: originalContent },
                     }),
                 },
             ])

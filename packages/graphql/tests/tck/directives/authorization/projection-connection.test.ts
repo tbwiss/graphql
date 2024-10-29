@@ -28,20 +28,20 @@ describe("Cypher Auth Projection On Connections", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Post {
+            type Post @node {
                 content: String
                 creator: User! @relationship(type: "HAS_POST", direction: IN)
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
             }
 
-            extend type User @authorization(validate: [{ when: BEFORE, where: { node: { id: "$jwt.sub" } } }])
+            extend type User @authorization(validate: [{ when: BEFORE, where: { node: { id_EQ: "$jwt.sub" } } }])
             extend type Post
-                @authorization(validate: [{ when: BEFORE, where: { node: { creator: { id: "$jwt.sub" } } } }])
+                @authorization(validate: [{ when: BEFORE, where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
         `;
 
         neoSchema = new Neo4jGraphQL({
@@ -195,20 +195,20 @@ describe("Cypher Auth Projection On top-level connections", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Post {
+            type Post @node {
                 content: String
                 creator: User! @relationship(type: "HAS_POST", direction: IN)
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
             }
 
-            extend type User @authorization(validate: [{ when: BEFORE, where: { node: { id: "$jwt.sub" } } }])
+            extend type User @authorization(validate: [{ when: BEFORE, where: { node: { id_EQ: "$jwt.sub" } } }])
             extend type Post
-                @authorization(validate: [{ when: BEFORE, where: { node: { creator: { id: "$jwt.sub" } } } }])
+                @authorization(validate: [{ when: BEFORE, where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
         `;
 
         neoSchema = new Neo4jGraphQL({

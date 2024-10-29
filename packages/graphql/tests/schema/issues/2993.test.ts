@@ -30,7 +30,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
                 userName: String!
             }
 
-            type User implements Profile {
+            type User implements Profile @node {
                 id: ID! @id
                 userName: String!
                 following: [Profile!]! @relationship(type: "FOLLOWS", direction: OUT, properties: "FOLLOWS")
@@ -54,7 +54,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -76,7 +75,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -93,11 +91,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [FOLLOWSAggregationWhereInput!]
               NOT: FOLLOWSAggregationWhereInput
               OR: [FOLLOWSAggregationWhereInput!]
-              since_EQUAL: DateTime @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_GT: DateTime @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_GTE: DateTime @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_LT: DateTime @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              since_LTE: DateTime @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
               since_MAX_EQUAL: DateTime
               since_MAX_GT: DateTime
               since_MAX_GTE: DateTime
@@ -122,14 +115,13 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [FOLLOWSWhere!]
               NOT: FOLLOWSWhere
               OR: [FOLLOWSWhere!]
-              since: DateTime
+              since: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              since_EQ: DateTime
               since_GT: DateTime
               since_GTE: DateTime
               since_IN: [DateTime!]
               since_LT: DateTime
               since_LTE: DateTime
-              since_NOT: DateTime @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              since_NOT_IN: [DateTime!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type IDAggregateSelection {
@@ -140,7 +132,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             type Mutation {
               createUsers(input: [UserCreateInput!]!): CreateUsersMutationResponse!
               deleteUsers(delete: UserDeleteInput, where: UserWhere): DeleteInfo!
-              updateUsers(connect: UserConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: UserRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: UserDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: UserDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: UserUpdateInput, where: UserWhere): UpdateUsersMutationResponse!
+              updateUsers(update: UserUpdateInput, where: UserWhere): UpdateUsersMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -185,7 +177,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               \\"\\"\\"
               Specify one or more ProfileSort objects to sort Profiles by. The sorts will be applied in the order in which they are arranged in the array.
               \\"\\"\\"
-              sort: [ProfileSort]
+              sort: [ProfileSort!]
             }
 
             \\"\\"\\"
@@ -205,26 +197,18 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [ProfileWhere!]
               NOT: ProfileWhere
               OR: [ProfileWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID!]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
               typename_IN: [ProfileImplementation!]
-              userName: String
+              userName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               userName_CONTAINS: String
               userName_ENDS_WITH: String
+              userName_EQ: String
               userName_IN: [String!]
-              userName_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               userName_STARTS_WITH: String
             }
 
@@ -235,12 +219,12 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             type Query {
-              profiles(options: ProfileOptions, where: ProfileWhere): [Profile!]!
+              profiles(limit: Int, offset: Int, options: ProfileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
               profilesAggregate(where: ProfileWhere): ProfileAggregateSelection!
-              profilesConnection(after: String, first: Int, sort: [ProfileSort], where: ProfileWhere): ProfilesConnection!
-              users(options: UserOptions, where: UserWhere): [User!]!
+              profilesConnection(after: String, first: Int, sort: [ProfileSort!], where: ProfileWhere): ProfilesConnection!
+              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
               usersAggregate(where: UserWhere): UserAggregateSelection!
-              usersConnection(after: String, first: Int, sort: [UserSort], where: UserWhere): UsersConnection!
+              usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -260,7 +244,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -273,9 +256,9 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             type User implements Profile {
-              following(directed: Boolean = true, options: ProfileOptions, where: ProfileWhere): [Profile!]!
-              followingAggregate(directed: Boolean = true, where: ProfileWhere): UserProfileFollowingAggregationSelection
-              followingConnection(after: String, directed: Boolean = true, first: Int, sort: [UserFollowingConnectionSort!], where: UserFollowingConnectionWhere): UserFollowingConnection!
+              following(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProfileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
+              followingAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProfileWhere): UserProfileFollowingAggregationSelection
+              followingConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserFollowingConnectionSort!], where: UserFollowingConnectionWhere): UserFollowingConnection!
               id: ID!
               userName: String!
             }
@@ -284,10 +267,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               count: Int!
               id: IDAggregateSelection!
               userName: StringAggregateSelection!
-            }
-
-            input UserConnectInput {
-              following: [UserFollowingConnectFieldInput!]
             }
 
             input UserCreateInput {
@@ -299,10 +278,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               following: [UserFollowingDeleteFieldInput!]
             }
 
-            input UserDisconnectInput {
-              following: [UserFollowingDisconnectFieldInput!]
-            }
-
             type UserEdge {
               cursor: String!
               node: User!
@@ -312,7 +287,8 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [UserFollowingAggregateInput!]
               NOT: UserFollowingAggregateInput
               OR: [UserFollowingAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -341,9 +317,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               NOT: UserFollowingConnectionWhere
               OR: [UserFollowingConnectionWhere!]
               edge: FOLLOWSWhere
-              edge_NOT: FOLLOWSWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               node: ProfileWhere
-              node_NOT: ProfileWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             input UserFollowingCreateFieldInput {
@@ -367,42 +341,31 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [UserFollowingNodeAggregationWhereInput!]
               NOT: UserFollowingNodeAggregationWhereInput
               OR: [UserFollowingNodeAggregationWhereInput!]
-              id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
               userName_AVERAGE_LENGTH_EQUAL: Float
               userName_AVERAGE_LENGTH_GT: Float
               userName_AVERAGE_LENGTH_GTE: Float
               userName_AVERAGE_LENGTH_LT: Float
               userName_AVERAGE_LENGTH_LTE: Float
-              userName_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               userName_LONGEST_LENGTH_EQUAL: Int
               userName_LONGEST_LENGTH_GT: Int
               userName_LONGEST_LENGTH_GTE: Int
               userName_LONGEST_LENGTH_LT: Int
               userName_LONGEST_LENGTH_LTE: Int
-              userName_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-              userName_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
               userName_SHORTEST_LENGTH_EQUAL: Int
               userName_SHORTEST_LENGTH_GT: Int
               userName_SHORTEST_LENGTH_GTE: Int
               userName_SHORTEST_LENGTH_LT: Int
               userName_SHORTEST_LENGTH_LTE: Int
-              userName_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-              userName_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
             }
 
             type UserFollowingRelationship {
@@ -449,10 +412,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               userName: StringAggregateSelection!
             }
 
-            input UserRelationInput {
-              following: [UserFollowingCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Users by. The order in which sorts are applied is not guaranteed when specifying many fields in one UserSort object.
             \\"\\"\\"
@@ -470,9 +429,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              following: ProfileWhere @deprecated(reason: \\"Use \`following_SOME\` instead.\\")
               followingAggregate: UserFollowingAggregateInput
-              followingConnection: UserFollowingConnectionWhere @deprecated(reason: \\"Use \`followingConnection_SOME\` instead.\\")
               \\"\\"\\"
               Return Users where all of the related UserFollowingConnections match this filter
               \\"\\"\\"
@@ -481,7 +438,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               Return Users where none of the related UserFollowingConnections match this filter
               \\"\\"\\"
               followingConnection_NONE: UserFollowingConnectionWhere
-              followingConnection_NOT: UserFollowingConnectionWhere @deprecated(reason: \\"Use \`followingConnection_NONE\` instead.\\")
               \\"\\"\\"
               Return Users where one of the related UserFollowingConnections match this filter
               \\"\\"\\"
@@ -494,30 +450,21 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               following_ALL: ProfileWhere
               \\"\\"\\"Return Users where none of the related Profiles match this filter\\"\\"\\"
               following_NONE: ProfileWhere
-              following_NOT: ProfileWhere @deprecated(reason: \\"Use \`following_NONE\` instead.\\")
               \\"\\"\\"Return Users where one of the related Profiles match this filter\\"\\"\\"
               following_SINGLE: ProfileWhere
               \\"\\"\\"Return Users where some of the related Profiles match this filter\\"\\"\\"
               following_SOME: ProfileWhere
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID!]
-              id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               id_STARTS_WITH: ID
-              userName: String
+              userName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               userName_CONTAINS: String
               userName_ENDS_WITH: String
+              userName_EQ: String
               userName_IN: [String!]
-              userName_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              userName_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               userName_STARTS_WITH: String
             }
 

@@ -37,11 +37,11 @@ describe("info", () => {
 
     test("should return info from a create mutation", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -60,7 +60,6 @@ describe("info", () => {
             mutation($title: String!, $name: String!) {
                 ${Movie.operations.create}(input: [{ title: $title, actors: { create: [{ node: { name: $name } }] } }]) {
                     info {
-                        bookmark
                         nodesCreated
                         relationshipsCreated
                     }
@@ -80,7 +79,6 @@ describe("info", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect(typeof (gqlResult?.data as any)?.[Movie.operations.create].info.bookmark).toBe("string");
         expect((gqlResult?.data as any)?.[Movie.operations.create].info.nodesCreated).toBe(2);
         expect((gqlResult?.data as any)?.[Movie.operations.create].info.relationshipsCreated).toBe(1);
         expect((gqlResult?.data as any)?.[Movie.operations.create][Movie.plural]).toEqual([
@@ -90,7 +88,7 @@ describe("info", () => {
 
     test("should return info from a delete mutation", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -103,8 +101,9 @@ describe("info", () => {
 
         const query = `
             mutation($id: ID!) {
-                ${Movie.operations.delete}(where: { id: $id }) {
-                    bookmark
+                ${Movie.operations.delete}(where: { id_EQ: $id }) {
+                    nodesDeleted
+                    relationshipsDeleted
                 }
             }
         `;
@@ -115,12 +114,13 @@ describe("info", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect(typeof (gqlResult?.data as any)?.[Movie.operations.delete].bookmark).toBe("string");
+        expect((gqlResult?.data as any)?.[Movie.operations.delete].nodesDeleted).toBe(0);
+        expect((gqlResult?.data as any)?.[Movie.operations.delete].relationshipsDeleted).toBe(0);
     });
 
     test("should return info from an update mutation", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -133,12 +133,12 @@ describe("info", () => {
 
         const query = `
             mutation($id: ID!) {
-                ${Movie.operations.update}(where: { id: $id }) {
-                    info {
-                        bookmark
-                    }
+                ${Movie.operations.update}(where: { id_EQ: $id }) {
                     ${Movie.plural} {
                         id
+                    }
+                    info {
+                        nodesCreated
                     }
                 }
             }
@@ -149,7 +149,6 @@ describe("info", () => {
         });
 
         expect(gqlResult.errors).toBeFalsy();
-
-        expect(typeof (gqlResult?.data as any)[Movie.operations.update].info.bookmark).toBe("string");
+        expect((gqlResult?.data as any)?.[Movie.operations.update].info.nodesCreated).toBe(0);
     });
 });

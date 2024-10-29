@@ -41,11 +41,11 @@ describe("unwind-create field-level auth rules", () => {
             const User = testHelper.createUniqueType("User");
 
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
                 extend type ${User} {
-                    id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                    id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 }
             `;
 
@@ -89,12 +89,12 @@ describe("unwind-create field-level auth rules", () => {
             const User = testHelper.createUniqueType("User");
 
             const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
                 name: String
             }
             extend type ${User} {
-                id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
         `;
 
@@ -139,16 +139,16 @@ describe("unwind-create field-level auth rules", () => {
             const Post = testHelper.createUniqueType("Post");
 
             const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
                 name: String
             }
-            type ${Post} {
+            type ${Post} @node {
                 title: String
                 creator: ${User} @relationship(type: "HAS_POST", direction: IN)
             }
             extend type ${User} {
-                id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                id: ID @authorization(validate: [{ operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
         `;
 
@@ -207,7 +207,7 @@ describe("unwind-create field-level auth rules", () => {
                 roles: [String!]!
             }
 
-            type ${User} {
+            type ${User} @node {
                 id: ID
                 name: String
             }
@@ -260,7 +260,7 @@ describe("unwind-create field-level auth rules", () => {
                 roles: [String!]!
             }
 
-            type ${User} {
+            type ${User} @node {
                 id: ID
                 name: String
             }

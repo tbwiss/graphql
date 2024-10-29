@@ -15,9 +15,7 @@ jobs:
       matrix:
         package:
           - graphql
-          - ogm
           - introspector
-          - graphql-amqp-subscriptions-engine
 
     runs-on: ubuntu-latest
 

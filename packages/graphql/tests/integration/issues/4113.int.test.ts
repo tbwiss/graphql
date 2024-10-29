@@ -43,28 +43,28 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                 store: ID
             }
 
-            type ${User.name} {
+            type ${User.name} @node {
                 id: ID! @id @unique
                 email: String!
                 roles: [String!]!
                 store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
             }
 
-            type ${Store.name} {
+            type ${Store.name} @node {
                 id: ID! @id @unique
                 name: String!
                 employees: [${User.name}!]! @relationship(type: "WORKS_AT", direction: IN)
                 transactions: [${Transaction.name}!]! @relationship(type: "TRANSACTION", direction: IN)
             }
 
-            type ${Transaction.name} {
+            type ${Transaction.name} @node {
                 id: ID! @id @unique
                 store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [${TransactionItem.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
             }
 
-            type ${TransactionItem.name} {
+            type ${TransactionItem.name} @node {
                 transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
@@ -79,7 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { store: { id: "$jwt.store" } }
+                                node: { store: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -93,7 +93,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id: "$jwt.store" } } }
+                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -138,9 +138,9 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                     employees: {
                     connect: {
                         where: {
-                        node: {
-                            email: "a@a.com"
-                        }
+                            node: {
+                                email_EQ: "a@a.com"
+                            }
                         }
                     }
                     }
@@ -167,7 +167,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                         connect: {
                             where: {
                                 node: {
-                                    name: "Store"
+                                    name_EQ: "Store"
                                 }
                             }
                         }
@@ -242,21 +242,21 @@ describe("replicates the test for relationship to interface so that multiple ref
                 store: ID
             }
 
-            type ${User.name} {
+            type ${User.name} @node {
                 id: ID! @id @unique
                 email: String!
                 roles: [String!]!
                 store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
             }
 
-            type ${Store.name} {
+            type ${Store.name} @node {
                 id: ID! @id @unique
                 name: String!
                 employees: [${User.name}!]! @relationship(type: "WORKS_AT", direction: IN)
                 transactions: [${Transaction.name}!]! @relationship(type: "TRANSACTION", direction: IN)
             }
 
-            type ${Transaction.name} {
+            type ${Transaction.name} @node {
                 id: ID! @id @unique
                 store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
@@ -270,14 +270,14 @@ describe("replicates the test for relationship to interface so that multiple ref
                 quantity: Int
             }
 
-            type ${TransactionItem1.name} implements TransactionItemI {
+            type ${TransactionItem1.name} implements TransactionItemI @node {
                 transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
                 quantity: Int
             }
 
-            type ${TransactionItem2.name} implements TransactionItemI {
+            type ${TransactionItem2.name} implements TransactionItemI @node {
                 transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
@@ -292,7 +292,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { store: { id: "$jwt.store" } }
+                                node: { store: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -306,7 +306,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id: "$jwt.store" } } }
+                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -320,7 +320,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id: "$jwt.store" } } }
+                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -357,29 +357,29 @@ describe("replicates the test for relationship to interface so that multiple ref
         const gqlResult1 = await testHelper.executeGraphQL(setupCreateUsers);
         expect(gqlResult1.errors).toBeFalsy();
 
-        const setupCreateStores = `#graphql
+        const setupCreateStores = /* GraphQL */ `
             mutation {
                 ${Store.operations.create}(input: 
                 {
                     name: "Store", 
                     employees: {
-                    connect: {
-                        where: {
-                        node: {
-                            email: "a@a.com"
+                        connect: {
+                            where: {
+                                node: {
+                                    email_EQ: "a@a.com"
+                                }
+                            }
                         }
-                        }
-                    }
                     }
                 }
                 ) {
-                ${Store.plural} {
-                    id
-                    name
-                    employees {
-                    email
+                    ${Store.plural} {
+                        id
+                        name
+                        employees {
+                            email
+                        }
                     }
-                }
                 }
             }`;
         const gqlResult2 = await testHelper.executeGraphQL(setupCreateStores);
@@ -394,7 +394,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                         connect: {
                             where: {
                                 node: {
-                                    name: "Store"
+                                    name_EQ: "Store"
                                 }
                             }
                         }

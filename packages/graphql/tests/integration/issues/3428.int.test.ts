@@ -59,7 +59,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         `;
             createMutationWithNestedConnect = `#graphql
                 mutation {
-                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                         }
@@ -73,7 +73,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                             id: "1"
                             actors: {
                                 connectOrCreate: {
-                                    where: { node: { id: "1" } }
+                                    where: { node: { id_EQ: "1" } }
                                     onCreate: { node: { name: "someName" } }
                                 }
                             }
@@ -99,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             updateMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
-                        update: { actors: { connect: { where: { node: { name: "someName" } } } } }
+                        update: { actors: { connect: { where: { node: { name_EQ: "someName" } } } } }
                     ) {
                         info {
                             nodesCreated
@@ -114,7 +114,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                         update: {
                         actors: {
                             connectOrCreate: {
-                            where: { node: { id: "1" } }
+                            where: { node: { id_EQ: "1" } }
                             onCreate: { node: { name: "someName" } }
                             }
                         }
@@ -131,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                 mutation {
                     ${Movie.operations.update}(
                         update: {
-                        actors: { disconnect: { where: { node: { name: "someName" } } } }
+                        actors: { disconnect: { where: { node: { name_EQ: "someName" } } } }
                         }
                     ) {
                         info {
@@ -153,7 +153,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         `;
             updateMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { delete: { where: { node: { name_EQ: "someName" } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -163,7 +163,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         `;
             deleteMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name: "someName" } } } }) {
+                    ${Movie.operations.delete}(delete: { actors: { where: { node: { name_EQ: "someName" } } } }) {
                         nodesDeleted
                     }
                 }
@@ -171,12 +171,12 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         });
         test("Should not error and should only be able to perform the disconnect nested op when only the DISCONNECT nestedOperation is specified on rel to a type with a unique field", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     id: ID! @id @unique
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT])
                 }
@@ -241,12 +241,12 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
         test("Should only be able to perform the disconnect and connectOrCreate nested ops when DISCONNECT and CONNECT_OR_CREATE are the only nestedOperations specified", async () => {
             const typeDefs = `#graphql
-                type ${Person} {
+                type ${Person} @node {
                     id: ID! @id @unique
                     name: String
                 }
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT, CONNECT_OR_CREATE])
                 }
@@ -334,7 +334,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             `;
             createMutationWithNestedConnect = `#graphql
                 mutation {
-                    ${Movie.operations.create}(input: { id: "1", actors: { ${PersonOne}: { connect: { where: { node: { name: "someName" } } } } } }) {
+                    ${Movie.operations.create}(input: { id: "1", actors: { ${PersonOne}: { connect: { where: { node: { name_EQ: "someName" } } } } } }) {
                         info {
                             nodesCreated
                         }
@@ -349,7 +349,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                             actors: {
                                 ${PersonOne}: {
                                     connectOrCreate: {
-                                        where: { node: { name: "someName" } }
+                                        where: { node: { name_EQ: "someName" } }
                                         onCreate: { node: { name: "someName" } }
                                     }
                                 }
@@ -375,7 +375,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             updateMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
-                        update: { actors: { ${PersonOne}: { connect: { where: { node: { name: "someName" } } } } } }
+                        update: { actors: { ${PersonOne}: { connect: { where: { node: { name_EQ: "someName" } } } } } }
                     ) {
                         info {
                             nodesCreated
@@ -391,7 +391,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                             actors: {
                                 ${PersonOne}: {
                                     connectOrCreate: {
-                                        where: { node: { name: "someName" } }
+                                        where: { node: { name_EQ: "someName" } }
                                         onCreate: { node: { name: "someName" } }
                                     }
                                 }
@@ -409,7 +409,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                 mutation {
                     ${Movie.operations.update}(
                         update: {
-                        actors: { ${PersonOne}: { disconnect: { where: { node: { name: "someName" } } } } }
+                        actors: { ${PersonOne}: { disconnect: { where: { node: { name_EQ: "someName" } } } } }
                         }
                     ) {
                         info {
@@ -431,7 +431,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             `;
             updateMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { ${PersonOne}: { delete: { where: { node: { name: "someName" } } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { ${PersonOne}: { delete: { where: { node: { name_EQ: "someName" } } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -441,7 +441,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             `;
             deleteMutationWithNestedDelete = `#graphql
                 mutation {
-                    ${Movie.operations.delete}(delete: { actors: { ${PersonOne}: { where: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.delete}(delete: { actors: { ${PersonOne}: { where: { node: { name_EQ: "someName" } } } } }) {
                         nodesDeleted
                     }
                 }
@@ -450,17 +450,17 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
         test("Should not error and should only be able to perform the disconnect nested op when only the DISCONNECT nestedOperation is specified on rel to a type with a unique field", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String @unique
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT])
                 }
@@ -525,17 +525,17 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
         test("Should only be able to perform the disconnect and connectOrCreate nested ops when DISCONNECT and CONNECT_OR_CREATE are the only nestedOperations specified", async () => {
             const typeDefs = `#graphql
-                type ${PersonOne} {
+                type ${PersonOne} @node {
                     name: String @unique
                 }
 
-                type ${PersonTwo} {
+                type ${PersonTwo} @node {
                     nameTwo: String
                 }
 
                 union ${Person} = ${PersonOne} | ${PersonTwo}
 
-                type ${Movie} {
+                type ${Movie} @node {
                     id: ID
                     actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT, CONNECT_OR_CREATE])
                 }

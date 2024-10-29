@@ -26,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Place {
+            type Place @node {
                 displayName: String!
                 activity: [Publication!]! @relationship(type: "ACTIVITY", direction: IN)
             }
@@ -36,12 +36,12 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
                 activity: [Place!]! @declareRelationship
             }
 
-            type Post implements Publication {
+            type Post implements Publication @node {
                 name: String
                 activity: [Place!]! @relationship(type: "ACTIVITY", direction: OUT)
             }
 
-            type Story implements Publication {
+            type Story implements Publication @node {
                 name: String
                 activity: [Place!]! @relationship(type: "ACTIVITY", direction: OUT)
             }
@@ -55,7 +55,7 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
     test("sort should be correct when querying interface relationship field", async () => {
         const query = /* GraphQL */ `
             query {
-                places(options: { sort: { displayName: ASC } }) {
+                places(sort: { displayName: ASC }) {
                     displayName
                     activity {
                         name

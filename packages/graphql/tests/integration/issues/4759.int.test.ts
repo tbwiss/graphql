@@ -31,13 +31,13 @@ describe("https://github.com/neo4j/graphql/issues/4759", () => {
         Node2 = testHelper.createUniqueType("Node2");
 
         const typeDefs = /* GraphQL */ `
-            type ${Node2} {
+            type ${Node2} @node {
                 uuid: ID! @id
                 name: String!
                 active: Boolean!
             }
 
-            type ${Node1} {
+            type ${Node1} @node {
                 uuid: ID! @id
                 name: String!
                 nodes: [${Node2}!]! @relationship(type: "HAS_NODE", direction: IN)
@@ -63,7 +63,7 @@ describe("https://github.com/neo4j/graphql/issues/4759", () => {
                 ${Node1.plural} {
                     uuid
                     name
-                    nodesAggregate(where: { active: true }) {
+                    nodesAggregate(where: { active_EQ: true }) {
                         count
                     }
                 }
@@ -98,7 +98,7 @@ describe("https://github.com/neo4j/graphql/issues/4759", () => {
                 ${Node1.plural} {
                     uuid
                     name
-                    activeNodes: nodesAggregate(where: { active: true }) {
+                    activeNodes: nodesAggregate(where: { active_EQ: true }) {
                         count
                     }
                 }

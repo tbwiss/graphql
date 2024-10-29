@@ -39,13 +39,13 @@ describe("Top-level interface query fields", () => {
         MyOtherImplementationType = testHelper.createUniqueType("MyOtherImplementation");
 
         typeDefs = `
-            type ${SomeNodeType} implements MyOtherInterface & MyInterface {
+            type ${SomeNodeType} implements MyOtherInterface & MyInterface @node {
                 id: ID! @id @unique
                 something: String
                 somethingElse: String
                 other: [${OtherNodeType}!]! @relationship(type: "HAS_OTHER_NODES", direction: OUT)
             }
-            type ${OtherNodeType} {
+            type ${OtherNodeType} @node {
                 id: ID! @id @unique
                 interfaceField: MyInterface! @relationship(type: "HAS_INTERFACE_NODES", direction: OUT)
             }
@@ -57,11 +57,11 @@ describe("Top-level interface query fields", () => {
                 something: String
             }
 
-            type ${MyImplementationType} implements MyInterface {
+            type ${MyImplementationType} implements MyInterface @node {
                 id: ID! @id @unique
             }
 
-            type ${MyOtherImplementationType} implements MyInterface {
+            type ${MyOtherImplementationType} implements MyInterface @node {
                 id: ID! @id @unique
                 someField: String
             }
@@ -192,9 +192,9 @@ describe("Top-level interface query fields", () => {
                 },
             },
         });
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                myOtherInterfaces(options: {sort: [{ something: DESC }] }) {
+                myOtherInterfaces(sort: [{ something: DESC }]) {
                     id
                     ... on ${SomeNodeType} {
                         id
@@ -243,9 +243,9 @@ describe("Top-level interface query fields", () => {
                 },
             },
         });
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                myOtherInterfaces(options: {sort: [{ something: DESC }], limit: 1 }) {
+                myOtherInterfaces(sort: [{ something: DESC }], limit: 1) {
                     id
                     ... on ${SomeNodeType} {
                         id
@@ -289,7 +289,7 @@ describe("Top-level interface query fields", () => {
                 filter: [
                     {
                         operations: [READ]
-                        where: { node: { something: "$jwt.jwtAllowedNamesExample" }, jwt: { roles_INCLUDES: "admin" } }
+                        where: { node: { something_EQ: "$jwt.jwtAllowedNamesExample" }, jwt: { roles_INCLUDES: "admin" } }
                     }
                 ]
             ) 
@@ -473,7 +473,7 @@ describe("Top-level interface query fields", () => {
         test("Max limit from directive on Interface overwrites the limit argument", async () => {
             const query = /* GraphQL */ `
                 query {
-                    myInterfaces(options: { limit: 6 }) {
+                    myInterfaces(limit: 6) {
                         id
                         ... on ${MyOtherImplementationType.name} {
                             someField
@@ -504,7 +504,7 @@ describe("Top-level interface query fields", () => {
         test("Limit argument overwrites default if lower than max", async () => {
             const query = /* GraphQL */ `
                 query {
-                    myInterfaces(options: { limit: 2 }) {
+                    myInterfaces(limit: 2) {
                         id
                         ... on ${MyOtherImplementationType.name} {
                             someField

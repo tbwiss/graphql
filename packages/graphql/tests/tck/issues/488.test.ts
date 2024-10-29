@@ -26,24 +26,24 @@ describe("https://github.com/neo4j/graphql/issues/488", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Journalist {
+            type Journalist @node {
                 name: String!
                 keywords: [Keyword!]! @relationship(type: "HAS_KEYWORD", direction: OUT)
             }
 
             union Keyword = Emoji | Hashtag | Text
 
-            type Emoji {
+            type Emoji @node {
                 id: ID! @id @unique
                 type: String!
             }
 
-            type Hashtag {
+            type Hashtag @node {
                 id: ID! @id @unique
                 type: String!
             }
 
-            type Text {
+            type Text @node {
                 id: ID! @id @unique
                 type: String!
             }
@@ -57,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/488", () => {
     test("Should replicate issue and return correct cypher", async () => {
         const query = /* GraphQL */ `
             query {
-                journalists(where: { keywordsConnection: { Emoji: { node: { type: "Smile" } } } }) {
+                journalists(where: { keywordsConnection_SOME: { Emoji: { node: { type_EQ: "Smile" } } } }) {
                     name
                     keywords {
                         ... on Emoji {
@@ -108,10 +108,10 @@ describe("https://github.com/neo4j/graphql/issues/488", () => {
         `);
     });
 
-    test("Should replicate issue and return correct cypher (using not)", async () => {
+    test("Should replicate issue and return correct cypher (using NONE)", async () => {
         const query = /* GraphQL */ `
             query {
-                journalists(where: { keywordsConnection_NOT: { Emoji: { node: { type: "Smile" } } } }) {
+                journalists(where: { keywordsConnection_NONE: { Emoji: { node: { type_EQ: "Smile" } } } }) {
                     name
                     keywords {
                         ... on Emoji {

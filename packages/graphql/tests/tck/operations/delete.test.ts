@@ -18,7 +18,7 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("Cypher Delete", () => {
     let typeDefs: string;
@@ -26,12 +26,12 @@ describe("Cypher Delete", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 title: String
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -46,7 +46,7 @@ describe("Cypher Delete", () => {
     test("Simple Delete", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deleteMovies(where: { id: "123" }) {
+                deleteMovies(where: { id_EQ: "123" }) {
                     nodesDeleted
                 }
             }
@@ -70,7 +70,7 @@ describe("Cypher Delete", () => {
     test("Single Nested Delete", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deleteMovies(where: { id: 123 }, delete: { actors: { where: { node: { name: "Actor to delete" } } } }) {
+                deleteMovies(where: { id_EQ: 123 }, delete: { actors: { where: { node: { name_EQ: "Actor to delete" } } } }) {
                     nodesDeleted
                 }
             }
@@ -109,11 +109,11 @@ describe("Cypher Delete", () => {
         const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
-                    where: { id: 123 }
+                    where: { id_EQ: 123 }
                     delete: {
                         actors: [
-                            { where: { node: { name: "Actor to delete" } } }
-                            { where: { node: { name: "Another actor to delete" } } }
+                            { where: { node: { name_EQ: "Actor to delete" } } }
+                            { where: { node: { name_EQ: "Another actor to delete" } } }
                         ]
                     }
                 ) {
@@ -167,11 +167,11 @@ describe("Cypher Delete", () => {
         const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
-                    where: { id: 123 }
+                    where: { id_EQ: 123 }
                     delete: {
                         actors: {
-                            where: { node: { name: "Actor to delete" } }
-                            delete: { movies: { where: { node: { id: 321 } } } }
+                            where: { node: { name_EQ: "Actor to delete" } }
+                            delete: { movies: { where: { node: { id_EQ: 321 } } } }
                         }
                     }
                 ) {
@@ -226,14 +226,14 @@ describe("Cypher Delete", () => {
         const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
-                    where: { id: 123 }
+                    where: { id_EQ: 123 }
                     delete: {
                         actors: {
-                            where: { node: { name: "Actor to delete" } }
+                            where: { node: { name_EQ: "Actor to delete" } }
                             delete: {
                                 movies: {
-                                    where: { node: { id: 321 } }
-                                    delete: { actors: { where: { node: { name: "Another actor to delete" } } } }
+                                    where: { node: { id_EQ: 321 } }
+                                    delete: { actors: { where: { node: { name_EQ: "Another actor to delete" } } } }
                                 }
                             }
                         }

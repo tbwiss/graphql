@@ -31,13 +31,13 @@ describe("https://github.com/neo4j/graphql/issues/630", () => {
         typeActor = testHelper.createUniqueType("Actor");
 
         const typeDefs = `
-         type ${typeActor} {
+         type ${typeActor} @node {
              id: ID!
              name: String!
              movies: [${typeMovie}!]! @cypher(statement: "MATCH (this)-[:ACTED_IN]->(m:${typeMovie}) RETURN m", columnName:"m")
          }
  
-         type ${typeMovie} {
+         type ${typeMovie} @node {
              id: ID!
              title: String!
              actors: [${typeActor}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -82,7 +82,7 @@ describe("https://github.com/neo4j/graphql/issues/630", () => {
 
         const source = `
             query($actorId: ID!) {
-                ${typeActor.plural}(where: { id: $actorId }) {
+                ${typeActor.plural}(where: { id_EQ: $actorId }) {
                     id
                     name
                     movies {

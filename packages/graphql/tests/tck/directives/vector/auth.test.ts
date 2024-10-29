@@ -47,13 +47,14 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth where", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
-                @authorization(filter: [{ where: { node: { director: { id: "$jwt.sub" } } } }]) {
+                @authorization(filter: [{ where: { node: { director_SOME: { id_EQ: "$jwt.sub" } } } }]) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
         `;
@@ -245,13 +246,14 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
-                @authorization(validate: [{ when: [BEFORE], where: { node: { director: { id: "$jwt.sub" } } } }]) {
+                @authorization(validate: [{ when: [BEFORE], where: { node: { director_SOME: { id_EQ: "$jwt.sub" } } } }]) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
         `;
@@ -443,15 +445,16 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow ALL", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
                 @authorization(
-                    validate: [{ when: [BEFORE], where: { node: { director_ALL: { id: "$jwt.sub" } } } }]
+                    validate: [{ when: [BEFORE], where: { node: { director_ALL: { id_EQ: "$jwt.sub" } } } }]
                 ) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
         `;
@@ -646,17 +649,18 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow on connection node", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
                 @authorization(
                     validate: [
-                        { when: [BEFORE], where: { node: { directorConnection: { node: { id: "$jwt.sub" } } } } }
+                        { when: [BEFORE], where: { node: { directorConnection_SOME: { node: { id_EQ: "$jwt.sub" } } } } }
                     ]
                 ) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
         `;
@@ -848,12 +852,13 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow on connection node ALL", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
                 @authorization(
                     validate: [
                         {
                             when: [BEFORE]
-                            where: { node: { directorConnection_ALL: { node: { id: "$jwt.sub" } } } }
+                            where: { node: { directorConnection_ALL: { node: { id_EQ: "$jwt.sub" } } } }
                         }
                     ]
                 ) {
@@ -861,7 +866,7 @@ describe("Cypher -> vector -> Auth", () => {
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
         `;
@@ -1056,17 +1061,18 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow on connection edge", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
                 @authorization(
                     validate: [
-                        { when: [BEFORE], where: { node: { directorConnection: { edge: { year: 2020 } } } } }
+                        { when: [BEFORE], where: { node: { directorConnection_SOME: { edge: { year_EQ: 2020 } } } } }
                     ]
                 ) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN, properties: "Directed")
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
 
@@ -1259,17 +1265,18 @@ describe("Cypher -> vector -> Auth", () => {
     test("simple match with auth allow on connection edge ALL", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie
+                @node
                 @vector(indexes: [{ indexName: "movie_index", embeddingProperty: "movieVector", queryName: "${queryName}" }])
                 @authorization(
                     validate: [
-                        { when: [BEFORE], where: { node: { directorConnection_ALL: { edge: { year: 2020 } } } } }
+                        { when: [BEFORE], where: { node: { directorConnection_ALL: { edge: { year_EQ: 2020 } } } } }
                     ]
                 ) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN, properties: "Directed")
             }
 
-            type Person {
+            type Person @node {
                 id: ID
             }
 

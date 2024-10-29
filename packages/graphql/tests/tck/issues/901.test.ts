@@ -26,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/901", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Series {
+            type Series @node {
                 id: ID! @id @unique
                 name: String!
                 brand: Series @relationship(type: "HAS_BRAND", direction: OUT, properties: "Properties")
@@ -65,20 +65,20 @@ describe("https://github.com/neo4j/graphql/issues/901", () => {
                         {
                             manufacturerConnection: {
                                 edge: {
-                                    current: true,
+                                    current_EQ: true,
                                 },
                                 node: {
-                                    name: "abc",
+                                    name_EQ: "abc",
                                 },
                             },
                         },
                         {
                             brandConnection: {
                                 edge: {
-                                    current: true,
+                                    current_EQ: true,
                                 },
                                 node: {
-                                    name: "smart",
+                                    name_EQ: "smart",
                                 },
                             },
                         },

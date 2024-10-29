@@ -31,11 +31,11 @@ describe("aggregations-where-count", () => {
         Post = testHelper.createUniqueType("Post");
 
         const typeDefs = /* GraphQL */ `
-            type ${User} {
+            type ${User} @node {
                 testString: String!
             }
 
-            type ${Post} {
+            type ${Post} @node {
               testString: String!
               likes: [${User}!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -62,7 +62,7 @@ describe("aggregations-where-count", () => {
 
         const query = /* GraphQL */ `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_EQ: 1 } }) {
                         testString
                         likes {
                             testString
@@ -102,7 +102,7 @@ describe("aggregations-where-count", () => {
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_LT: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_LT: 1 } }) {
                         testString
                         likes {
                             testString
@@ -142,7 +142,7 @@ describe("aggregations-where-count", () => {
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_LTE: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_LTE: 1 } }) {
                         testString
                         likes {
                             testString
@@ -187,7 +187,7 @@ describe("aggregations-where-count", () => {
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_GT: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_GT: 1 } }) {
                         testString
                         likes {
                             testString
@@ -227,7 +227,7 @@ describe("aggregations-where-count", () => {
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_GTE: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_GTE: 1 } }) {
                         testString
                         likes {
                             testString
@@ -270,15 +270,15 @@ describe("aggregations-where-count  interface relationships of concrete types", 
             testString: String!
         }
 
-        type ${User} implements Human {
+        type ${User} implements Human @node {
             testString: String!
         }
 
-        type ${Person} implements Human {
+        type ${Person} implements Human @node {
             testString: String!
         }
 
-            type ${Post} {
+            type ${Post} @node {
               testString: String!
               likes: [Human!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -305,7 +305,7 @@ describe("aggregations-where-count  interface relationships of concrete types", 
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_EQ: 1 } }) {
                         testString
                         likes {
                             testString
@@ -345,7 +345,7 @@ describe("aggregations-where-count  interface relationships of concrete types", 
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_LT: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_LT: 1 } }) {
                         testString
                         likes {
                             testString
@@ -385,7 +385,7 @@ describe("aggregations-where-count  interface relationships of concrete types", 
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_LTE: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_LTE: 1 } }) {
                         testString
                         likes {
                             testString
@@ -430,7 +430,7 @@ describe("aggregations-where-count  interface relationships of concrete types", 
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_GT: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_GT: 1 } }) {
                         testString
                         likes {
                             testString
@@ -470,7 +470,7 @@ describe("aggregations-where-count  interface relationships of concrete types", 
 
         const query = `
                 {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { count_GTE: 1 } }) {
+                    ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { count_GTE: 1 } }) {
                         testString
                         likes {
                             testString

@@ -32,23 +32,23 @@ describe("Auth projections for interface relationship fields", () => {
                 title: String!
             }
 
-            type Movie implements Production {
+            type Movie implements Production @node {
                 title: String!
                 runtime: Int!
             }
 
-            type Series implements Production {
+            type Series implements Production @node {
                 title: String!
                 episodes: String!
             }
 
-            extend type Series @authorization(validate: [{ when: BEFORE, where: { node: { episodes: "$jwt.sub" } } }])
+            extend type Series @authorization(validate: [{ when: BEFORE, where: { node: { episodes_EQ: "$jwt.sub" } } }])
 
             type ActedIn @relationshipProperties {
                 screenTime: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }

@@ -47,7 +47,7 @@ describe("delete interface relationships", () => {
 
     beforeEach(async () => {
         const typeDefs = gql`
-            type ${episodeType.name} {
+            type ${episodeType.name} @node {
                 runtime: Int!
                 series: ${seriesType.name} ! @relationship(type: "HAS_EPISODE", direction: IN)
             }
@@ -57,19 +57,19 @@ describe("delete interface relationships", () => {
                 actors: [${actorType.name}!]! @declareRelationship
             }
 
-            type ${movieType.name} implements Production {
+            type ${movieType.name} implements Production @node {
                 title: String!
                 runtime: Int!
                 actors: [${actorType.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${seriesType.name} implements Production {
+            type ${seriesType.name} implements Production @node {
                 title: String!
                 episodes: [${episodeType.name}!]! @relationship(type: "HAS_EPISODE", direction: OUT)
                 actors: [${actorType.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${actorType.name} {
+            type ${actorType.name} @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -141,7 +141,7 @@ describe("delete interface relationships", () => {
     test("should delete one nested concrete entity", async () => {
         const query = `
             mutation DeleteActorAndMovie($name: String, $title: String) {
-                ${actorType.operations.delete}(where: { name: $name }, delete: { actedIn:  { where: { node: { typename_IN: [${movieType}], title: $title } } } } ) {
+                ${actorType.operations.delete}(where: { name_EQ: $name }, delete: { actedIn:  { where: { node: { typename_IN: [${movieType}], title_EQ: $title } } } } ) {
                     nodesDeleted
                     relationshipsDeleted
                 }
@@ -166,10 +166,10 @@ describe("delete interface relationships", () => {
         const query = `
             mutation DeleteActorAndMovie($name1: String, $movieScreenTime1: Int) {
                 ${actorType.operations.delete}(
-                    where: { name: $name1 }
+                    where: { name_EQ: $name1 }
                     delete: {
                         actedIn: {
-                            where: { edge: { screenTime: $movieScreenTime1 } }
+                            where: { edge: { screenTime_EQ: $movieScreenTime1 } }
                         }
                     }
                 ) {
@@ -197,10 +197,10 @@ describe("delete interface relationships", () => {
         const query = `
             mutation DeleteActorAndMovie($name1: String, $movieScreenTime1: Int, $movieScreenTime2: Int) {
                 ${actorType.operations.delete}(
-                    where: { name: $name1 }
+                    where: { name_EQ: $name1 }
                     delete: {
                         actedIn: {
-                            where: { edge: { OR: [ {screenTime: $movieScreenTime1 }, { screenTime: $movieScreenTime2 } ]} } 
+                            where: { edge: { OR: [ {screenTime_EQ: $movieScreenTime1 }, { screenTime_EQ: $movieScreenTime2 } ]} } 
                         }
                     }
                 ) {
@@ -232,13 +232,13 @@ describe("delete interface relationships", () => {
         const query = `
             mutation DeleteActorAndMovie($name1: String, $movieTitle2: String, $name2: String) {
                 ${actorType.operations.delete}(
-                    where: { name: $name1 }
+                    where: { name_EQ: $name1 }
                     delete: {
                         actedIn: {
-                            where: { node: { title: $movieTitle2 } }
+                            where: { node: { title_EQ: $movieTitle2 } }
                             delete: {
                                 actors: {
-                                    where: { node: { name: $name2 } }
+                                    where: { node: { name_EQ: $name2 } }
                                 }
                             }
                         }

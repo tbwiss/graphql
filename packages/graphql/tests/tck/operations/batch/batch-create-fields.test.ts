@@ -26,7 +26,7 @@ describe("Batch Create, Scalar types", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Actor {
+            type Actor @node {
                 id: ID! @id @unique
                 name: String
                 born: Date
@@ -35,7 +35,7 @@ describe("Batch Create, Scalar types", () => {
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 runningTime: Duration
                 location: Point
@@ -44,7 +44,7 @@ describe("Batch Create, Scalar types", () => {
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Website {
+            type Website @node {
                 address: String
             }
 
@@ -388,12 +388,12 @@ describe("Batch Create, Scalar types", () => {
                         { id: "1", actors: { create: [{ node: { name: "actor 1" }, edge: { year: 2022 } }] } }
                         { id: "2", actors: { create: [{ node: { name: "actor 2" }, edge: { year: 1999 } }] } }
                         { id: "3", website: { create: { node: { address: "mywebsite.com" } } } }
-                        { id: "4", actors: { connect: { where: { node: { id: "2" } } } } }
+                        { id: "4", actors: { connect: { where: { node: { id_EQ: "2" } } } } }
                         {
                             id: "5"
                             actors: {
                                 connectOrCreate: {
-                                    where: { node: { id: "2" } }
+                                    where: { node: { id_EQ: "2" } }
                                     onCreate: { node: { name: "actor 2" } }
                                 }
                             }

@@ -21,7 +21,7 @@ import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/2250", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
 
     let Movie: UniqueType;
     let Person: UniqueType;
@@ -33,13 +33,13 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
         Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 directors: [Director!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
@@ -52,7 +52,7 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
                 year: Int!
             }
 
-            type ${Person} {
+            type ${Person} @node {
                 name: String!
                 reputation: Int!
             }
@@ -63,7 +63,7 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: true,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
     });
@@ -80,7 +80,7 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
                         directors: {
                             ${Actor}: [
                                 {
-                                    where: { node: { name: "Keanu Reeves" } }
+                                    where: { node: { name_EQ: "Keanu Reeves" } }
                                     update: {
                                         edge: { year: 2020 }
                                         node: {

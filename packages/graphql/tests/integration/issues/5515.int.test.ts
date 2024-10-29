@@ -42,31 +42,31 @@ describe("https://github.com/neo4j/graphql/issues/5515", () => {
                 roles: [String!]!
             }
 
-            type ${User}
+            type ${User} @node
                 @authorization(
                     validate: [
                         { operations: [CREATE, DELETE], where: { jwt: { roles_INCLUDES: "admin" } } }
-                        { operations: [READ, UPDATE], where: { node: { id: "$jwt.sub" } } }
+                        { operations: [READ, UPDATE], where: { node: { id_EQ: "$jwt.sub" } } }
                     ]
-                    filter: [{ where: { node: { id: "$jwt.sub" } } }]
+                    filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]
                 ) {
                 id: ID!
                 cabinets: [${Cabinet}!]! @relationship(type: "HAS_CABINET", direction: OUT)
             }
 
-            type ${Cabinet} @authorization(filter: [{ where: { node: { user: { id: "$jwt.sub" } } } }]) {
+            type ${Cabinet} @authorization(filter: [{ where: { node: { user: { id_EQ: "$jwt.sub" } } } }]) @node {
                 id: ID! @id
                 categories: [${Category}!]! @relationship(type: "HAS_CATEGORY", direction: OUT)
                 user: ${User}! @relationship(type: "HAS_CABINET", direction: IN)
             }
 
-            type ${Category} @authorization(filter: [{ where: { node: { cabinet: { user: { id: "$jwt.sub" } } } } }]) {
+            type ${Category} @authorization(filter: [{ where: { node: { cabinet: { user: { id_EQ: "$jwt.sub" } } } } }]) @node {
                 id: ID! @id
                 files: [${File}!]! @relationship(type: "HAS_FILE", direction: OUT)
                 cabinet: ${Cabinet}! @relationship(type: "HAS_CATEGORY", direction: IN)
             }
 
-            type ${File} {
+            type ${File} @node {
                 id: ID! @unique
                 category: ${Category} @relationship(type: "HAS_FILE", direction: IN)
             }
@@ -93,7 +93,7 @@ describe("https://github.com/neo4j/graphql/issues/5515", () => {
 
         const query = /* GraphQL */ `
             mutation {
-                ${Category.operations.delete}(where: { id: "category-video" }) {
+                ${Category.operations.delete}(where: { id_EQ: "category-video" }) {
                     __typename
                     nodesDeleted
                     relationshipsDeleted

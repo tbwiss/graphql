@@ -26,11 +26,11 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type User {
+            type User @node {
                 name: String!
                 otherName: String
             }
-            type Post {
+            type Post @node {
                 content: String!
                 alternateContent: String!
                 likes: [User!]! @relationship(type: "LIKES", direction: IN, properties: "likesProperties")
@@ -283,7 +283,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                             where: {
                                 likesAggregate: {
                                     count_GT: 10
-                                    node: { AND: [{ name_SHORTEST_GT: 25 }, { name_SHORTEST_LT: 80 }] }
+                                    node: { AND: [{ name_SHORTEST_LENGTH_GT: 25 }, { name_SHORTEST_LENGTH_LT: 80 }] }
                                 }
                             }
                         ) {
@@ -331,7 +331,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                             where: {
                                 likesAggregate: {
                                     count_GT: 10
-                                    node: { AND: [{ name_SHORTEST_GT: 25, name_SHORTEST_LT: 80 }] }
+                                    node: { AND: [{ name_SHORTEST_LENGTH_GT: 25, name_SHORTEST_LENGTH_LT: 80 }] }
                                 }
                             }
                         ) {
@@ -379,7 +379,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                             where: {
                                 likesAggregate: {
                                     count_GT: 10
-                                    node: { OR: [{ name_SHORTEST_GT: 25 }, { name_SHORTEST_LT: 80 }] }
+                                    node: { OR: [{ name_SHORTEST_LENGTH_GT: 25 }, { name_SHORTEST_LENGTH_LT: 80 }] }
                                 }
                             }
                         ) {
@@ -429,8 +429,8 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                                     count_GT: 10
                                     node: {
                                         OR: [
-                                            { name_SHORTEST_GT: 25, name_SHORTEST_LT: 40 }
-                                            { name_SHORTEST_GTE: 1233 }
+                                            { name_SHORTEST_LENGTH_GT: 25, name_SHORTEST_LENGTH_LT: 40 }
+                                            { name_SHORTEST_LENGTH_GTE: 1233 }
                                         ]
                                     }
                                 }
@@ -486,12 +486,12 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                                     count_GT: 10
                                     OR: [
                                         {
-                                            edge: { someProp_LONGEST_GT: 4, someProp_SHORTEST_LT: 10 }
-                                            node: { name_AVERAGE_GT: 3782 }
+                                            edge: { someProp_LONGEST_LENGTH_GT: 4, someProp_SHORTEST_LENGTH_LT: 10 }
+                                            node: { name_AVERAGE_LENGTH_GT: 3782 }
                                         }
-                                        { node: { name_SHORTEST_GT: 25 } }
+                                        { node: { name_SHORTEST_LENGTH_GT: 25 } }
                                     ]
-                                    edge: { someProp_LONGEST_LT: 12, someProp_SHORTEST_GT: 20 }
+                                    edge: { someProp_LONGEST_LENGTH_LT: 12, someProp_SHORTEST_LENGTH_GT: 20 }
                                 }
                             }
                         ) {
@@ -551,7 +551,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
         test("implicit AND", async () => {
             const query = /* GraphQL */ `
                 {
-                    posts(where: { content: "stuff", alternateContent: "stuff2" }) {
+                    posts(where: { content_EQ: "stuff", alternateContent_EQ: "stuff2" }) {
                         content
                     }
                 }
@@ -576,7 +576,11 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
         test("explicit OR with an implicit AND", async () => {
             const query = /* GraphQL */ `
                 {
-                    posts(where: { OR: [{ content: "stuff", alternateContent: "stuff2" }, { content: "stuff3" }] }) {
+                    posts(
+                        where: {
+                            OR: [{ content_EQ: "stuff", alternateContent_EQ: "stuff2" }, { content_EQ: "stuff3" }]
+                        }
+                    ) {
                         content
                     }
                 }
@@ -602,7 +606,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
         test("explicit NOT with an implicit AND", async () => {
             const query = /* GraphQL */ `
                 {
-                    posts(where: { NOT: { content: "stuff", alternateContent: "stuff2" } }) {
+                    posts(where: { NOT: { content_EQ: "stuff", alternateContent_EQ: "stuff2" } }) {
                         content
                     }
                 }
@@ -629,7 +633,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
         test("implicit AND  inside relationship filter", async () => {
             const query = /* GraphQL */ `
                 {
-                    posts(where: { likes_SOME: { name: "stuff", otherName: "stuff2" } }) {
+                    posts(where: { likes_SOME: { name_EQ: "stuff", otherName_EQ: "stuff2" } }) {
                         content
                     }
                 }
@@ -657,7 +661,7 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
         test("implicit AND outside relationship filters", async () => {
             const query = /* GraphQL */ `
                 {
-                    posts(where: { likes_SOME: { name: "stuff" }, likes_ALL: { otherName: "stuff2" } }) {
+                    posts(where: { likes_SOME: { name_EQ: "stuff" }, likes_ALL: { otherName_EQ: "stuff2" } }) {
                         content
                     }
                 }
@@ -694,9 +698,9 @@ describe("https://github.com/neo4j/graphql/issues/3765", () => {
                     posts(
                         where: {
                             OR: [
-                                { likes_SOME: { name: "stuff" } }
-                                { likes_ALL: { otherName: "stuff2" } }
-                                { likes_SOME: { otherName: "stuff3" } }
+                                { likes_SOME: { name_EQ: "stuff" } }
+                                { likes_ALL: { otherName_EQ: "stuff2" } }
+                                { likes_SOME: { otherName_EQ: "stuff3" } }
                             ]
                         }
                     ) {

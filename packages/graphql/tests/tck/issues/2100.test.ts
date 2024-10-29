@@ -26,11 +26,11 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type ServiceLog {
+            type ServiceLog @node {
                 id: ID
                 records: [Record!]! @relationship(type: "HAS_BUSSING", direction: OUT)
             }
-            type BussingRecord implements Record {
+            type BussingRecord implements Record @node {
                 id: ID!
                 attendance: Int
                 markedAttendance: Boolean!
@@ -50,7 +50,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                 serviceLogs: [ServiceLog!]! @declareRelationship
             }
 
-            type Bacenta implements Church {
+            type Bacenta implements Church @node {
                 id: ID @id @unique
                 name: String!
                 serviceLogs: [ServiceLog!]! @relationship(type: "HAS_HISTORY", direction: OUT)
@@ -65,7 +65,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                     )
             }
 
-            type TimeGraph {
+            type TimeGraph @node {
                 date: Date
             }
 
@@ -85,7 +85,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
     test("query nested relations under a root connection field", async () => {
         const query = /* GraphQL */ `
             query {
-                bacentas(where: { id: 1 }) {
+                bacentas(where: { id_EQ: 1 }) {
                     id
                     name
                     bussing(limit: 10) {

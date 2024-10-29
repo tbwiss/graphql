@@ -22,7 +22,7 @@ import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-ut
 
 describe("https://github.com/neo4j/graphql/issues/4287", () => {
     const typeDefs = /* GraphQL */ `
-        type Actor {
+        type Actor @node {
             name: String
             actedIn: [Production!]! @relationship(type: "ACTED_IN", properties: "actedIn", direction: OUT)
         }
@@ -32,11 +32,11 @@ describe("https://github.com/neo4j/graphql/issues/4287", () => {
         interface Production {
             title: String
         }
-        type Movie implements Production {
+        type Movie implements Production @node {
             title: String
             runtime: Int
         }
-        type Series implements Production {
+        type Series implements Production @node {
             title: String
             episodes: Int
         }
@@ -49,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/4287", () => {
             query {
                 actors {
                     actedInConnection(
-                        where: { OR: [{ node: { title: "something" } }, { node: { title: "whatever" } }] }
+                        where: { OR: [{ node: { title_EQ: "something" } }, { node: { title_EQ: "whatever" } }] }
                     ) {
                         edges {
                             node {

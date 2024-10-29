@@ -33,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
         Story = testHelper.createUniqueType("Story");
 
         const typeDefs = `
-            type ${Place} {
+            type ${Place} @node {
                 displayName: String!
                 activity: [Publication!]! @relationship(type: "ACTIVITY", direction: IN)
             }
@@ -43,12 +43,12 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
                 activity: [${Place}!]! @declareRelationship
             }
 
-            type ${Post} implements Publication {
+            type ${Post} implements Publication @node {
                 name: String
                 activity: [${Place}!]! @relationship(type: "ACTIVITY", direction: OUT)
             }
 
-            type ${Story} implements Publication {
+            type ${Story} implements Publication @node {
                 name: String
                 activity: [${Place}!]! @relationship(type: "ACTIVITY", direction: OUT)
             }
@@ -72,9 +72,9 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
     });
 
     test("should correctly order when requesting only top-level fields", async () => {
-        const query = `
+        const query = /* GraphQL */ `
         query {
-            ${Place.plural}(options: {sort: {displayName: ASC}}) {
+            ${Place.plural}(sort: { displayName: ASC }) {
               displayName
             }
           }
@@ -105,9 +105,9 @@ describe("https://github.com/neo4j/graphql/issues/2267", () => {
     });
 
     test("should correctly order when requesting nested interface level fields", async () => {
-        const query = `
+        const query = /* GraphQL */ `
         query {
-            ${Place.plural}(options: {sort: {displayName: ASC}}) {
+            ${Place.plural}(sort: { displayName: ASC }) {
               displayName
               activity{
                 name

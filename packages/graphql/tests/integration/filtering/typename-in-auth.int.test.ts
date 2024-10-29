@@ -42,19 +42,19 @@ describe("typename_IN with auth", () => {
             cost: Float!
         }
 
-        type ${Movie.name} implements Production {
+        type ${Movie.name} implements Production @node {
             title: String!
             cost: Float!
             runtime: Int!
         }
 
-        type ${Series.name} implements Production {
+        type ${Series.name} implements Production @node {
             title: String!
             cost: Float!
             episodes: Int!
         }
 
-        type ${Cartoon.name} implements Production {
+        type ${Cartoon.name} implements Production @node {
             title: String!
             cost: Float!
             cartoonist: String!
@@ -64,7 +64,7 @@ describe("typename_IN with auth", () => {
             screenTime: Int!
         }
 
-        type ${Actor.name}  {
+        type ${Actor.name}  @node {
             name: String!
             actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
         }
@@ -94,7 +94,7 @@ describe("typename_IN with auth", () => {
                                 operations: [READ]
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
                                     }
                                 }
                             }
@@ -142,7 +142,7 @@ describe("typename_IN with auth", () => {
                                 operations: [READ]
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
                                     }
                                 }
                             }
@@ -185,7 +185,7 @@ describe("typename_IN with auth", () => {
                                 operations: [READ]
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
                                     }
                                 }
                             }
@@ -235,7 +235,7 @@ describe("typename_IN with auth", () => {
                                 operations: [READ]
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
                                     }
                                 }
                             }
@@ -279,7 +279,7 @@ describe("typename_IN with auth", () => {
                                 operations: [READ]
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
                                     }
                                 }
                             }
@@ -333,7 +333,7 @@ describe("typename_IN with auth", () => {
                             {
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Movie.name}] }] } } 
                                     }
                                 }
                             }
@@ -379,7 +379,7 @@ describe("typename_IN with auth", () => {
                             {
                                 where: {
                                     node: {
-                                        actedInConnection_SOME: { node: { AND: [ { title: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
+                                        actedInConnection_SOME: { node: { AND: [ { title_EQ: "The Matrix" }, {typename_IN: [${Series.name}] }] } } 
                                     }
                                 }
                             }

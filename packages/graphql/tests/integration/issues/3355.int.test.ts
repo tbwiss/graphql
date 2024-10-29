@@ -18,12 +18,11 @@
  */
 
 import { generate } from "randomstring";
-import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/3355", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let Movie: UniqueType;
 
     beforeAll(() => {
@@ -36,7 +35,7 @@ describe("https://github.com/neo4j/graphql/issues/3355", () => {
 
     test("should return info object when subscriptions enabled", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
@@ -45,7 +44,7 @@ describe("https://github.com/neo4j/graphql/issues/3355", () => {
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: new TestSubscriptionsEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -63,7 +62,7 @@ describe("https://github.com/neo4j/graphql/issues/3355", () => {
 
         const query = `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id: $id }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
                 info {
                     nodesCreated
                     nodesDeleted

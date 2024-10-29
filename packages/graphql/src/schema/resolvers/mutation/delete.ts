@@ -25,7 +25,6 @@ import { translateDelete } from "../../../translate";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { publishEventsToSubscriptionMechanism } from "../../subscriptions/publish-events-to-subscription-mechanism";
 import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
 export function deleteResolver({
@@ -55,9 +54,7 @@ export function deleteResolver({
             info,
         });
 
-        publishEventsToSubscriptionMechanism(executeResult, context.features?.subscriptions, context.schemaModel);
-
-        return { bookmark: executeResult.bookmark, ...executeResult.statistics };
+        return executeResult.statistics;
     }
 
     const hasDeleteInput = composer.has(concreteEntityAdapter.operations.deleteInputTypeName);

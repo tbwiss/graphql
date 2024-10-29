@@ -33,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
         Invitee = testHelper.createUniqueType("Invitee");
 
         const typeDefs = /* GraphQL */ `
-            type ${Group} {
+            type ${Group} @node {
                 id: ID! @id @unique
                 name: String!
                 invitees: [${Invitee}!]! @relationship(type: "INVITED_TO", direction: IN, aggregate: true)
@@ -44,7 +44,7 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
                 ACCEPTED
             }
 
-            type ${Invitee}
+            type ${Invitee} @node
                 @authorization(
                     validate: [
                         { operations: [CREATE], where: { node: { group: { inviteesAggregate: { count_LT: 5 } } } } }
@@ -85,8 +85,8 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
         `;
 
         const updateGroups = /* GraphQL */ `
-            mutation UpdateGroups($create: ${Group}RelationInput, $where: ${Group}Where) {
-                ${Group.operations.update}(create: $create, where: $where) {
+            mutation UpdateGroups($update: ${Group}UpdateInput, $where: ${Group}Where) {
+                ${Group.operations.update}(update: $update, where: $where) {
                     ${Group.plural} {
                         invitees {
                             email
@@ -107,18 +107,20 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
         const updateGroupsResult = await testHelper.executeGraphQLWithToken(updateGroups, token, {
             variableValues: {
                 where: {
-                    name: "test",
+                    name_EQ: "test",
                 },
-                create: {
+                update: {
                     invitees: [
                         {
-                            node: {
-                                email: "test@test.com",
-                                group: {
-                                    connect: {
-                                        where: {
-                                            node: {
-                                                id: "insert_group_id_here",
+                            create: {
+                                node: {
+                                    email: "test@test.com",
+                                    group: {
+                                        connect: {
+                                            where: {
+                                                node: {
+                                                    id_EQ: "insert_group_id_here",
+                                                },
                                             },
                                         },
                                     },

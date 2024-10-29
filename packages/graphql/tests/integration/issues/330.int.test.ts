@@ -38,11 +38,11 @@ describe("unauthenticated-requests", () => {
 
     test("should throw Unauthenticated when trying to pluck undefined value with allow", async () => {
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type ${User} @authorization(validate: [{ when: BEFORE, where: { node: { id: "$jwt.sub" } } }])
+            extend type ${User} @authorization(validate: [{ when: BEFORE, where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
@@ -73,11 +73,11 @@ describe("unauthenticated-requests", () => {
 
     test("should throw Unauthenticated when trying to pluck undefined value with where", async () => {
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type ${User} @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+            extend type ${User} @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
@@ -111,11 +111,11 @@ describe("unauthenticated-requests", () => {
 
     test("should throw Unauthenticated when trying to pluck undefined value with bind", async () => {
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type ${User} @authorization(validate: [{ when: AFTER, where: { node: { id: "$jwt.sub" } } }])
+            extend type ${User} @authorization(validate: [{ when: AFTER, where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
@@ -147,7 +147,7 @@ describe("unauthenticated-requests", () => {
     // If the below test starts failing, we will need to change the default value that we use for non-existent JWT claims
     test("maps are not supported in the database and can be used as JWT default value", async () => {
         const typeDefs = `
-            type ${User} {
+            type ${User} @node {
                 id: ID
             }
         `;

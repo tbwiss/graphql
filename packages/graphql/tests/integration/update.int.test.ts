@@ -48,7 +48,7 @@ describe("update", () => {
 
     test("should update no movies where predicate yields false", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
@@ -66,7 +66,7 @@ describe("update", () => {
 
         const query = `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id: $id }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -86,7 +86,7 @@ describe("update", () => {
 
     test("should update a single movie", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
@@ -108,7 +108,7 @@ describe("update", () => {
 
         const query = `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id: $id }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -137,13 +137,13 @@ describe("update", () => {
     });
     test("should connect through interface relationship", async () => {
         const typeDefs = gql`
-            type ${Movie} implements Production @subscription(events: []) {
+            type ${Movie} implements Production @subscription(events: []) @node {
                 title: String!
                 id: ID @unique
                 director: [Creature!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type ${Series} implements Production {
+            type ${Series} implements Production @node {
                 title: String!
                 episode: Int!
                 id: ID @unique
@@ -155,7 +155,7 @@ describe("update", () => {
                 director: [Creature!]! @declareRelationship
             }
 
-            type ${Person} implements Creature {
+            type ${Person} implements Creature @node {
                 id: ID
                 movies: Production! @relationship(type: "DIRECTED", direction: OUT)
             }
@@ -168,24 +168,23 @@ describe("update", () => {
 
         await testHelper.initNeo4jGraphQL({
             typeDefs,
-            features: {
-                subscriptions: true,
-            },
         });
         const query = `
         mutation {
             ${Movie.operations.update}(
-                where: { id: "1" }, 
-                connect: { director: { 
-                    where: { node: {id: "2"} }, 
+                where: { id_EQ: "1" }, 
+                update: { director: { 
+                    connect: {
+                    where: { node: { id_EQ: "2"} }, 
                     connect: { movies: {
-                        where: { node: {id: "3"} }, 
+                        where: { node: { id_EQ: "3"} }, 
                         connect: { director: {
-                            where: { node: {id: "4"} }, 
+                            where: { node: { id_EQ: "4"} }, 
                             connect: { movies: {
-                                where: { node: { id: "5" } }
+                                where: { node: { id_EQ: "5" } }
                             } }
                         } }
+                    }
                     } } 
                 } }) {
                 ${Movie.plural} {
@@ -228,12 +227,12 @@ describe("update", () => {
 
     test("should update a movie when matching on relationship property", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -256,7 +255,7 @@ describe("update", () => {
         const query = `
         mutation($updatedMovieId: ID, $actorName: String) {
             ${Movie.operations.update}(
-              where: { actorsConnection: { node: { name: $actorName } } },
+              where: { actorsConnection_SOME: { node: { name_EQ: $actorName } } },
               update: {
                 id: $updatedMovieId
               }
@@ -294,7 +293,7 @@ describe("update", () => {
 
     test("should update 2 movies", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
@@ -314,7 +313,7 @@ describe("update", () => {
 
         const query = `
         mutation($id1: ID, $id2: ID, $name: String) {
-            ${Movie.operations.update}(where: { OR: [{id: $id1}, {id: $id2}] }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -350,12 +349,12 @@ describe("update", () => {
 
     test("should update nested actors from a movie", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -378,10 +377,10 @@ describe("update", () => {
         const query = `
         mutation($movieId: ID, $initialName: String, $updatedName: String) {
             ${Movie.operations.update}(
-              where: { id: $movieId },
+              where: { id_EQ: $movieId },
               update: {
                 actors: [{
-                  where: { node: { name: $initialName } },
+                  where: { node: { name_EQ: $initialName } },
                   update: { node: { name: $updatedName } }
                 }]
               }
@@ -421,12 +420,12 @@ describe("update", () => {
 
     test("should delete a nested actor from a movie abc", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -447,7 +446,7 @@ describe("update", () => {
 
         const mutation = `
             mutation($id: ID, $actorName1: String) {
-                ${Movie.operations.update}(where: { id: $id }, delete: { actors: { where: { node: { name: $actorName1 } } } }) {
+                ${Movie.operations.update}(where: { id_EQ: $id }, update: { actors: { delete: { where: { node: { name_EQ: $actorName1 } } } } }) {
                     ${Movie.plural} {
                         id
                         actors {
@@ -486,12 +485,12 @@ describe("update", () => {
 
     test("should delete a nested actor from a movie within an update block", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -512,7 +511,7 @@ describe("update", () => {
 
         const mutation = `
             mutation($id: ID, $actorName1: String) {
-                ${Movie.operations.update}(where: { id: $id }, update: { actors: { delete: { where: { node: { name: $actorName1 } } } } }) {
+                ${Movie.operations.update}(where: { id_EQ: $id }, update: { actors: { delete: { where: { node: { name_EQ: $actorName1 } } } } }) {
                     ${Movie.plural} {
                         id
                         actors {
@@ -551,12 +550,12 @@ describe("update", () => {
 
     test("should delete a nested actor and one of their nested movies, within an update block abc", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -583,9 +582,9 @@ describe("update", () => {
         const mutation = `
             mutation($movieId1: ID, $actorName1: String, $movieId2: ID) {
                 ${Movie.operations.update}(
-                    where: { id: $movieId1 }
+                    where: { id_EQ: $movieId1 }
                     update: {
-                        actors: { delete: { where: { node: { name: $actorName1 } }, delete: { movies: { where: { node: { id: $movieId2 } } } } } }
+                        actors: { delete: { where: { node: { name_EQ: $actorName1 } }, delete: { movies: { where: { node: { id_EQ: $movieId2 } } } } } }
                     }
                 ) {
                     ${Movie.plural} {
@@ -643,12 +642,12 @@ describe("update", () => {
 
     test("should delete multiple nested actors from a movie", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -675,8 +674,8 @@ describe("update", () => {
         const mutation = `
             mutation($id: ID, $name1: String, $name3: String) {
                 ${Movie.operations.update}(
-                    where: { id: $id }
-                    delete: { actors: [{ where: { node: { name: $name1 } } }, { where: { node: { name: $name3 } } }] }
+                    where: { id_EQ: $id }
+                    update: { actors: { delete: [{ where: { node: { name_EQ: $name1 } } }, { where: { node: { name_EQ: $name3 } } }]}}
                 ) {
                     ${Movie.plural} {
                         id
@@ -719,12 +718,12 @@ describe("update", () => {
 
     test("should update nested actors from a move then update the movie from the nested actors", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
               name: String
               movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
               id: ID
               title: String
               actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -740,15 +739,15 @@ describe("update", () => {
         const query = `
         mutation {
             ${Movie.operations.update}(
-              where: { id: "${movieId}" }
+              where: { id_EQ: "${movieId}" }
               update: {
                 actors: [{
-                  where: { node: { name: "old actor name" } }
+                  where: { node: { name_EQ: "old actor name" } }
                   update: {
                     node: {
                         name: "new actor name"
                         movies: [{
-                            where: { node: { title: "old movie title" } }
+                            where: { node: { title_EQ: "old movie title" } }
                             update: { node: { title: "new movie title" } }
                         }]
                     }
@@ -787,12 +786,12 @@ describe("update", () => {
 
     test("should connect a single movie to a actor", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -810,7 +809,7 @@ describe("update", () => {
 
         const query = `
         mutation {
-            ${Movie.operations.update}(where: { id: "${movieId}" }, connect: {actors: [{where: {node:{id: "${actorId}"}}}]}) {
+            ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { connect: [{ where: { node:{ id_EQ: "${actorId}"}}}]}}) {
                 ${Movie.plural} {
                     id
                     actors {
@@ -843,18 +842,18 @@ describe("update", () => {
 
     test("should connect a single movie to a actor based on a connection predicate", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                 series: [${Series}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Series} {
+            type ${Series} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -877,8 +876,8 @@ describe("update", () => {
         const query = `
             mutation($movieId: ID, $seriesId: ID) {
                 ${Movie.operations.update}(
-                    where: { id: $movieId }
-                    connect: { actors: [{ where: { node: { seriesConnection: { node: { id: $seriesId } } } } }] }
+                    where: { id_EQ: $movieId }
+                    update: { actors: { connect: [{ where: { node: { seriesConnection_SOME: { node: { id_EQ: $seriesId } } } } }]} }
                 ) {
                     ${Movie.plural} {
                         id
@@ -915,12 +914,12 @@ describe("update", () => {
 
     test("should disconnect an actor from a movie", async () => {
         const typeDefs = `
-            type ${Actor} {
+            type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -941,7 +940,7 @@ describe("update", () => {
 
         const query = `
         mutation {
-            ${Movie.operations.update}(where: { id: "${movieId}" }, disconnect: {actors: [{where: { node: { id: "${actorId1}"}}}]}) {
+            ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { disconnect: [{where: { node: { id_EQ: "${actorId1}"}}}]}}) {
                 ${Movie.plural} {
                     id
                     actors {
@@ -978,16 +977,16 @@ describe("update", () => {
 
     test("should disconnect a color from a photo through a product", async () => {
         const typeDefs = `
-            type ${Product} {
+            type ${Product} @node {
                 id: ID
                 photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
             }
 
-            type ${Color} {
+            type ${Color} @node {
                 id: ID
             }
 
-            type ${Photo} {
+            type ${Photo} @node {
                 id: ID
                 color: ${Color} @relationship(type: "OF_COLOR", direction: OUT)
             }
@@ -1010,13 +1009,13 @@ describe("update", () => {
         const query = `
         mutation {
             ${Product.operations.update}(
-              where: { id: "${productId}" }
+              where: { id_EQ: "${productId}" }
               update: {
                 photos: [{
-                  where: { node: { id: "${photoId}" } }
+                  where: { node: { id_EQ: "${photoId}" } }
                   update: {
                       node: {
-                        color: { disconnect: { where: { node: { id: "${colorId}" } } } }
+                        color: { disconnect: { where: { node: { id_EQ: "${colorId}" } } } }
                       }
                   }
                 }]
@@ -1061,19 +1060,19 @@ describe("update", () => {
 
     test("should update the colors of a product to light versions", async () => {
         const typeDefs = `
-          type ${Product} {
+          type ${Product} @node {
              id: ID
              name: String
              photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type ${Color} {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type ${Photo} {
+           type ${Photo} @node {
              id: ID
              name: String
              color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
@@ -1113,29 +1112,29 @@ describe("update", () => {
         const query = `
             mutation {
                 ${Product.operations.update}(
-                  where: { id: "${productId}" }
+                  where: { id_EQ: "${productId}" }
                   update: {
                     photos: [
                       {
-                        where: { node: { name: "Green Photo", id: "${photo0Id}" } }
+                        where: { node: { name_EQ: "Green Photo", id_EQ: "${photo0Id}" } }
                         update: {
                             node: {
                                 name: "Light Green Photo"
                                 color: {
-                                    connect: { where: { node: { name: "Light Green", id: "${photo0Color1Id}" } } }
-                                    disconnect: { where: { node: { name: "Green", id: "${photo0Color0Id}" } } }
+                                    connect: { where: { node: { name_EQ: "Light Green", id_EQ: "${photo0Color1Id}" } } }
+                                    disconnect: { where: { node: { name_EQ: "Green", id_EQ: "${photo0Color0Id}" } } }
                                 }
                             }
                         }
                       }
                       {
-                        where: { node: { name: "Yellow Photo", id: "${photo1Id}" } }
+                        where: { node: { name_EQ: "Yellow Photo", id_EQ: "${photo1Id}" } }
                         update: {
                             node: {
                                 name: "Light Yellow Photo"
                                 color: {
-                                    connect: { where: { node: { name: "Light Yellow", id: "${photo1Color1Id}" } } }
-                                    disconnect: { where: { node: { name: "Yellow", id: "${photo1Color0Id}" } } }
+                                    connect: { where: { node: { name_EQ: "Light Yellow", id_EQ: "${photo1Color1Id}" } } }
+                                    disconnect: { where: { node: { name_EQ: "Yellow", id_EQ: "${photo1Color0Id}" } } }
                                 }
                             }
                         }
@@ -1212,19 +1211,19 @@ describe("update", () => {
 
     test("should update a Product via creating a new Photo and creating a new Color (via field level update)", async () => {
         const typeDefs = `
-          type ${Product} {
+          type ${Product} @node {
              id: ID
              name: String
              photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type ${Color} {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type ${Photo} {
+           type ${Photo} @node {
              id: ID
              name: String
              color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
@@ -1248,7 +1247,7 @@ describe("update", () => {
         const query = `
             mutation {
                 ${Product.operations.update}(
-                  where: { id: "${productId}" }
+                  where: { id_EQ: "${productId}" }
                   update: {
                       photos: [{
                           create: [{
@@ -1304,19 +1303,19 @@ describe("update", () => {
 
     test("should update a Product via creating a new Photo and creating a new Color (via top level create)", async () => {
         const typeDefs = `
-          type ${Product} {
+          type ${Product} @node {
              id: ID
              name: String
              photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type ${Color} {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type ${Photo} {
+           type ${Photo} @node {
              id: ID
              name: String
              color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
@@ -1340,9 +1339,9 @@ describe("update", () => {
         const query = `
             mutation {
                 ${Product.operations.update}(
-                  where: { id: "${productId}" }
-                  create: {
-                    photos: [{
+                  where: { id_EQ: "${productId}" }
+                  update: {
+                    photos: { create:[{
                       node: {
                         id: "${photoId}",
                         name: "Green Photo",
@@ -1355,7 +1354,7 @@ describe("update", () => {
                             }
                         }
                       }
-                    }]
+                    }]}
                   }
                 ) {
                     ${Product.plural} {

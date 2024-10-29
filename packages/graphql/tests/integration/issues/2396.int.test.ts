@@ -38,16 +38,16 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         Estate = testHelper.createUniqueType("Estate");
 
         const typeDefs = `
-            type ${PostalCode} @mutation(operations: [CREATE, UPDATE]) {
+            type ${PostalCode} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
                 number: String! @unique
 
                 address: [${Address}!]! @relationship(type: "HAS_POSTAL_CODE", direction: IN)
             }
 
-            extend type ${PostalCode} @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type ${PostalCode} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
 
-            type ${Address} @mutation(operations: [CREATE, UPDATE]) {
+            type ${Address} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
                 uuid: ID! @id @unique
                 createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -56,9 +56,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 postalCode: ${PostalCode}! @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
             }
 
-            extend type ${Address} @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type ${Address} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
 
-            type ${Mandate} @mutation(operations: [CREATE, UPDATE]) {
+            type ${Mandate} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
                 number: ID! @id @unique # numéro
                 createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -69,9 +69,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 valuation: ${Valuation}! @relationship(type: "HAS_VALUATION", direction: OUT)
             }
 
-            extend type ${Mandate} @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type ${Mandate} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
 
-            type ${Valuation} @mutation(operations: [CREATE, UPDATE]) {
+            type ${Valuation} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
                 uuid: ID! @id @unique
                 createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -80,7 +80,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 estate: ${Estate} @relationship(type: "VALUATION_FOR", direction: OUT)
             }
 
-            extend type ${Valuation} @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type ${Valuation} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
 
             enum EstateType {
                 APARTMENT
@@ -97,7 +97,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 BUSINESS_FUND
             }
 
-            type ${Estate} @mutation(operations: [CREATE, UPDATE]) {
+            type ${Estate} @node @mutation(operations: [CREATE, UPDATE]) {
                 archivedAt: DateTime
                 uuid: ID! @id @unique
                 createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -110,7 +110,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 address: ${Address} @relationship(type: "HAS_ADDRESS", direction: OUT)
             }
 
-            extend type ${Estate} @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type ${Estate} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
         `;
 
         const input = [
@@ -708,9 +708,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
     });
 
     test("should return 27 results with no pagination arguments", async () => {
-        const query = `
-            query Mandates($where: ${Mandate}Where, $options: ${Mandate}Options) {
-                ${Mandate.plural}(options: $options, where: $where) {
+        const query = /* GraphQL */ `
+            query Mandates($where: ${Mandate}Where, $limit: Int, $offset: Int, $sort: [${Mandate}Sort!]) {
+                ${Mandate.plural}(limit: $limit, offset: $offset, sort: $sort, where: $where) {
                     valuation {
                         estate {
                             uuid
@@ -721,7 +721,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         `;
 
         const variableValues = {
-            options: {},
+            sort: null,
+            limit: null,
+            offset: null,
             where: {
                 price_GTE: 0,
                 valuation: {
@@ -748,9 +750,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
     });
 
     test("should return 20 with limit 20", async () => {
-        const query = `
-            query Mandates($where: ${Mandate}Where, $options: ${Mandate}Options) {
-                ${Mandate.plural}(options: $options, where: $where) {
+        const query = /* GraphQL */ `
+            query Mandates($where: ${Mandate}Where, $limit: Int, $offset: Int, $sort: [${Mandate}Sort!]) {
+                ${Mandate.plural}(limit: $limit, offset: $offset, sort: $sort, where: $where) {
                     valuation {
                         estate {
                             uuid
@@ -761,7 +763,8 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         `;
 
         const variableValues = {
-            options: { offset: 0, limit: 20 },
+            offset: 0,
+            limit: 20,
             where: {
                 price_GTE: 0,
                 valuation: {
@@ -788,9 +791,9 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
     });
 
     test("should return 7 results with offset 20 limit 40", async () => {
-        const query = `
-            query Mandates($where: ${Mandate}Where, $options: ${Mandate}Options) {
-                ${Mandate.plural}(options: $options, where: $where) {
+        const query = /* GraphQL */ `
+            query Mandates($where: ${Mandate}Where, $limit: Int, $offset: Int, $sort: [${Mandate}Sort!]) {
+                ${Mandate.plural}(sort: $sort, limit: $limit, offset: $offset, where: $where) {
                     valuation {
                         estate {
                             uuid
@@ -801,10 +804,8 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         `;
 
         const variableValues = {
-            options: {
-                offset: 20,
-                limit: 40,
-            },
+            offset: 20,
+            limit: 40,
             where: {
                 price_GTE: 0,
                 valuation: {

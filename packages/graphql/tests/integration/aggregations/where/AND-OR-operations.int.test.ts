@@ -42,11 +42,11 @@ describe("Nested within AND/OR", () => {
         postType = testHelper.createUniqueType("Post");
 
         const typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 testString: String!
             }
 
-            type ${postType.name} {
+            type ${postType.name} @node {
               content: String!
               likes: [${userType.name}!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -79,9 +79,9 @@ describe("Nested within AND/OR", () => {
             query {
                 ${postType.plural}(where: { 
                     likesAggregate: {
-                        count: 3
+                        count_EQ: 3
                         node: {
-                            testString_SHORTEST_EQUAL: 3
+                            testString_SHORTEST_LENGTH_EQUAL: 3
                         }
                     }
                 }) {
@@ -108,10 +108,10 @@ describe("Nested within AND/OR", () => {
                 ${postType.plural}(where: { 
                     likesAggregate: {
                         OR: [
-                            { count: 3 }
+                            { count_EQ: 3 }
                             {
                                 node: {
-                                    testString_SHORTEST_EQUAL: 3
+                                    testString_SHORTEST_LENGTH_EQUAL: 3
                                 }
                             }
                         ]
@@ -149,10 +149,10 @@ describe("Nested within AND/OR", () => {
                 ${postType.plural}(where: { 
                     likesAggregate: {
                         AND: [
-                            { count: 3 }
+                            { count_EQ: 3 }
                             {
                                 node: {
-                                    testString_SHORTEST_EQUAL: 3
+                                    testString_SHORTEST_LENGTH_EQUAL: 3
                                 }
                             }
                         ]
@@ -186,12 +186,12 @@ describe("Nested within AND/OR", () => {
                                 AND: [
                                     {
                                         node: {
-                                            testString_SHORTEST_LT: 4
+                                            testString_SHORTEST_LENGTH_LT: 4
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 2
                                         }
                                     }
                                 ]
@@ -211,6 +211,9 @@ describe("Nested within AND/OR", () => {
             [postType.plural]: expect.toIncludeSameMembers([
                 {
                     content: content5,
+                },
+                {
+                    content: content4,
                 },
             ]),
         });
@@ -227,12 +230,12 @@ describe("Nested within AND/OR", () => {
                                 AND: [
                                     {
                                         node: {
-                                            NOT: { testString_SHORTEST_GT: 4 }
+                                            NOT: { testString_SHORTEST_LENGTH_GT: 4 }
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 2
                                         }
                                     }
                                 ]
@@ -253,6 +256,9 @@ describe("Nested within AND/OR", () => {
                 {
                     content: content5,
                 },
+                {
+                    content: content4,
+                },
             ]),
         });
     });
@@ -268,12 +274,12 @@ describe("Nested within AND/OR", () => {
                                 OR: [
                                     {
                                         node: {
-                                            testString_SHORTEST_LT: 4
+                                            testString_SHORTEST_LENGTH_LT: 4
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 20
                                         }
                                     }
                                 ]
@@ -318,12 +324,12 @@ describe("Nested within AND/OR", () => {
                                 OR: [
                                     {
                                         node: {
-                                            testString_SHORTEST_LT: 4
+                                            testString_SHORTEST_LENGTH_LT: 4
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 20
                                         }
                                     }
                                 ]
@@ -362,12 +368,12 @@ describe("Nested within AND/OR", () => {
                                 OR: [
                                     {
                                         node: {
-                                            NOT: { testString_SHORTEST_GT: 4 }
+                                            NOT: { testString_SHORTEST_LENGTH_GT: 4 }
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 20
                                         }
                                     }
                                 ]
@@ -406,12 +412,12 @@ describe("Nested within AND/OR", () => {
                                 AND: [
                                     {
                                         node: {
-                                            testString_SHORTEST_LT: 4
+                                            testString_SHORTEST_LENGTH_LT: 4
                                         }
                                     }
                                     {
                                         node: {
-                                            testString_EQUAL: "${testString5}"
+                                            testString_SHORTEST_LENGTH_GT: 2
                                         }
                                     }
                                 ]
@@ -437,6 +443,9 @@ describe("Nested within AND/OR", () => {
                 },
                 {
                     content: content3,
+                },
+                {
+                    content: content4,
                 },
                 {
                     content: content5,

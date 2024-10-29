@@ -34,13 +34,13 @@ describe("https://github.com/neo4j/graphql/issues/1756", () => {
             id: ID! 
         }
 
-        type ${productType.name} implements INode {
+        type ${productType.name} implements INode @node {
             id: ID! @populatedBy(operations: [CREATE], callback: "nanoid")
             name: String!
             genre: [${genreType.name}!]! @relationship(type: "HAS_GENRE", direction: OUT)
         }
 
-        type ${genreType.name} implements INode {
+        type ${genreType.name} implements INode @node {
             id: ID! @populatedBy(operations: [CREATE], callback: "nanoid")
             value: String! @unique
         }
@@ -67,7 +67,7 @@ describe("https://github.com/neo4j/graphql/issues/1756", () => {
                   {
                     where: {
                       node: {
-                        value: "Action"
+                        value_EQ: "Action"
                       }
                     },
                     onCreate: {
@@ -107,7 +107,7 @@ describe("https://github.com/neo4j/graphql/issues/1756", () => {
                 {
                   where: {
                     node: {
-                      value: "Action"
+                      value_EQ: "Action"
                     }
                   },
                   onCreate: {

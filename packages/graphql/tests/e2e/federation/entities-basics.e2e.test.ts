@@ -44,7 +44,7 @@ describe("Federation 2 Entities Basics (https://www.apollographql.com/docs/feder
         const products = `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
-            type ${Product} @key(fields: "id") @shareable {
+            type ${Product} @key(fields: "id") @shareable @node {
                 id: ID!
                 name: String
                 price: Int
@@ -54,11 +54,11 @@ describe("Federation 2 Entities Basics (https://www.apollographql.com/docs/feder
         const reviews = `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
-            type ${Product} @key(fields: "id", resolvable: false) @shareable {
+            type ${Product} @key(fields: "id", resolvable: false) @shareable @node {
                 id: ID!
             }
 
-            type ${Review} {
+            type ${Review} @node {
                 score: Int!
                 description: String!
                 product: ${Product}! @relationship(type: "HAS_REVIEW", direction: IN)
@@ -104,18 +104,18 @@ describe("Federation 2 Entities Basics (https://www.apollographql.com/docs/feder
 
         const response = await request.post("").send({
             query: `
-            {
-                ${Review.plural} {
-                  description
-                  score
-                  product {
-                    id
-                    name
-                    price
+                {
+                  ${Review.plural} {
+                    description
+                    score
+                    product {
+                      id
+                      name
+                      price
+                    }
                   }
                 }
-              }
-        `,
+            `,
         });
 
         expect(response.status).toBe(200);

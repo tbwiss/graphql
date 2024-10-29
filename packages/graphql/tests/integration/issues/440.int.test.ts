@@ -18,12 +18,11 @@
  */
 
 import { generate } from "randomstring";
-import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/440", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let typeDefs: string;
     let Video: UniqueType;
     let Category: UniqueType;
@@ -33,12 +32,12 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
         Category = testHelper.createUniqueType("Category");
 
         typeDefs = `
-        type ${Video} {
+        type ${Video} @node {
             id: ID! @unique
             categories: [${Category}!]! @relationship(type: "IS_CATEGORIZED_AS", direction: OUT)
         }
 
-        type ${Category} {
+        type ${Category} @node {
             id: ID! @unique
             videos: [${Video}!]! @relationship(type: "IS_CATEGORIZED_AS", direction: IN)
         }
@@ -83,7 +82,7 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
 
         const mutation = `
             mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
-                ${Video.operations.update}(where: {id: $id}, update: $fields) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
                     ${Video.plural} {
                         id
                         categories {
@@ -144,7 +143,7 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
 
         const mutation = `
             mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
-                ${Video.operations.update}(where: {id: $id}, update: $fields) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
                     ${Video.plural} {
                         id
                         categories {
@@ -175,7 +174,7 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: new TestSubscriptionsEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
         const videoID = generate({ charset: "alphabetic" });
@@ -210,7 +209,7 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
 
         const mutation = `
             mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
-                ${Video.operations.update}(where: {id: $id}, update: $fields) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
                     ${Video.plural} {
                         id
                         categories {

@@ -17,45 +17,24 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import type { Neo4jGraphQLSubscriptionsEngine } from "../../../../src";
-import { Neo4jGraphQLSubscriptionsCDCEngine } from "../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
 import type { TestGraphQLServer } from "../../setup/apollo-server";
 import { ApolloTestServer } from "../../setup/apollo-server";
 import { WebSocketTestClient } from "../../setup/ws-client";
 
-describe.each([
-    {
-        name: "Neo4jGraphQLSubscriptionsDefaultEngine",
-        engine: (_driver: Driver, _db: string) => new Neo4jGraphQLSubscriptionsDefaultEngine(),
-    },
-    {
-        name: "Neo4jGraphQLSubscriptionsCDCEngine",
-        engine: (driver: Driver, db: string) =>
-            new Neo4jGraphQLSubscriptionsCDCEngine({
-                driver,
-                pollTime: 100,
-                queryConfig: {
-                    database: db,
-                },
-            }),
-    },
-])("$name - Create Subscription with optional filters valid for all types", ({ engine }) => {
+describe("Create Subscription with optional filters valid for all types", () => {
     const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
-    let subscriptionEngine: Neo4jGraphQLSubscriptionsEngine;
 
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-         type ${typeMovie} {
+         type ${typeMovie} @node {
             id: ID
             similarIds: [ID]
             title: String
@@ -70,12 +49,10 @@ describe.each([
          }
          `;
 
-        const driver = await testHelper.getDriver();
-        subscriptionEngine = engine(driver, testHelper.database);
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: subscriptionEngine,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -93,7 +70,6 @@ describe.each([
 
     afterEach(async () => {
         await wsClient.close();
-        subscriptionEngine.close();
         await server.close();
         await testHelper.close();
     });
@@ -258,156 +234,6 @@ describe.each([
         ]);
     });
 
-    test("subscription with NOT_INCLUDES on String", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { similarTitles_NOT_INCLUDES: "movie" }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        similarTitles
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ similarTitles: ["movie", "movie"] });
-        await createMovie({ similarTitles: ["mock"] });
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { similarTitles: ["mock"] },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_INCLUDES on ID as String", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { similarIds_NOT_INCLUDES: "1" }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        similarIds
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ similarIds: ["1", "12"] });
-        await createMovie({ similarIds: ["11"] });
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { similarIds: ["11"] },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_INCLUDES on ID as number", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { similarIds_NOT_INCLUDES: 42 }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        similarIds
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ similarIds: [2, 4, 42] });
-        await createMovie({ similarIds: [4, 2] });
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { similarIds: ["4", "2"] },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_INCLUDES on Int", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { allDates_NOT_INCLUDES: 2019 }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        allDates
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ allDates: [2020, 2018] });
-        await createMovie({ allDates: [] });
-
-        await wsClient.waitForEvents(2);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { allDates: [2020, 2018] },
-                },
-            },
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { allDates: [] },
-                },
-            },
-        ]);
-    });
-    test("subscription with NOT_INCLUDES on Float", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { allRatings_NOT_INCLUDES: 5.4 }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        allRatings
-                    }
-                }
-            }
-        `);
-
-        await createMovie({ allRatings: [6, 5.4] });
-        await createMovie({ allRatings: [5.4] });
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([]);
-    });
-    test("subscription with NOT_INCLUDES on BigInt", async () => {
-        await wsClient.subscribe(`
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { allSizes_NOT_INCLUDES: "9223372036854775608" }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        allSizes
-                    }
-                }
-            }
-        `);
-
-        await createMovie({
-            allSizes: ["9223372036854775608", "922372036854775608"],
-        });
-        await createMovie({ allSizes: ["123"] });
-
-        await wsClient.waitForEvents(1);
-
-        expect(wsClient.errors).toEqual([]);
-        expect(wsClient.events).toEqual([
-            {
-                [typeMovie.operations.subscribe.created]: {
-                    [typeMovie.operations.subscribe.payload.created]: { allSizes: ["123"] },
-                },
-            },
-        ]);
-    });
-
     test("subscription with INCLUDES on String should error", async () => {
         const onReturnError = jest.fn();
         await wsClient.subscribe(
@@ -435,48 +261,6 @@ describe.each([
             `
             subscription {
                 ${typeMovie.operations.subscribe.created}(where: { isFavorite_INCLUDES: true }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        isFavorite
-                    }
-                }
-            }
-        `,
-            onReturnError
-        );
-
-        await createMovie({ isFavorite: true });
-        await createMovie({ isFavorite: false });
-
-        expect(onReturnError).toHaveBeenCalled();
-        expect(wsClient.events).toEqual([]);
-    });
-    test("subscription with NOT_INCLUDES on String should error", async () => {
-        const onReturnError = jest.fn();
-        await wsClient.subscribe(
-            `
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { similarTitles_NOT_INCLUDES: ["movie"] }) {
-                    ${typeMovie.operations.subscribe.payload.created} {
-                        similarTitles
-                    }
-                }
-            }
-        `,
-            onReturnError
-        );
-
-        await createMovie({ similarTitles: ["dummy", "movie"] });
-        await createMovie({ similarTitles: ["mock"] });
-
-        expect(onReturnError).toHaveBeenCalled();
-        expect(wsClient.events).toEqual([]);
-    });
-    test("subscription with NOT_INCLUDES on Boolean should error", async () => {
-        const onReturnError = jest.fn();
-        await wsClient.subscribe(
-            `
-            subscription {
-                ${typeMovie.operations.subscribe.created}(where: { isFavorite_NOT_INCLUDES: true }) {
                     ${typeMovie.operations.subscribe.payload.created} {
                         isFavorite
                     }

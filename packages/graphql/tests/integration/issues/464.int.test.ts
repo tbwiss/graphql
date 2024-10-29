@@ -62,12 +62,12 @@ describe("https://github.com/neo4j/graphql/issues/464", () => {
         typeBook = testHelper.createUniqueType("Book");
 
         typeDefs = gql`
-            type ${typeAuthor.name} {
+            type ${typeAuthor.name} @node {
                 id: ID!
                 name: String!
             }
 
-            type ${typeBook.name} {
+            type ${typeBook.name} @node {
                 id: ID!
                 name: String!
                 author: ${typeAuthor.name}! @relationship(type: "WROTE", direction: IN)
@@ -94,9 +94,6 @@ describe("https://github.com/neo4j/graphql/issues/464", () => {
                         }
                     ]
                 ) {
-                    info {
-                        bookmark
-                    }
                     ${typeBook.plural} {
                         id
                         name
@@ -137,7 +134,6 @@ describe("https://github.com/neo4j/graphql/issues/464", () => {
 
         expect(result.data).toEqual({
             [typeBook.operations.create]: {
-                info: { bookmark: expect.any(String) },
                 [typeBook.plural]: [
                     {
                         id: bookId,
@@ -175,7 +171,6 @@ describe("https://github.com/neo4j/graphql/issues/464", () => {
 
             expect(result.data).toEqual({
                 [typeBook.operations.create]: {
-                    info: { bookmark: expect.any(String) },
                     [typeBook.plural]: [
                         {
                             id: bookId,
@@ -217,7 +212,6 @@ describe("https://github.com/neo4j/graphql/issues/464", () => {
 
             expect(result.data).toEqual({
                 [typeBook.operations.create]: {
-                    info: { bookmark: null },
                     [typeBook.plural]: [
                         {
                             id: bookId,

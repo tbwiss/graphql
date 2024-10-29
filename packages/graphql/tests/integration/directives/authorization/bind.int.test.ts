@@ -40,11 +40,11 @@ describe("auth/bind", () => {
     describe("create", () => {
         test("should throw forbidden when creating a node with invalid bind", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${User} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -79,17 +79,17 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when creating a nested node with invalid bind", async () => {
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -136,17 +136,17 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when creating field with invalid bind", async () => {
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
                 extend type ${User}  {
-                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 }
             `;
 
@@ -160,7 +160,7 @@ describe("auth/bind", () => {
             const query = `
                mutation {
                    ${Post.operations.update}(
-                       where: { id: "${postId}" }
+                       where: { id_EQ: "${postId}" }
                        update: {
                            creator: {
                                create: { node: { id: "not bound" } }
@@ -196,13 +196,13 @@ describe("auth/bind", () => {
 
         test("should no throw forbidden when creating a node without passing the bind specified at the Field level", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     name: String
                 }
 
                 extend type ${User} {
-                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 }
             `;
 
@@ -247,13 +247,13 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when creating a node when rule is not satisfied", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID 
                     name: String
                 }
 
                 extend type ${User} {
-                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.sub" } } }])
+                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 }
             `;
 
@@ -298,19 +298,19 @@ describe("auth/bind", () => {
 
         test("should no throw forbidden when creating a nested node without passing the bind specified at the Field level", async () => {
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     title: String
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
                 extend type ${Post} {
-                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id: "$jwt.postId" } } }])
+                    id: ID @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { id_EQ: "$jwt.postId" } } }])
                 }
             `;
 
@@ -364,16 +364,16 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when creating field with invalid bind (bind across relationships)", async () => {
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -428,11 +428,11 @@ describe("auth/bind", () => {
     describe("update", () => {
         test("should throw forbidden when updating a node with invalid bind", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                extend type ${User} @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { id: "$jwt.sub" } } }])
+                extend type ${User} @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
             const userId = generate({
@@ -441,7 +441,7 @@ describe("auth/bind", () => {
 
             const query = `
                 mutation {
-                    ${User.operations.update}(where: { id: "${userId}" }, update: { id: "not bound" }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { id: "not bound" }) {
                         ${User.plural} {
                             id
                         }
@@ -471,17 +471,17 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when updating a nested node with invalid bind", async () => {
             const typeDefs = `
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                type ${User} {
+                type ${User} @node {
                     id: ID
                     posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
-                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -495,10 +495,10 @@ describe("auth/bind", () => {
             const query = `
                 mutation {
                     ${User.operations.update}(
-                        where: { id: "${userId}" },
+                        where: { id_EQ: "${userId}" },
                         update: {
                             posts: {
-                                where: { node: { id: "${postId}" } },
+                                where: { node: { id_EQ: "${postId}" } },
                                 update: {
                                     node: {
                                         creator: { update: { node: { id: "not bound" } } }
@@ -536,12 +536,12 @@ describe("auth/bind", () => {
 
         test("should throw forbidden when updating a node property with invalid bind", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
                 extend type ${User} {
-                    id: ID @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { id: "$jwt.sub" } } }])
+                    id: ID @authorization(validate: [{ when: AFTER, operations: [UPDATE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 }
             `;
 
@@ -552,7 +552,7 @@ describe("auth/bind", () => {
             const query = `
                 mutation {
                     ${User.operations.update}(
-                        where: { id: "${userId}" },
+                        where: { id_EQ: "${userId}" },
                         update: { id: "not bound" }
                     ) {
                         ${User.plural} {
@@ -585,16 +585,16 @@ describe("auth/bind", () => {
     describe("connect", () => {
         test("should throw forbidden when connecting a node property with invalid bind", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE_RELATIONSHIP], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [CREATE_RELATIONSHIP], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -608,10 +608,12 @@ describe("auth/bind", () => {
             const query = `
                 mutation {
                     ${Post.operations.update}(
-                        where: { id: "${postId}" },
-                        connect: {
+                        where: { id_EQ: "${postId}" },
+                        update: {
                             creator: {
-                                where: { node: { id: "not bound" } }
+                                connect: {
+                                    where: { node: { id_EQ: "not bound" } }
+                                }
                             }
                         }
                     ) {
@@ -646,16 +648,16 @@ describe("auth/bind", () => {
     describe("disconnect", () => {
         test("should throw forbidden when disconnecting a node property with invalid bind", async () => {
             const typeDefs = `
-                type ${User} {
+                type ${User} @node {
                     id: ID
                 }
 
-                type ${Post} {
+                type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [DELETE_RELATIONSHIP], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(validate: [{ when: AFTER, operations: [DELETE_RELATIONSHIP], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -669,10 +671,12 @@ describe("auth/bind", () => {
             const query = `
                 mutation {
                     ${Post.operations.update}(
-                        where: { id: "${postId}" },
-                        disconnect: {
+                        where: { id_EQ: "${postId}" },
+                        update: {
                             creator: {
-                                where: { node: { id: "${userId}" } }
+                                disconnect: {
+                                    where: { node: { id_EQ: "${userId}" } }
+                                }
                             }
                         }
                     ) {

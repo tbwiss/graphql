@@ -38,12 +38,12 @@ describe("connectOrCreate", () => {
                 roles: [String!]!
             }
             
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String
                 genres: [${typeGenre.name}!]! @relationship(type: "IN_GENRE", direction: OUT)
             }
     
-            type ${typeGenre.name} @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
+            type ${typeGenre.name} @node @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                 name: String @unique
             }
             `;
@@ -55,7 +55,7 @@ describe("connectOrCreate", () => {
                         title: "Forrest Gump 2"
                         genres: {
                           connectOrCreate: {
-                            where: { node: { name: "Horror" } }
+                            where: { node: { name_EQ: "Horror" } }
                             onCreate: { node: { name: "Horror" } }
                           }
                         }
@@ -76,7 +76,7 @@ describe("connectOrCreate", () => {
                                 title: "Cool Movie"
                                 genres: {
                                     connectOrCreate: {
-                                        where: { node: { name: "Comedy" } },
+                                        where: { node: { name_EQ: "Comedy" } },
                                         onCreate: { node: { name: "Comedy" } }
                                     }
                                 }
@@ -155,12 +155,12 @@ describe("connectOrCreate", () => {
                 roles: [String!]!
             }
             
-            type ${typeMovie.name} @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
+            type ${typeMovie.name} @node @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                 title: String
                 genres: [${typeGenre.name}!]! @relationship(type: "IN_GENRE", direction: OUT)
             }
     
-            type ${typeGenre.name} @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
+            type ${typeGenre.name} @node @authorization(validate: [{ operations: [CREATE_RELATIONSHIP, CREATE], where: { jwt: { roles_INCLUDES: "admin" } } }]) {
                 name: String @unique
             }
             `;
@@ -172,7 +172,7 @@ describe("connectOrCreate", () => {
                         title: "Forrest Gump 2"
                         genres: {
                           connectOrCreate: {
-                            where: { node: { name: "Horror" } }
+                            where: { node: { name_EQ: "Horror" } }
                             onCreate: { node: { name: "Horror" } }
                           }
                         }
@@ -193,7 +193,7 @@ describe("connectOrCreate", () => {
                                 title: "Cool Movie"
                                 genres: {
                                     connectOrCreate: {
-                                        where: { node: { name: "Comedy" } },
+                                        where: { node: { name_EQ: "Comedy" } },
                                         onCreate: { node: { name: "Comedy" } }
                                     }
                                 }

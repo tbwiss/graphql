@@ -39,16 +39,16 @@ describe("aggregations-where-node-int", () => {
             someInt: Int!
         }
 
-        type ${Person} implements Human {
+        type ${Person} implements Human @node {
             testString: String!
             someInt: Int!
         }
-            type ${User} implements Human {
+            type ${User} implements Human @node {
                 testString: String!
                 someInt: Int!
             }
     
-            type ${Post} {
+            type ${Post} @node {
               testString: String!
               likes: [Human!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -58,203 +58,6 @@ describe("aggregations-where-node-int", () => {
 
     afterEach(async () => {
         await testHelper.close();
-    });
-
-    test("should return posts where a like Int is EQUAL to", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(67883);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_EQUAL: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is GT than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(38531);
-        const someIntGt = someInt - 1;
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_GT: ${someIntGt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is GTE than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(33494);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_GTE: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is LT than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(64621);
-        const someIntLT = someInt + 1;
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_LT: ${someIntLT} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is LTE than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(84082);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_LTE: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
     });
 
     describe("AVERAGE", () => {
@@ -282,7 +85,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_EQUAL: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_EQUAL: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -321,7 +124,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GT: ${avgGT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GT: ${avgGT} } } }) {
                             testString
                             likes {
                                 testString
@@ -360,7 +163,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -400,7 +203,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LT: ${avgLT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LT: ${avgLT} } } }) {
                             testString
                             likes {
                                 testString
@@ -439,7 +242,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -483,7 +286,7 @@ describe("aggregations-where-node-int", () => {
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_SUM_EQUAL: ${sum} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_SUM_EQUAL: ${sum} } } }) {
                             testString
                             likes {
                                 testString
@@ -521,16 +324,16 @@ describe("aggregations-where-node-int interface relationships of concrete types"
             someInt: Int!
         }
 
-        type ${Person} implements Human {
+        type ${Person} implements Human @node {
             testString: String!
             someInt: Int!
         }
-            type ${User} implements Human {
+            type ${User} implements Human @node {
                 testString: String!
                 someInt: Int!
             }
     
-            type ${Post} {
+            type ${Post} @node {
               testString: String!
               likes: [Human!]! @relationship(type: "LIKES", direction: IN)
             }
@@ -540,203 +343,6 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
     afterEach(async () => {
         await testHelper.close();
-    });
-
-    test("should return posts where a like Int is EQUAL to", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(10628);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_EQUAL: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is GT than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(28724);
-        const someIntGt = someInt - 1;
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_GT: ${someIntGt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is GTE than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(86262);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_GTE: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is LT than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(89902);
-        const someIntLT = someInt + 1;
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_LT: ${someIntLT} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
-    });
-
-    test("should return posts where a like Float is LTE than", async () => {
-        const testString = generate({
-            charset: "alphabetic",
-            readable: true,
-        });
-
-        const someInt = Number(78777);
-
-        await testHelper.executeCypher(
-            `
-                    CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString}", someInt: ${someInt}})
-                    CREATE (:${Post} {testString: "${testString}"})
-                `
-        );
-
-        const query = `
-                {
-                    ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_LTE: ${someInt} } } }) {
-                        testString
-                        likes {
-                            testString
-                            someInt
-                        }
-                    }
-                }
-            `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect((gqlResult.data as any)[Post.plural]).toEqual([
-            {
-                testString,
-                likes: [{ testString, someInt }],
-            },
-        ]);
     });
 
     describe("AVERAGE", () => {
@@ -764,7 +370,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_EQUAL: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_EQUAL: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -804,7 +410,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GT: ${avgGT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GT: ${avgGT} } } }) {
                             testString
                             likes {
                                 testString
@@ -843,7 +449,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_GTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -883,7 +489,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LT: ${avgLT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LT: ${avgLT} } } }) {
                             testString
                             likes {
                                 testString
@@ -922,7 +528,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_AVERAGE_LTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -967,7 +573,7 @@ describe("aggregations-where-node-int interface relationships of concrete types"
 
             const query = `
                     {
-                        ${Post.plural}(where: { testString: "${testString}", likesAggregate: { node: { someInt_SUM_EQUAL: ${sum} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { someInt_SUM_EQUAL: ${sum} } } }) {
                             testString
                             likes {
                                 testString

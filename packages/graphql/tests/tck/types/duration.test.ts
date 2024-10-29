@@ -26,7 +26,7 @@ describe("Cypher Duration", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Movie {
+            type Movie @node {
                 id: ID
                 duration: Duration
             }
@@ -40,7 +40,7 @@ describe("Cypher Duration", () => {
     test("Simple Read", async () => {
         const query = /* GraphQL */ `
             query {
-                movies(where: { duration: "P1Y" }) {
+                movies(where: { duration_EQ: "P1Y" }) {
                     duration
                 }
             }

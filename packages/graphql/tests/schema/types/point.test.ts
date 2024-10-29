@@ -18,14 +18,14 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { lexicographicSortSchema } from "graphql/utilities";
 import { gql } from "graphql-tag";
+import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Point", () => {
     test("Point", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 filmedAt: Point!
             }
         `;
@@ -42,7 +42,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -56,7 +55,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -102,15 +100,14 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: PointInput
+              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_DISTANCE: PointDistance
+              filmedAt_EQ: PointInput
               filmedAt_GT: PointDistance
               filmedAt_GTE: PointDistance
               filmedAt_IN: [PointInput!]
               filmedAt_LT: PointDistance
               filmedAt_LTE: PointDistance
-              filmedAt_NOT: PointInput @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              filmedAt_NOT_IN: [PointInput!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -159,9 +156,9 @@ describe("Point", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -176,7 +173,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -192,7 +188,7 @@ describe("Point", () => {
 
     test("CartesianPoint", async () => {
         const typeDefs = gql`
-            type Machine {
+            type Machine @node {
                 partLocation: CartesianPoint!
             }
         `;
@@ -233,7 +229,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -247,7 +242,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -293,15 +287,14 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocation: CartesianPointInput
+              partLocation: CartesianPointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               partLocation_DISTANCE: CartesianPointDistance
+              partLocation_EQ: CartesianPointInput
               partLocation_GT: CartesianPointDistance
               partLocation_GTE: CartesianPointDistance
               partLocation_IN: [CartesianPointInput!]
               partLocation_LT: CartesianPointDistance
               partLocation_LTE: CartesianPointDistance
-              partLocation_NOT: CartesianPointInput @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              partLocation_NOT_IN: [CartesianPointInput!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MachinesConnection {
@@ -325,9 +318,9 @@ describe("Point", () => {
             }
 
             type Query {
-              machines(options: MachineOptions, where: MachineWhere): [Machine!]!
+              machines(limit: Int, offset: Int, options: MachineOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MachineSort!], where: MachineWhere): [Machine!]!
               machinesAggregate(where: MachineWhere): MachineAggregateSelection!
-              machinesConnection(after: String, first: Int, sort: [MachineSort], where: MachineWhere): MachinesConnection!
+              machinesConnection(after: String, first: Int, sort: [MachineSort!], where: MachineWhere): MachinesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -342,7 +335,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -358,7 +350,7 @@ describe("Point", () => {
 
     test("Points", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 filmedAt: [Point!]!
             }
         `;
@@ -375,7 +367,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -389,7 +380,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -426,10 +416,9 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: [PointInput!]
+              filmedAt: [PointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              filmedAt_EQ: [PointInput!]
               filmedAt_INCLUDES: PointInput
-              filmedAt_NOT: [PointInput!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              filmedAt_NOT_INCLUDES: PointInput @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MoviesConnection {
@@ -471,7 +460,7 @@ describe("Point", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, where: MovieWhere): MoviesConnection!
             }
@@ -480,7 +469,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -496,7 +484,7 @@ describe("Point", () => {
 
     test("CartesianPoints", async () => {
         const typeDefs = gql`
-            type Machine {
+            type Machine @node {
                 partLocations: [CartesianPoint!]!
             }
         `;
@@ -531,7 +519,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -545,7 +532,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -582,10 +568,9 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocations: [CartesianPointInput!]
+              partLocations: [CartesianPointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              partLocations_EQ: [CartesianPointInput!]
               partLocations_INCLUDES: CartesianPointInput
-              partLocations_NOT: [CartesianPointInput!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              partLocations_NOT_INCLUDES: CartesianPointInput @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type MachinesConnection {
@@ -609,7 +594,7 @@ describe("Point", () => {
             }
 
             type Query {
-              machines(options: MachineOptions, where: MachineWhere): [Machine!]!
+              machines(limit: Int, offset: Int, options: MachineOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MachineWhere): [Machine!]!
               machinesAggregate(where: MachineWhere): MachineAggregateSelection!
               machinesConnection(after: String, first: Int, where: MachineWhere): MachinesConnection!
             }
@@ -618,7 +603,6 @@ describe("Point", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

@@ -31,12 +31,12 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
         Genre = testHelper.createUniqueType("Genre");
 
         const typeDefs = `#graphql
-            type ${Movie} {
+            type ${Movie} @node {
                 name: String!
                 genre: ${Genre}! @relationship(type: "HAS_GENRE", direction: OUT)
             }
 
-            type ${Genre} {
+            type ${Genre} @node {
                 name: String! @unique
                 movies: [${Movie}!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
@@ -61,9 +61,8 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
         const mutation = `#graphql
             mutation UpdateMovieWithConnectAndUpdate {
                 ${Movie.operations.update}(
-                    where: { name: "TestMovie1" }
-                    update: { name: "TestMovie1" }
-                    connect: { genre: { where: { node: { name: "Thriller" } } } }
+                    where: { name_EQ: "TestMovie1" }
+                    update: { name: "TestMovie1", genre: {connect: { where: { node: { name_EQ: "Thriller" } } }} }
                 ) {
                     ${Movie.plural} {
                         name

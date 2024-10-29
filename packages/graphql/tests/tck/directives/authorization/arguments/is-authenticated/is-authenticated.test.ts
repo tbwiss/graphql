@@ -28,16 +28,16 @@ describe("Cypher Auth isAuthenticated", () => {
 
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type History {
+            type History @node {
                 url: String @authentication(operations: [READ])
             }
 
-            type Post {
+            type Post @node {
                 id: String
                 content: String
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 password: String
@@ -230,7 +230,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id: "1" }, update: { id: "id-1" }) {
+                updateUsers(where: { id_EQ: "1" }, update: { id: "id-1" }) {
                     users {
                         id
                     }
@@ -262,7 +262,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node & Field", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id: "1" }, update: { password: "password" }) {
+                updateUsers(where: { id_EQ: "1" }, update: { password: "password" }) {
                     users {
                         id
                     }
@@ -286,102 +286,6 @@ describe("Cypher Auth isAuthenticated", () => {
             "{
                 \\"param0\\": \\"1\\",
                 \\"this_update_password\\": \\"password\\",
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Connect", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(connect: { posts: {} }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "super_admin", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            CALL {
-            	WITH this
-            	OPTIONAL MATCH (this_connect_posts0_node:Post)
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_posts0_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_posts0_node
-            			MERGE (this)-[:HAS_POST]->(this_connect_posts0_node)
-            		}
-            	}
-            WITH this, this_connect_posts0_node
-            	RETURN count(*) AS connect_this_connect_posts_Post0
-            }
-            WITH *
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Disconnect", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(disconnect: { posts: {} }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "super_admin", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_posts0_rel:HAS_POST]->(this_disconnect_posts0:Post)
-            CALL {
-            	WITH this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	WITH collect(this_disconnect_posts0) as this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	UNWIND this_disconnect_posts0 as x
-            	DELETE this_disconnect_posts0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_posts_Post
-            }
-            WITH *
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"updateUsers\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"posts\\": [
-                                {}
-                            ]
-                        }
-                    }
-                },
                 \\"resolvedCallbacks\\": {}
             }"
         `);

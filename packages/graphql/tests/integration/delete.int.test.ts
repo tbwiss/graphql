@@ -38,7 +38,7 @@ describe("delete", () => {
 
     test("should delete a single movie", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -51,7 +51,7 @@ describe("delete", () => {
 
         const mutation = `
         mutation($id: ID!) {
-            ${Movie.operations.delete}(where: { id: $id }) {
+            ${Movie.operations.delete}(where: { id_EQ: $id }) {
               nodesDeleted
               relationshipsDeleted
             }
@@ -86,7 +86,7 @@ describe("delete", () => {
 
     test("should not delete a movie if predicate does not yield true", async () => {
         const typeDefs = `
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
@@ -99,7 +99,7 @@ describe("delete", () => {
 
         const mutation = `
         mutation($id: ID!) {
-            ${Movie.operations.delete}(where: { id: $id }) {
+            ${Movie.operations.delete}(where: { id_EQ: $id }) {
               nodesDeleted
               relationshipsDeleted
             }
@@ -134,12 +134,12 @@ describe("delete", () => {
 
     test("should delete a single movie and a single nested actor", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -157,7 +157,7 @@ describe("delete", () => {
 
         const mutation = `
             mutation($id: ID!, $name: String) {
-                ${Movie.operations.delete}(where: { id: $id }, delete: { actors: { where: { node: { name: $name } } } }) {
+                ${Movie.operations.delete}(where: { id_EQ: $id }, delete: { actors: { where: { node: { name_EQ: $name } } } }) {
                     nodesDeleted
                     relationshipsDeleted
                 }
@@ -207,12 +207,12 @@ describe("delete", () => {
 
     test("should delete a movie, a single nested actor and another movie they act in", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -235,8 +235,8 @@ describe("delete", () => {
         const mutation = `
             mutation($id1: ID!, $name: String, $id2: ID!) {
                 ${Movie.operations.delete}(
-                    where: { id: $id1 }
-                    delete: { actors: { where: { node: { name: $name } }, delete: { movies: { where: { node: { id: $id2 } } } } } }
+                    where: { id_EQ: $id1 }
+                    delete: { actors: { where: { node: { name_EQ: $name } }, delete: { movies: { where: { node: { id_EQ: $id2 } } } } } }
                 ) {
                     nodesDeleted
                     relationshipsDeleted
@@ -300,12 +300,12 @@ describe("delete", () => {
 
     test("should delete a movie using a connection where filter", async () => {
         const typeDefs = gql`
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type ${Movie} {
+            type ${Movie} @node {
                 id: ID
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
@@ -323,7 +323,7 @@ describe("delete", () => {
 
         const mutation = `
             mutation($name: String) {
-                ${Movie.operations.delete}(where: { actorsConnection: { node: { name: $name } } } ) {
+                ${Movie.operations.delete}(where: { actorsConnection_SOME: { node: { name_EQ: $name } } } ) {
                     nodesDeleted
                     relationshipsDeleted
                 }

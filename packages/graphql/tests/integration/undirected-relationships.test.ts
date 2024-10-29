@@ -31,7 +31,7 @@ describe("undirected relationships", () => {
     test("query for an undirected relationship", async () => {
         const userType = new UniqueType("User");
         const typeDefs = gql`
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 friends: [${userType.name}!]! @relationship(type: "FRIENDS_WITH", direction: OUT)
             }
@@ -42,7 +42,7 @@ describe("undirected relationships", () => {
         });
         const query = /* GraphQL */ `
             query {
-                ${userType.plural}(where: {name: "Ford"}) {
+                ${userType.plural}(where: { name_EQ: "Ford"}) {
                     name
                     friends: friends(directed: false) {
                         name
@@ -80,7 +80,7 @@ describe("undirected relationships", () => {
     test("query for an undirected relationship on single relationship", async () => {
         const userType = new UniqueType("User");
         const typeDefs = gql`
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 friend: ${userType.name} @relationship(type: "FRIENDS_WITH", direction: OUT)
             }
@@ -91,7 +91,7 @@ describe("undirected relationships", () => {
         });
         const query = /* GraphQL */ `
             query {
-                ${userType.plural}(where: {name: "Ford"}) {
+                ${userType.plural}(where: {name_EQ: "Ford"}) {
                     name
                     friend: friend(directed: false) {
                         name

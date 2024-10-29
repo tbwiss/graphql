@@ -18,35 +18,38 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
 import { createBearerToken } from "../../utils/create-bearer-token";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("https://github.com/neo4j/graphql/issues/2437", () => {
     let typeDefs: string;
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = `
+        typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
 
-            type Agent @mutation(operations: [CREATE, UPDATE]) {
+            type Agent @mutation(operations: [CREATE, UPDATE]) @node {
                 uuid: ID! @id @unique
                 archivedAt: DateTime
 
                 valuations: [Valuation!]! @relationship(type: "IS_VALUATION_AGENT", direction: OUT)
             }
             extend type Agent
-                @authorization(validate: [{ operations: [CREATE], where: { jwt: { roles_INCLUDES: "Admin" } } }], filter: [{ where: { node: { archivedAt: null } } }])
+                @authorization(
+                    validate: [{ operations: [CREATE], where: { jwt: { roles_INCLUDES: "Admin" } } }]
+                    filter: [{ where: { node: { archivedAt_EQ: null } } }]
+                )
 
-            type Valuation @mutation(operations: [CREATE, UPDATE]) {
+            type Valuation @mutation(operations: [CREATE, UPDATE]) @node {
                 uuid: ID! @id @unique
                 archivedAt: DateTime
 
                 agent: Agent! @relationship(type: "IS_VALUATION_AGENT", direction: IN)
             }
-            extend type Valuation @authorization(filter: [{ where: { node: { archivedAt: null } } }])
+            extend type Valuation @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
         `;
 
         neoSchema = new Neo4jGraphQL({
@@ -58,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/2437", () => {
     test("query and limits nested connections", async () => {
         const query = /* GraphQL */ `
             query Agents {
-                agents(where: { uuid: "a1" }) {
+                agents(where: { uuid_EQ: "a1" }) {
                     uuid
                     valuationsConnection(first: 10) {
                         edges {

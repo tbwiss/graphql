@@ -34,24 +34,25 @@ describe("Cypher Auth Where", () => {
                 creator: User! @declareRelationship
             }
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 content: [Content!]! @relationship(type: "HAS_CONTENT", direction: OUT)
             }
 
-            type Comment implements Content {
+            type Comment implements Content @node {
                 id: ID
                 content: String
                 creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
             }
 
             type Post implements Content
+                @node
                 @authorization(
                     filter: [
                         {
                             operations: [READ, UPDATE, DELETE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP]
-                            where: { node: { creator: { id: "$jwt.sub" } } }
+                            where: { node: { creator: { id_EQ: "$jwt.sub" } } }
                         }
                     ]
                 ) {
@@ -65,18 +66,21 @@ describe("Cypher Auth Where", () => {
                     filter: [
                         {
                             operations: [READ, UPDATE, DELETE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP]
-                            where: { node: { id: "$jwt.sub" } }
+                            where: { node: { id_EQ: "$jwt.sub" } }
                         }
                     ]
                 )
 
             extend type User {
-                password: String! @authorization(filter: [{ operations: [READ], where: { node: { id: "$jwt.sub" } } }])
+                password: String!
+                    @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
 
             extend type Post {
                 secretKey: String!
-                    @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                    @authorization(
+                        filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
         `;
 
@@ -127,7 +131,7 @@ describe("Cypher Auth Where", () => {
     test("Read Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             {
-                posts(where: { content: "bob" }) {
+                posts(where: { content_EQ: "bob" }) {
                     id
                 }
             }
@@ -283,7 +287,7 @@ describe("Cypher Auth Where", () => {
             {
                 users {
                     id
-                    contentConnection(where: { node: { id: "some-id" } }) {
+                    contentConnection(where: { node: { id_EQ: "some-id" } }) {
                         edges {
                             node {
                                 ... on Post {
@@ -397,7 +401,7 @@ describe("Cypher Auth Where", () => {
     test("Update Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(where: { content: "bob" }, update: { content: "Bob" }) {
+                updatePosts(where: { content_EQ: "bob" }, update: { content: "Bob" }) {
                     posts {
                         id
                     }
@@ -562,7 +566,7 @@ describe("Cypher Auth Where", () => {
     test("Delete Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deletePosts(where: { content: "Bob" }) {
+                deletePosts(where: { content_EQ: "Bob" }) {
                     nodesDeleted
                 }
             }
@@ -745,7 +749,7 @@ describe("Cypher Auth Where", () => {
                             id: "123"
                             name: "Bob"
                             password: "password"
-                            content: { connect: { where: { node: { id: "post-id" } } } }
+                            content: { connect: { where: { node: { id_EQ: "post-id" } } } }
                         }
                     ]
                 ) {
@@ -919,7 +923,7 @@ describe("Cypher Auth Where", () => {
     test("Connect Node + User Defined Where (from update update)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { content: { connect: { where: { node: { id: "new-id" } } } } }) {
+                updateUsers(update: { content: { connect: { where: { node: { id_EQ: "new-id" } } } } }) {
                     users {
                         id
                     }
@@ -997,160 +1001,6 @@ describe("Cypher Auth Where", () => {
                     \\"sub\\": \\"id-01\\"
                 },
                 \\"this_content0_connect0_node_param0\\": \\"new-id\\",
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Connect Node (from update connect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(connect: { content: { where: { node: {} } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, { token });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            WITH *
-            CALL {
-            	WITH this
-            	OPTIONAL MATCH (this_connect_content0_node:Comment)
-            	WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_content0_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_content0_node
-            			MERGE (this)-[:HAS_CONTENT]->(this_connect_content0_node)
-            		}
-            	}
-            WITH this, this_connect_content0_node
-            	RETURN count(*) AS connect_this_connect_content_Comment0
-            }
-            CALL {
-            		WITH this
-            	OPTIONAL MATCH (this_connect_content1_node:Post)
-            OPTIONAL MATCH (this_connect_content1_node)<-[:HAS_CONTENT]-(authorization__before_this0:User)
-            WITH *, count(authorization__before_this0) AS creatorCount
-            WITH *
-            	WHERE (($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))) AND ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_content1_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_content1_node
-            			MERGE (this)-[:HAS_CONTENT]->(this_connect_content1_node)
-            		}
-            	}
-            WITH this, this_connect_content1_node
-            	RETURN count(*) AS connect_this_connect_content_Post1
-            }
-            WITH *
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Connect Node + User Defined Where (from update connect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(connect: { content: { where: { node: { id: "some-id" } } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, { token });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            WITH *
-            CALL {
-            	WITH this
-            	OPTIONAL MATCH (this_connect_content0_node:Comment)
-            	WHERE this_connect_content0_node.id = $this_connect_content0_node_param0 AND ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_content0_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_content0_node
-            			MERGE (this)-[:HAS_CONTENT]->(this_connect_content0_node)
-            		}
-            	}
-            WITH this, this_connect_content0_node
-            	RETURN count(*) AS connect_this_connect_content_Comment0
-            }
-            CALL {
-            		WITH this
-            	OPTIONAL MATCH (this_connect_content1_node:Post)
-            OPTIONAL MATCH (this_connect_content1_node)<-[:HAS_CONTENT]-(authorization__before_this0:User)
-            WITH *, count(authorization__before_this0) AS creatorCount
-            WITH *
-            	WHERE this_connect_content1_node.id = $this_connect_content1_node_param0 AND (($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))) AND ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_content1_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_content1_node
-            			MERGE (this)-[:HAS_CONTENT]->(this_connect_content1_node)
-            		}
-            	}
-            WITH this, this_connect_content1_node
-            	RETURN count(*) AS connect_this_connect_content_Post1
-            }
-            WITH *
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"this_connect_content0_node_param0\\": \\"some-id\\",
-                \\"this_connect_content1_node_param0\\": \\"some-id\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -1234,7 +1084,7 @@ describe("Cypher Auth Where", () => {
     test("Disconnect Node + User Defined Where (from update update)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { content: [{ disconnect: { where: { node: { id: "new-id" } } } }] }) {
+                updateUsers(update: { content: [{ disconnect: { where: { node: { id_EQ: "new-id" } } } }] }) {
                     users {
                         id
                     }
@@ -1312,171 +1162,11 @@ describe("Cypher Auth Where", () => {
                                         {
                                             \\"where\\": {
                                                 \\"node\\": {
-                                                    \\"id\\": \\"new-id\\"
+                                                    \\"id_EQ\\": \\"new-id\\"
                                                 }
                                             }
                                         }
                                     ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Disconnect Node (from update disconnect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(disconnect: { content: { where: {} } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, { token });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_content0_rel:HAS_CONTENT]->(this_disconnect_content0:Comment)
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            CALL {
-            	WITH this_disconnect_content0, this_disconnect_content0_rel, this
-            	WITH collect(this_disconnect_content0) as this_disconnect_content0, this_disconnect_content0_rel, this
-            	UNWIND this_disconnect_content0 as x
-            	DELETE this_disconnect_content0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_content_Comment
-            }
-            CALL {
-            	WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_content0_rel:HAS_CONTENT]->(this_disconnect_content0:Post)
-            OPTIONAL MATCH (this_disconnect_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User)
-            WITH *, count(authorization__before_this0) AS creatorCount
-            WITH *
-            WHERE (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)) AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))))
-            CALL {
-            	WITH this_disconnect_content0, this_disconnect_content0_rel, this
-            	WITH collect(this_disconnect_content0) as this_disconnect_content0, this_disconnect_content0_rel, this
-            	UNWIND this_disconnect_content0 as x
-            	DELETE this_disconnect_content0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_content_Post
-            }
-            WITH *
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"updateUsers\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"content\\": [
-                                {
-                                    \\"where\\": {}
-                                }
-                            ]
-                        }
-                    }
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Disconnect Node + User Defined Where (from update disconnect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(disconnect: { content: { where: { node: { id: "some-id" } } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, { token });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_content0_rel:HAS_CONTENT]->(this_disconnect_content0:Comment)
-            WHERE this_disconnect_content0.id = $updateUsers_args_disconnect_content0_where_Comment_this_disconnect_content0param0 AND ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            CALL {
-            	WITH this_disconnect_content0, this_disconnect_content0_rel, this
-            	WITH collect(this_disconnect_content0) as this_disconnect_content0, this_disconnect_content0_rel, this
-            	UNWIND this_disconnect_content0 as x
-            	DELETE this_disconnect_content0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_content_Comment
-            }
-            CALL {
-            	WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_content0_rel:HAS_CONTENT]->(this_disconnect_content0:Post)
-            OPTIONAL MATCH (this_disconnect_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User)
-            WITH *, count(authorization__before_this0) AS creatorCount
-            WITH *
-            WHERE this_disconnect_content0.id = $updateUsers_args_disconnect_content0_where_Post_this_disconnect_content0param0 AND (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)) AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))))
-            CALL {
-            	WITH this_disconnect_content0, this_disconnect_content0_rel, this
-            	WITH collect(this_disconnect_content0) as this_disconnect_content0, this_disconnect_content0_rel, this
-            	UNWIND this_disconnect_content0 as x
-            	DELETE this_disconnect_content0_rel
-            }
-            RETURN count(*) AS disconnect_this_disconnect_content_Post
-            }
-            WITH *
-            WITH *
-            WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"updateUsers_args_disconnect_content0_where_Comment_this_disconnect_content0param0\\": \\"some-id\\",
-                \\"updateUsers_args_disconnect_content0_where_Post_this_disconnect_content0param0\\": \\"some-id\\",
-                \\"updateUsers\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"content\\": [
-                                {
-                                    \\"where\\": {
-                                        \\"node\\": {
-                                            \\"id\\": \\"some-id\\"
-                                        }
-                                    }
                                 }
                             ]
                         }

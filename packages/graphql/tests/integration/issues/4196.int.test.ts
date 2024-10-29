@@ -33,17 +33,17 @@ describe("https://github.com/neo4j/graphql/issues/4196", () => {
         FooBar = testHelper.createUniqueType("FooBar");
 
         const typeDefs = /* GraphQL */ `
-            type ${Foo} {
+            type ${Foo} @node {
                 name: String
                 bars: [${Bar}!]! @relationship(type: "relatesTo", direction: OUT)
             }
             
-            type ${Bar} {
+            type ${Bar} @node {
                 name: String
                 foobars: [${FooBar}!]! @relationship(type: "relatesTo", direction: OUT)
             }
 
-            type ${FooBar} {
+            type ${FooBar} @node {
                 name: String
                 bars: [${FooBar}!]! @relationship(type: "relatesTo", direction: IN)
             }
@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/4196", () => {
     test("querying multiple nested nodes should be sorted correctly", async () => {
         const query = /* GraphQL */ `
             query {
-                ${Foo.plural} (options: {sort: {name: ASC}}) {
+                ${Foo.plural} (sort: { name: ASC }) {
                     name
                     bars {
                         foobars {

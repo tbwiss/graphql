@@ -33,17 +33,17 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
         testCommunity = testHelper.createUniqueType("Community");
 
         const typeDefs = `
-            type ${testContent.name} {
+            type ${testContent.name} @node {
                 name: String!
             }
 
-            type ${testProject.name} {
+            type ${testProject.name} @node {
                 name: String!
             }
 
             union FeedItem = ${testContent.name} | ${testProject.name}
 
-            type ${testCommunity.name} {
+            type ${testCommunity.name} @node {
                 id: Int!
                 feedItem: FeedItem
                     @cypher(
@@ -75,7 +75,7 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
     test("single value is returned for custom Cypher field of Union type", async () => {
         const query = `
             query {
-                ${testCommunity.plural}(where: { id: 111111 }) {
+                ${testCommunity.plural}(where: { id_EQ: 111111 }) {
                     id
                     feedItem {
                         __typename
@@ -111,7 +111,7 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
     test("multiple values are returned for custom Cypher field of list of Union types", async () => {
         const query = `
             query {
-                ${testCommunity.plural}(where: { id: 4656564 }) {
+                ${testCommunity.plural}(where: { id_EQ: 4656564 }) {
                     id
                     hasFeedItems {
                         __typename

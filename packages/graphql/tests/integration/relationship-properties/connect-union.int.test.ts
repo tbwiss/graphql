@@ -34,15 +34,15 @@ describe("Relationship properties - connect on union", () => {
         Show = testHelper.createUniqueType("Show");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} {
+            type ${Movie} @node {
                 title: String!
             }
 
-            type ${Show} {
+            type ${Show} @node {
                 name: String!
             }
 
-            type ${Actor} {
+            type ${Actor} @node {
                 name: String!
                 actedIn: [ActedInUnion!]!
                     @relationship(type: "ACTED_IN", properties: "ActedInInterface", direction: OUT)
@@ -75,7 +75,7 @@ describe("Relationship properties - connect on union", () => {
                             actedIn: {
                                 ${Movie}: {
                                     connect: {
-                                        where: { node: { title: $movieTitle } }
+                                        where: { node: { title_EQ: $movieTitle } }
                                         edge: { screenTime: $screenTime }
                                     }
                                 }
@@ -125,12 +125,14 @@ describe("Relationship properties - connect on union", () => {
         const source = /* GraphQL */ `
             mutation($movieTitle: String!, $screenTime: Int!, $actorName: String!) {
                 ${Actor.operations.update}(
-                    where: { name: $actorName }
-                    connect: {
+                    where: { name_EQ: $actorName }
+                    update: {
                         actedIn: {
                             ${Movie}: {
-                                where: { node: { title: $movieTitle } }
-                                edge: { screenTime: $screenTime }
+                                connect: {
+                                    where: { node: { title_EQ: $movieTitle } }
+                                    edge: { screenTime: $screenTime }
+                                }
                             }
                         }
                     }

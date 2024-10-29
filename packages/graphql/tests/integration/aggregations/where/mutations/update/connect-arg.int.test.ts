@@ -41,12 +41,12 @@ describe("Connect using aggregate where", () => {
         postType = testHelper.createUniqueType("Post");
         likeInterface = testHelper.createUniqueType("LikeEdge");
         typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
     
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID
                 content: String!
                 likes: [${userType.name}!]! @relationship(type: "LIKES", direction: IN, properties: "${likeInterface.name}")
@@ -82,14 +82,14 @@ describe("Connect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: { 
                             connect: { 
                                 where: { 
                                     node: {
                                         likesAggregate: {
-                                            count: 2
+                                            count_EQ: 2
                                         }
                                     } 
                                 } 
@@ -128,7 +128,7 @@ describe("Connect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: { 
                             connect: { 
@@ -137,10 +137,10 @@ describe("Connect using aggregate where", () => {
                                         likesAggregate: {
                                             OR: [
                                                 {
-                                                    count: 2
+                                                    count_EQ: 2
                                                 },
                                                 {
-                                                    count: 0
+                                                    count_EQ: 0
                                                 }
                                             ]
                                         }
@@ -184,7 +184,7 @@ describe("Connect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: {
                             connect: {
@@ -199,9 +199,9 @@ describe("Connect using aggregate where", () => {
                                                 },
                                                 {
                                                     node: {
-                                                        name_SHORTEST_LT: 2 
+                                                        name_SHORTEST_LENGTH_LT: 2 
                                                     }
-                                                    count: 2
+                                                    count_EQ: 2
                                                 }
                                             ]
                                         }
@@ -246,7 +246,7 @@ describe("Connect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: {
                             connect: {
@@ -261,9 +261,9 @@ describe("Connect using aggregate where", () => {
                                                 },
                                                 {
                                                     node: {
-                                                        NOT: { name_SHORTEST_GTE: 2 } 
+                                                        NOT: { name_SHORTEST_LENGTH_GTE: 2 } 
                                                     }
-                                                    count: 2
+                                                    count_EQ: 2
                                                 }
                                             ]
                                         }
@@ -334,19 +334,19 @@ describe("Connect UNIONs using aggregate where", () => {
         likeInterface = testHelper.createUniqueType("LikeEdge");
         userUnion = testHelper.createUniqueType("UserUnion");
         typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
 
-            type ${specialUserType.name} {
+            type ${specialUserType.name} @node {
                 specialName: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
 
             union ${userUnion.name} = ${userType.name} | ${specialUserType.name}
     
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID
                 content: String!
                 likes: [${userUnion.name}!]! @relationship(type: "LIKES", direction: IN, properties: "${likeInterface.name}")
@@ -387,14 +387,16 @@ describe("Connect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId3}" }
-                    connect: {
+                    where: { id_EQ: "${postId3}" }
+                    update: {
                         likes: {
                             ${specialUserType.name}: {
-                                where: {
-                                    node: {
-                                        likedPostsAggregate: {
-                                            count: 2
+                                connect: {
+                                    where: {
+                                        node: {
+                                            likedPostsAggregate: {
+                                                count_EQ: 2
+                                            }
                                         }
                                     }
                                 }
@@ -441,26 +443,28 @@ describe("Connect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId1}" }
-                    connect: {
+                    where: { id_EQ: "${postId1}" }
+                    update: {
                         likes: {
                             ${userType.name}: {
-                                where: {
-                                    node: {
-                                        OR: [
-                                            {
-                                                likedPostsAggregate: {
-                                                    count_LT: 2
-                                                }
-                                            },
-                                            {
-                                                likedPostsAggregate: {
-                                                    edge: {
-                                                        likedAt_MAX_GT: "${date2.toISOString()}"
+                                connect: {
+                                    where: {
+                                        node: {
+                                            OR: [
+                                                {
+                                                    likedPostsAggregate: {
+                                                        count_LT: 2
+                                                    }
+                                                },
+                                                {
+                                                    likedPostsAggregate: {
+                                                        edge: {
+                                                            likedAt_MAX_GT: "${date2.toISOString()}"
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        ]
+                                            ]
+                                        }
                                     }
                                 }
                             }
@@ -515,37 +519,39 @@ describe("Connect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId1}" }
-                    connect: {
+                    where: { id_EQ: "${postId1}" }
+                    update: {
                         likes: {
                             ${specialUserType.name}: {
-                                where: {
-                                    node: {
-                                        OR: [
-                                            {
-                                                likedPostsAggregate: {
-                                                    count_LT: 1
-                                                }
-                                            },
-                                            {
-                                                AND: [
-                                                    {
-                                                        likedPostsAggregate: {
-                                                            edge: {
-                                                                likedAt_MAX_GT: "${date2.toISOString()}"
-                                                            }
-                                                        }
-                                                    },
-                                                    {
-                                                        likedPostsAggregate: {
-                                                            node: {
-                                                                content_SHORTEST_LTE: 5
-                                                            }
-                                                        }
+                                connect: {
+                                    where: {
+                                        node: {
+                                            OR: [
+                                                {
+                                                    likedPostsAggregate: {
+                                                        count_LT: 1
                                                     }
-                                                ]
-                                            }
-                                        ]
+                                                },
+                                                {
+                                                    AND: [
+                                                        {
+                                                            likedPostsAggregate: {
+                                                                edge: {
+                                                                    likedAt_MAX_GT: "${date2.toISOString()}"
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            likedPostsAggregate: {
+                                                                node: {
+                                                                    content_SHORTEST_LENGTH_LTE: 5
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
                                     }
                                 }
                             }

@@ -18,7 +18,7 @@
  */
 
 import { Neo4jGraphQL } from "../../../src";
-import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
 describe("context-variable-not-always-resolved-on-cypher-queries", () => {
     let neoSchema: Neo4jGraphQL;
@@ -40,7 +40,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             iri: ID! @id @alias(property: "uri")
             hasResourceType: [ResourceType!]! @relationship(type: "hasResourceType", direction: OUT)
         }
-        type ResourceType @mutation(operations: []) @limit(default: 1, max: 1000) {
+        type ResourceType @mutation(operations: []) @limit(default: 1, max: 1000) @node {
             iri: ID! @id @alias(property: "uri")
         }
 
@@ -71,8 +71,10 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
         const query = /* GraphQL */ `
             query {
                 exprs(
-                    where: { realizationOf: { hasResourceType: { iri: "http://data.somesite.com/crown/test-id" } } }
-                    options: { limit: 1 }
+                    where: {
+                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                    }
+                    limit: 1
                 ) {
                     iri
                 }
@@ -114,8 +116,10 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
         const query = /* GraphQL */ `
             query {
                 exprs(
-                    where: { realizationOf: { hasResourceType: { iri: "http://data.somesite.com/crown/test-id" } } }
-                    options: { limit: 1 }
+                    where: {
+                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                    }
+                    limit: 1
                 ) {
                     iri
                     relToUnion {
@@ -178,8 +182,10 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
         const query = /* GraphQL */ `
             query {
                 exprs(
-                    where: { realizationOf: { hasResourceType: { iri: "http://data.somesite.com/crown/test-id" } } }
-                    options: { limit: 1 }
+                    where: {
+                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                    }
+                    limit: 1
                 ) {
                     iri
                     relToInterface {

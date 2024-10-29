@@ -29,8 +29,9 @@ describe("@coalesce directive", () => {
     });
 
     test("on non-primitive field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String!
                 location: Point! @coalesce(value: "default")
             }
@@ -46,8 +47,9 @@ describe("@coalesce directive", () => {
     });
 
     test("on DateTime field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String!
                 createdAt: DateTime! @coalesce(value: "1970-01-01T00:00:00.000Z")
             }
@@ -63,8 +65,9 @@ describe("@coalesce directive", () => {
     });
 
     test("with an argument with a type which doesn't match the field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String! @coalesce(value: 2)
             }
         `;
@@ -82,7 +85,7 @@ describe("@coalesce directive", () => {
         const type = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID!
                 classification: String @coalesce(value: "Unrated")
             }
@@ -94,7 +97,7 @@ describe("@coalesce directive", () => {
 
         const query = `
             query {
-                ${type.plural}(where: {classification: "Unrated"}){
+                ${type.plural}(where: {classification_EQ: "Unrated"}){
                     id
                     classification
                 }
@@ -127,7 +130,7 @@ describe("@coalesce directive", () => {
                 ACTIVE
                 INACTIVE
             }
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID
                 status: Status @coalesce(value: ACTIVE)
             }
@@ -139,7 +142,7 @@ describe("@coalesce directive", () => {
 
         const query = `
             query {
-                ${type.plural}(where: {status: ACTIVE}){
+                ${type.plural}(where: {status_EQ: ACTIVE}){
                     id
                     status
                 }
@@ -173,7 +176,7 @@ describe("@coalesce directive", () => {
                 INACTIVE
             }
 
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID
                 statuses: [Status!] @coalesce(value: [ACTIVE, INACTIVE])
             }
@@ -185,7 +188,7 @@ describe("@coalesce directive", () => {
 
         const query = `
             query {
-                ${type.plural}(where: {statuses: [ACTIVE, INACTIVE]}){
+                ${type.plural}(where: {statuses_EQ: [ACTIVE, INACTIVE]}){
                     id
                     statuses
                 }

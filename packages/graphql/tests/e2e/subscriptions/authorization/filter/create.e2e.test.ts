@@ -19,7 +19,6 @@
 
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import { createJwtHeader } from "../../../../utils/create-jwt-request";
 import type { UniqueType } from "../../../../utils/graphql-types";
 import { TestHelper } from "../../../../utils/tests-helper";
@@ -28,7 +27,7 @@ import { ApolloTestServer } from "../../../setup/apollo-server";
 import { WebSocketTestClient } from "../../../setup/ws-client";
 
 describe("Subscriptions authorization with create events", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let User: UniqueType;
@@ -45,9 +44,10 @@ describe("Subscriptions authorization with create events", () => {
             }
 
             type ${User}
+                @node
                 @subscriptionsAuthorization(
                     filter: [
-                        { where: { node: { id: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
+                        { where: { node: { id_EQ: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
                         { where: { jwt: { roles_INCLUDES: "admin" } } }
                     ]
                 ) {
@@ -59,7 +59,7 @@ describe("Subscriptions authorization with create events", () => {
             typeDefs,
             features: {
                 authorization: { key },
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -184,7 +184,7 @@ describe("Subscriptions authorization with create events", () => {
 });
 
 describe("Subscriptions authentication with create events", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let User: UniqueType;
@@ -200,6 +200,7 @@ describe("Subscriptions authentication with create events", () => {
             }
 
             type ${User}
+                @node
                 @authentication(jwt: { roles_INCLUDES: "admin" }) {
                 id: ID!
             }
@@ -209,7 +210,7 @@ describe("Subscriptions authentication with create events", () => {
             typeDefs,
             features: {
                 authorization: { key },
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 

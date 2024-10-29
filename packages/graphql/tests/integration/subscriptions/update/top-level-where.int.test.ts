@@ -17,13 +17,11 @@
  * limitations under the License.
  */
 
-import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Delete using top level aggregate where - subscriptions enabled", () => {
-    const testHelper = new TestHelper();
-    let plugin: TestSubscriptionsEngine;
+    const testHelper = new TestHelper({ cdc: true });
 
     let userType: UniqueType;
     let postType: UniqueType;
@@ -44,14 +42,12 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
         userType = testHelper.createUniqueType("User");
         postType = testHelper.createUniqueType("Post");
 
-        plugin = new TestSubscriptionsEngine();
-
         const typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 testString: String!
             }
 
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID!
                 content: String!
                 likes: [${userType.name}!]! @relationship(type: "LIKES", direction: IN)
@@ -74,7 +70,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: plugin,
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
     });
@@ -89,9 +85,9 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
                 ${postType.operations.update}(
                     where: { 
                         likesAggregate: {
-                            count: 3
+                            count_EQ: 3
                             node: {
-                                testString_SHORTEST_EQUAL: 3
+                                testString_SHORTEST_LENGTH_EQUAL: 3
                             }
                         }
                     }
@@ -121,10 +117,10 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
                 ${postType.operations.update}(where: { 
                     likesAggregate: {
                         OR: [
-                            { count: 3 }
+                            { count_EQ: 3 }
                             {
                                 node: {
-                                    testString_SHORTEST_EQUAL: 3
+                                    testString_SHORTEST_LENGTH_EQUAL: 3
                                 }
                             }
                         ]
@@ -154,10 +150,10 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
                 ${postType.operations.update}(where: { 
                     likesAggregate: {
                         AND: [
-                            { count: 3 }
+                            { count_EQ: 3 }
                             {
                                 node: {
-                                    testString_SHORTEST_EQUAL: 3
+                                    testString_SHORTEST_LENGTH_EQUAL: 3
                                 }
                             }
                         ]
@@ -177,174 +173,6 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
         expect(result.data).toEqual({
             [postType.operations.update]: {
                 [postType.plural]: expect.toBeArrayOfSize(1),
-            },
-        });
-    });
-
-    test("AND within an AND", async () => {
-        const query = `
-            mutation {
-                ${postType.operations.update}(where: { 
-                    likesAggregate: {
-                        AND: [
-                            { count_LTE: 2 }
-                            {
-                                AND: [
-                                    {
-                                        node: {
-                                            testString_SHORTEST_LT: 4
-                                        }
-                                    }
-                                    {
-                                        node: {
-                                            testString_EQUAL: "${testString5}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }) {
-                    ${postType.plural} {
-                        id
-                        content
-                    }
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-
-        expect(result.errors).toBeFalsy();
-        expect(result.data).toEqual({
-            [postType.operations.update]: {
-                [postType.plural]: expect.toBeArrayOfSize(1),
-            },
-        });
-    });
-
-    test("OR within an OR", async () => {
-        const query = `
-            mutation {
-                ${postType.operations.update}(where: { 
-                    likesAggregate: {
-                        OR: [
-                            { count_LTE: 2 }
-                            {
-                                OR: [
-                                    {
-                                        node: {
-                                            testString_SHORTEST_LT: 4
-                                        }
-                                    }
-                                    {
-                                        node: {
-                                            testString_EQUAL: "${testString5}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }) {
-                    ${postType.plural} {
-                        id
-                        content
-                    }
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-
-        expect(result.errors).toBeFalsy();
-        expect(result.data).toEqual({
-            [postType.operations.update]: {
-                [postType.plural]: expect.toBeArrayOfSize(4),
-            },
-        });
-    });
-
-    test("OR within an AND", async () => {
-        const query = `
-            mutation {
-                ${postType.operations.update}(where: { 
-                    likesAggregate: {
-                        AND: [
-                            { count_LTE: 2 }
-                            {
-                                OR: [
-                                    {
-                                        node: {
-                                            testString_SHORTEST_LT: 4
-                                        }
-                                    }
-                                    {
-                                        node: {
-                                            testString_EQUAL: "${testString5}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }) {
-                    ${postType.plural} {
-                        id
-                        content
-                    }
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-
-        expect(result.errors).toBeFalsy();
-        expect(result.data).toEqual({
-            [postType.operations.update]: {
-                [postType.plural]: expect.toBeArrayOfSize(2),
-            },
-        });
-    });
-
-    test("AND within an OR", async () => {
-        const query = `
-            mutation {
-                ${postType.operations.update}(where: { 
-                    likesAggregate: {
-                        OR: [
-                            { count_GTE: 2 }
-                            {
-                                AND: [
-                                    {
-                                        node: {
-                                            testString_SHORTEST_LT: 4
-                                        }
-                                    }
-                                    {
-                                        node: {
-                                            testString_EQUAL: "${testString5}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }) {
-                    ${postType.plural} {
-                        id
-                        content
-                    }
-                }
-            }
-        `;
-
-        const result = await testHelper.executeGraphQL(query);
-
-        expect(result.errors).toBeFalsy();
-        expect(result.data).toEqual({
-            [postType.operations.update]: {
-                [postType.plural]: expect.toBeArrayOfSize(4),
             },
         });
     });

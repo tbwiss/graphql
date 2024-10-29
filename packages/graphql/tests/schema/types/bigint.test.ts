@@ -18,14 +18,14 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { lexicographicSortSchema } from "graphql/utilities";
 import { gql } from "graphql-tag";
+import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Bigint", () => {
     test("BigInt", async () => {
         const typeDefs = gql`
-            type File {
+            type File @node {
                 name: String!
                 size: BigInt!
             }
@@ -60,7 +60,6 @@ describe("Bigint", () => {
             Information about the number of nodes and relationships created during a create mutation
             \\"\\"\\"
             type CreateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -69,7 +68,6 @@ describe("Bigint", () => {
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
             type DeleteInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -123,24 +121,19 @@ describe("Bigint", () => {
               AND: [FileWhere!]
               NOT: FileWhere
               OR: [FileWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              name_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
               name_STARTS_WITH: String
-              size: BigInt
+              size: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              size_EQ: BigInt
               size_GT: BigInt
               size_GTE: BigInt
               size_IN: [BigInt!]
               size_LT: BigInt
               size_LTE: BigInt
-              size_NOT: BigInt @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-              size_NOT_IN: [BigInt!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
             }
 
             type FilesConnection {
@@ -164,9 +157,9 @@ describe("Bigint", () => {
             }
 
             type Query {
-              files(options: FileOptions, where: FileWhere): [File!]!
+              files(limit: Int, offset: Int, options: FileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [FileSort!], where: FileWhere): [File!]!
               filesAggregate(where: FileWhere): FileAggregateSelection!
-              filesConnection(after: String, first: Int, sort: [FileSort], where: FileWhere): FilesConnection!
+              filesConnection(after: String, first: Int, sort: [FileSort!], where: FileWhere): FilesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -191,7 +184,6 @@ describe("Bigint", () => {
             Information about the number of nodes and relationships created and deleted during an update mutation
             \\"\\"\\"
             type UpdateInfo {
-              bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

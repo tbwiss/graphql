@@ -19,7 +19,6 @@
 
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQLSubscriptionsDefaultEngine } from "../../../../../src/classes/subscription/Neo4jGraphQLSubscriptionsDefaultEngine";
 import { createJwtHeader } from "../../../../utils/create-jwt-request";
 import type { UniqueType } from "../../../../utils/graphql-types";
 import { TestHelper } from "../../../../utils/tests-helper";
@@ -28,7 +27,7 @@ import { ApolloTestServer } from "../../../setup/apollo-server";
 import { WebSocketTestClient } from "../../../setup/ws-client";
 
 describe("Subscriptions authorization with update events", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
     let User: UniqueType;
@@ -45,9 +44,10 @@ describe("Subscriptions authorization with update events", () => {
             }
 
             type ${User}
+                @node
                 @subscriptionsAuthorization(
                     filter: [
-                        { where: { node: { id: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
+                        { where: { node: { id_EQ: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
                         { where: { jwt: { roles_INCLUDES: "admin" } } }
                     ]
                 ) {
@@ -59,7 +59,7 @@ describe("Subscriptions authorization with update events", () => {
             typeDefs,
             features: {
                 authorization: { key },
-                subscriptions: new Neo4jGraphQLSubscriptionsDefaultEngine(),
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
@@ -197,7 +197,7 @@ describe("Subscriptions authorization with update events", () => {
             .send({
                 query: `
                     mutation {
-                        ${User.operations.update}(where: { id: "${id1}" }, update: { id: "${id2}" }) {
+                        ${User.operations.update}(where: { id_EQ: "${id1}" }, update: { id: "${id2}" }) {
                             ${User.plural} {
                                 id
                             }

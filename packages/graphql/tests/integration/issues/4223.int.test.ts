@@ -21,7 +21,7 @@ import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/4223", () => {
-    const testHelper = new TestHelper();
+    const testHelper = new TestHelper({ cdc: true });
 
     let User: UniqueType;
     let Tenant: UniqueType;
@@ -49,18 +49,18 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
                 id: String
                 roles: [String]
             }
-            type ${User.name} @authorization(validate: [{ where: { node: { userId: "$jwt.id" } }, operations: [READ] }]) {
+            type ${User.name} @authorization(validate: [{ where: { node: { userId_EQ: "$jwt.id" } }, operations: [READ] }]) @node {
                 userId: String! @unique
                 adminAccess: [${Tenant.name}!]! @relationship(type: "ADMIN_IN", direction: OUT)
             }
     
-            type ${Tenant.name} @authorization(validate: [{ where: { node: { admins: { userId: "$jwt.id" } } } }]) {
+            type ${Tenant.name} @authorization(validate: [{ where: { node: { admins_SOME: { userId_EQ: "$jwt.id" } } } }]) @node {
                 id: ID! @id
                 settings: ${Settings.name}! @relationship(type: "VEHICLECARD_OWNER", direction: IN)
                 admins: [${User.name}!]! @relationship(type: "ADMIN_IN", direction: IN)
             }
     
-            type ${Settings.name} @authorization(validate: [{ where: { node: { tenant: { admins: { userId: "$jwt.id" } } } } }]) {
+            type ${Settings.name} @authorization(validate: [{ where: { node: { tenant: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) @node {
                 id: ID! @id
                 openingDays: [${OpeningDay.name}!]!  @relationship(type: "VALID_GARAGES", direction: OUT)
                 myWorkspace: ${MyWorkspace.name}! @relationship(type: "HAS_WORKSPACE_SETTINGS", direction: OUT)
@@ -68,8 +68,9 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
             }
     
             type ${OpeningDay.name}
+                @node
                 @authorization(
-                    validate: [{ where: { node: { settings: { tenant: { admins: { userId: "$jwt.id" } } } } } }]
+                    validate: [{ where: { node: { settings: { tenant: { admins_SOME: { userId_EQ: "$jwt.id" } } } } } }]
                 ) {
                 id: ID! @id
                 settings: ${Settings.name} @relationship(type: "VALID_GARAGES", direction: IN)
@@ -77,9 +78,10 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
             }
     
             type ${OpeningHoursInterval.name}
+                @node
                 @authorization(
                     validate: [
-                        { where: { node: { openingDay: { settings: { tenant: { admins: { userId: "$jwt.id" } } } } } } }
+                        { where: { node: { openingDay: { settings: { tenant: { admins_SOME: { userId_EQ: "$jwt.id" } } } } } } }
                     ]
                 ) {
                 name: String
@@ -87,12 +89,13 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
             }
             
             type ${MyWorkspace.name}
+                @node
                 @authorization(
                     validate: [
                         {
                             where: {
                                 node: {
-                                    settings: { tenant: { admins: { userId: "$jwt.id" } } }
+                                    settings: { tenant: { admins_SOME: { userId_EQ: "$jwt.id" } } }
                                 }
                             }
                         }
@@ -200,7 +203,7 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
-                subscriptions: true,
+                subscriptions: await testHelper.getSubscriptionEngine(),
                 populatedBy: {
                     callbacks: {
                         getUserIDFromContext: () => "hi",

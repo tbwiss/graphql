@@ -34,14 +34,14 @@ describe("Cypher Auth Where with Roles", () => {
 
             union Search = Post
 
-            type User {
+            type User @node {
                 id: ID
                 name: String
                 posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                 content: [Search!]! @relationship(type: "HAS_POST", direction: OUT) # something to test unions
             }
 
-            type Post {
+            type Post @node {
                 id: ID
                 content: String
                 creator: User @relationship(type: "HAS_POST", direction: IN)
@@ -50,24 +50,27 @@ describe("Cypher Auth Where with Roles", () => {
             extend type User
                 @authorization(
                     validate: [
-                        { where: { node: { id: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
+                        { where: { node: { id_EQ: "$jwt.sub" }, jwt: { roles_INCLUDES: "user" } } }
                         { where: { jwt: { roles_INCLUDES: "admin" } } }
                     ]
                 )
 
             extend type User {
-                password: String! @authorization(filter: [{ operations: [READ], where: { node: { id: "$jwt.sub" } } }])
+                password: String!
+                    @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
 
             extend type Post {
                 secretKey: String!
-                    @authorization(filter: [{ operations: [READ], where: { node: { creator: { id: "$jwt.sub" } } } }])
+                    @authorization(
+                        filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             extend type Post
                 @authorization(
                     validate: [
-                        { where: { node: { creator: { id: "$jwt.sub" } }, jwt: { roles_INCLUDES: "user" } } }
+                        { where: { node: { creator: { id_EQ: "$jwt.sub" } }, jwt: { roles_INCLUDES: "user" } } }
                         { where: { jwt: { roles_INCLUDES: "admin" } } }
                     ]
                 )
@@ -118,7 +121,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Read Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             {
-                users(where: { name: "bob" }) {
+                users(where: { name_EQ: "bob" }) {
                     id
                 }
             }
@@ -265,7 +268,7 @@ describe("Cypher Auth Where with Roles", () => {
             {
                 users {
                     id
-                    postsConnection(where: { node: { id: "some-id" } }) {
+                    postsConnection(where: { node: { id_EQ: "some-id" } }) {
                         edges {
                             node {
                                 content
@@ -325,7 +328,7 @@ describe("Cypher Auth Where with Roles", () => {
             {
                 users {
                     id
-                    posts(where: { content: "cool" }) {
+                    posts(where: { content_EQ: "cool" }) {
                         content
                     }
                 }
@@ -490,7 +493,7 @@ describe("Cypher Auth Where with Roles", () => {
             {
                 users {
                     id
-                    contentConnection(where: { Post: { node: { id: "some-id" } } }) {
+                    contentConnection(where: { Post: { node: { id_EQ: "some-id" } } }) {
                         edges {
                             node {
                                 ... on Post {
@@ -598,7 +601,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Update Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { name: "bob" }, update: { name: "Bob" }) {
+                updateUsers(where: { name_EQ: "bob" }, update: { name: "Bob" }) {
                     users {
                         id
                     }
@@ -900,7 +903,7 @@ describe("Cypher Auth Where with Roles", () => {
                             id: "123"
                             name: "Bob"
                             password: "password"
-                            posts: { connect: { where: { node: { id: "post-id" } } } }
+                            posts: { connect: { where: { node: { id_EQ: "post-id" } } } }
                         }
                     ]
                 ) {
@@ -1053,7 +1056,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Connect Node + User Defined Where (from update update)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { posts: { connect: { where: { node: { id: "new-id" } } } } }) {
+                updateUsers(update: { posts: { connect: { where: { node: { id_EQ: "new-id" } } } } }) {
                     users {
                         id
                     }
@@ -1111,151 +1114,6 @@ describe("Cypher Auth Where with Roles", () => {
                 \\"param2\\": \\"user\\",
                 \\"param3\\": \\"admin\\",
                 \\"this_posts0_connect0_node_param0\\": \\"new-id\\",
-                \\"authorization__before_param2\\": \\"user\\",
-                \\"authorization__before_param3\\": \\"admin\\",
-                \\"authorization__before_param4\\": \\"user\\",
-                \\"authorization__before_param5\\": \\"admin\\",
-                \\"authorization__after_param2\\": \\"user\\",
-                \\"authorization__after_param3\\": \\"admin\\",
-                \\"authorization__after_param4\\": \\"user\\",
-                \\"authorization__after_param5\\": \\"admin\\",
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Connect Node (from update connect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(connect: { posts: { where: { node: {} } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            WITH *
-            CALL {
-            	WITH this
-            	OPTIONAL MATCH (this_connect_posts0_node:Post)
-            	WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__before_this0 IN [(this_connect_posts0_node)<-[:HAS_POST]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__before_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_posts0_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_posts0_node
-            			MERGE (this)-[:HAS_POST]->(this_connect_posts0_node)
-            		}
-            	}
-            WITH this, this_connect_posts0_node
-            WITH this, this_connect_posts0_node
-            WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__after_this0 IN [(this_connect_posts0_node)<-[:HAS_POST]-(authorization__after_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__after_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            	RETURN count(*) AS connect_this_connect_posts_Post0
-            }
-            WITH *
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $update_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $update_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"update_param2\\": \\"user\\",
-                \\"update_param3\\": \\"admin\\",
-                \\"param2\\": \\"user\\",
-                \\"param3\\": \\"admin\\",
-                \\"authorization__before_param2\\": \\"user\\",
-                \\"authorization__before_param3\\": \\"admin\\",
-                \\"authorization__before_param4\\": \\"user\\",
-                \\"authorization__before_param5\\": \\"admin\\",
-                \\"authorization__after_param2\\": \\"user\\",
-                \\"authorization__after_param3\\": \\"admin\\",
-                \\"authorization__after_param4\\": \\"user\\",
-                \\"authorization__after_param5\\": \\"admin\\",
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Connect Node + User Defined Where (from update connect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(connect: { posts: { where: { node: { id: "some-id" } } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            WITH *
-            CALL {
-            	WITH this
-            	OPTIONAL MATCH (this_connect_posts0_node:Post)
-            	WHERE this_connect_posts0_node.id = $this_connect_posts0_node_param0 AND (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__before_this0 IN [(this_connect_posts0_node)<-[:HAS_POST]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__before_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            	CALL {
-            		WITH *
-            		WITH collect(this_connect_posts0_node) as connectedNodes, collect(this) as parentNodes
-            		CALL {
-            			WITH connectedNodes, parentNodes
-            			UNWIND parentNodes as this
-            			UNWIND connectedNodes as this_connect_posts0_node
-            			MERGE (this)-[:HAS_POST]->(this_connect_posts0_node)
-            		}
-            	}
-            WITH this, this_connect_posts0_node
-            WITH this, this_connect_posts0_node
-            WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__after_this0 IN [(this_connect_posts0_node)<-[:HAS_POST]-(authorization__after_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__after_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            	RETURN count(*) AS connect_this_connect_posts_Post0
-            }
-            WITH *
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $update_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $update_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"update_param2\\": \\"user\\",
-                \\"update_param3\\": \\"admin\\",
-                \\"param2\\": \\"user\\",
-                \\"param3\\": \\"admin\\",
-                \\"this_connect_posts0_node_param0\\": \\"some-id\\",
                 \\"authorization__before_param2\\": \\"user\\",
                 \\"authorization__before_param3\\": \\"admin\\",
                 \\"authorization__before_param4\\": \\"user\\",
@@ -1340,7 +1198,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Disconnect Node + User Defined Where (from update update)", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { posts: [{ disconnect: { where: { node: { id: "new-id" } } } }] }) {
+                updateUsers(update: { posts: [{ disconnect: { where: { node: { id_EQ: "new-id" } } } }] }) {
                     users {
                         id
                     }
@@ -1410,172 +1268,11 @@ describe("Cypher Auth Where with Roles", () => {
                                         {
                                             \\"where\\": {
                                                 \\"node\\": {
-                                                    \\"id\\": \\"new-id\\"
+                                                    \\"id_EQ\\": \\"new-id\\"
                                                 }
                                             }
                                         }
                                     ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Disconnect Node (from update disconnect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(disconnect: { posts: { where: {} } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_posts0_rel:HAS_POST]->(this_disconnect_posts0:Post)
-            WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__before_this0 IN [(this_disconnect_posts0)<-[:HAS_POST]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__before_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            CALL {
-            	WITH this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	WITH collect(this_disconnect_posts0) as this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	UNWIND this_disconnect_posts0 as x
-            	DELETE this_disconnect_posts0_rel
-            }
-            WITH this, this_disconnect_posts0
-            WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__after_this0 IN [(this_disconnect_posts0)<-[:HAS_POST]-(authorization__after_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__after_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            RETURN count(*) AS disconnect_this_disconnect_posts_Post
-            }
-            WITH *
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $update_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $update_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"update_param2\\": \\"user\\",
-                \\"update_param3\\": \\"admin\\",
-                \\"param2\\": \\"user\\",
-                \\"param3\\": \\"admin\\",
-                \\"authorization__before_param2\\": \\"user\\",
-                \\"authorization__before_param3\\": \\"admin\\",
-                \\"authorization__before_param4\\": \\"user\\",
-                \\"authorization__before_param5\\": \\"admin\\",
-                \\"authorization__after_param2\\": \\"user\\",
-                \\"authorization__after_param3\\": \\"admin\\",
-                \\"authorization__after_param4\\": \\"user\\",
-                \\"authorization__after_param5\\": \\"admin\\",
-                \\"updateUsers\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"posts\\": [
-                                {
-                                    \\"where\\": {}
-                                }
-                            ]
-                        }
-                    }
-                },
-                \\"resolvedCallbacks\\": {}
-            }"
-        `);
-    });
-
-    test("Disconnect Node + User Defined Where (from update disconnect)", async () => {
-        const query = /* GraphQL */ `
-            mutation {
-                updateUsers(disconnect: { posts: { where: { node: { id: "some-id" } } } }) {
-                    users {
-                        id
-                    }
-                }
-            }
-        `;
-
-        const token = createBearerToken("secret", { sub: "id-01", roles: ["admin"] });
-        const result = await translateQuery(neoSchema, query, {
-            token,
-        });
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:User)
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            WITH this
-            CALL {
-            WITH this
-            OPTIONAL MATCH (this)-[this_disconnect_posts0_rel:HAS_POST]->(this_disconnect_posts0:Post)
-            WHERE this_disconnect_posts0.id = $updateUsers_args_disconnect_posts0_where_Post_this_disconnect_posts0param0 AND (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__before_this0 IN [(this_disconnect_posts0)<-[:HAS_POST]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__before_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            CALL {
-            	WITH this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	WITH collect(this_disconnect_posts0) as this_disconnect_posts0, this_disconnect_posts0_rel, this
-            	UNWIND this_disconnect_posts0 as x
-            	DELETE this_disconnect_posts0_rel
-            }
-            WITH this, this_disconnect_posts0
-            WHERE (apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__after_this0 IN [(this_disconnect_posts0)<-[:HAS_POST]-(authorization__after_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__after_param4 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param5 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            RETURN count(*) AS disconnect_this_disconnect_posts_Post
-            }
-            WITH *
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $update_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $update_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            RETURN collect(DISTINCT this { .id }) AS data"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"isAuthenticated\\": true,
-                \\"jwt\\": {
-                    \\"roles\\": [
-                        \\"admin\\"
-                    ],
-                    \\"sub\\": \\"id-01\\"
-                },
-                \\"update_param2\\": \\"user\\",
-                \\"update_param3\\": \\"admin\\",
-                \\"param2\\": \\"user\\",
-                \\"param3\\": \\"admin\\",
-                \\"updateUsers_args_disconnect_posts0_where_Post_this_disconnect_posts0param0\\": \\"some-id\\",
-                \\"authorization__before_param2\\": \\"user\\",
-                \\"authorization__before_param3\\": \\"admin\\",
-                \\"authorization__before_param4\\": \\"user\\",
-                \\"authorization__before_param5\\": \\"admin\\",
-                \\"authorization__after_param2\\": \\"user\\",
-                \\"authorization__after_param3\\": \\"admin\\",
-                \\"authorization__after_param4\\": \\"user\\",
-                \\"authorization__after_param5\\": \\"admin\\",
-                \\"updateUsers\\": {
-                    \\"args\\": {
-                        \\"disconnect\\": {
-                            \\"posts\\": [
-                                {
-                                    \\"where\\": {
-                                        \\"node\\": {
-                                            \\"id\\": \\"some-id\\"
-                                        }
-                                    }
                                 }
                             ]
                         }

@@ -35,7 +35,7 @@ describe("aggregations-top_level-alias", () => {
 
     test("should perform many aggregations while aliasing each field and return correct data", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testString: ID!
                 id: ID!
                 title: String!
@@ -67,7 +67,7 @@ describe("aggregations-top_level-alias", () => {
 
         const query = /* GraphQL */ `
                 {
-                    ${typeMovie.operations.aggregate}(where: { testString: "${testString}" }) {
+                    ${typeMovie.operations.aggregate}(where: { testString_EQ: "${testString}" }) {
                         _count: count
                         _id: id {
                             _shortest: shortest

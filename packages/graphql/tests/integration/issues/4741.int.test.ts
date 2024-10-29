@@ -31,12 +31,12 @@ describe("https://github.com/neo4j/graphql/issues/4741", () => {
         ListOli = testHelper.createUniqueType("ListOli");
 
         const typeDefs = /* GraphQL */ `
-            type ${Opportunity} {
+            type ${Opportunity} @node {
                 country: String!
                 listsOlis: [${ListOli}!]! @relationship(type: "HAS_LIST", direction: OUT)
             }
 
-            type ${ListOli} {
+            type ${ListOli} @node {
                 name: String!
             }
         `;
@@ -57,40 +57,6 @@ describe("https://github.com/neo4j/graphql/issues/4741", () => {
         const query = /* GraphQL */ `
             query {
                 ${Opportunity.operations.connection}(first: 10, where: { listsOlisAggregate: { count_GT: 1 } }) {
-                    edges {
-                        node {
-                            country
-                            listsOlisConnection {
-                                totalCount
-                            }
-                        }
-                    }
-                }
-            }
-        `;
-
-        const queryResults = await testHelper.executeGraphQL(query);
-        expect(queryResults.errors).toBeUndefined();
-        expect(queryResults.data).toEqual({
-            [Opportunity.operations.connection]: {
-                edges: expect.toIncludeSameMembers([
-                    {
-                        node: {
-                            country: "ES",
-                            listsOlisConnection: {
-                                totalCount: 2,
-                            },
-                        },
-                    },
-                ]),
-            },
-        });
-    });
-
-    test("should return only one Opportunity filering by name length", async () => {
-        const query = /* GraphQL */ `
-            query {
-                ${Opportunity.operations.connection}(first: 10, where: { listsOlisAggregate: { node: { name_LT: 10 } } }) {
                     edges {
                         node {
                             country

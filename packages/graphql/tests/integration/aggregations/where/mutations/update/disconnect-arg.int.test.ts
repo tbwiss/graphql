@@ -39,12 +39,12 @@ describe("Disconnect using aggregate where", () => {
         postType = testHelper.createUniqueType("Post");
         likeInterface = testHelper.createUniqueType("LikeEdge");
         typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
     
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID
                 content: String!
                 likes: [${userType.name}!]! @relationship(type: "LIKES", direction: IN, properties: "${likeInterface.name}")
@@ -76,14 +76,14 @@ describe("Disconnect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: { 
                             disconnect: { 
                                 where: { 
                                     node: {
                                         likesAggregate: {
-                                            count: 2
+                                            count_EQ: 2
                                         }
                                     } 
                                 } 
@@ -120,7 +120,7 @@ describe("Disconnect using aggregate where", () => {
         const query = `
              mutation {
                  ${userType.operations.update}(
-                     where: { name: "${userName}" }
+                     where: { name_EQ: "${userName}" }
                      update: { 
                          likedPosts: { 
                              disconnect: { 
@@ -129,12 +129,12 @@ describe("Disconnect using aggregate where", () => {
                                          likesAggregate: {
                                             OR: [
                                             {
-                                                count: 2
+                                                count_EQ: 2
                                                 
                                             },
                                             {
                                                 node: {
-                                                    name_SHORTEST_LT: 10 
+                                                    name_SHORTEST_LENGTH_LT: 10 
                                                 }
                                              }
                                             ]
@@ -174,7 +174,7 @@ describe("Disconnect using aggregate where", () => {
         const query = `
             mutation {
                 ${userType.operations.update}(
-                    where: { name: "${userName}" }
+                    where: { name_EQ: "${userName}" }
                     update: { 
                         likedPosts: {
                             disconnect: {
@@ -189,9 +189,9 @@ describe("Disconnect using aggregate where", () => {
                                                 },
                                                 {
                                                     node: {
-                                                        name_SHORTEST_GT: 2 
+                                                        name_SHORTEST_LENGTH_GT: 2 
                                                     }
-                                                    count: 2
+                                                    count_EQ: 2
                                                 }
                                             ]
                                         }
@@ -257,19 +257,19 @@ describe("Disconnect UNIONs using aggregate where", () => {
         likeInterface = testHelper.createUniqueType("LikeEdge");
         userUnion = testHelper.createUniqueType("UserUnion");
         typeDefs = `
-            type ${userType.name} {
+            type ${userType.name} @node {
                 name: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
 
-            type ${specialUserType.name} {
+            type ${specialUserType.name} @node {
                 specialName: String!
                 likedPosts: [${postType.name}!]! @relationship(type: "LIKES", direction: OUT, properties: "${likeInterface.name}")
             }
 
             union ${userUnion.name} = ${userType.name} | ${specialUserType.name}
     
-            type ${postType.name} {
+            type ${postType.name} @node {
                 id: ID
                 content: String!
                 likes: [${userUnion.name}!]! @relationship(type: "LIKES", direction: IN, properties: "${likeInterface.name}")
@@ -310,14 +310,16 @@ describe("Disconnect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId2}" }
-                    disconnect: {
+                    where: { id_EQ: "${postId2}" }
+                    update: {
                         likes: {
                             ${specialUserType.name}: {
-                                where: {
-                                    node: {
-                                        likedPostsAggregate: {
-                                            count: 2
+                                    disconnect: {
+                                    where: {
+                                        node: {
+                                            likedPostsAggregate: {
+                                                count_EQ: 2
+                                            }
                                         }
                                     }
                                 }
@@ -366,26 +368,28 @@ describe("Disconnect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId2}" }
-                    disconnect: {
+                    where: { id_EQ: "${postId2}" }
+                    update: {
                         likes: {
                             ${userType.name}: {
-                                where: {
-                                    node: {
-                                        AND: [
-                                            {
-                                                likedPostsAggregate: {
-                                                    count: 2
-                                                }
-                                            },
-                                            {
-                                                likedPostsAggregate: {
-                                                    edge: {
-                                                        likedAt_MAX_GT: "${date2.toISOString()}"
+                                disconnect: {
+                                    where: {
+                                        node: {
+                                            AND: [
+                                                {
+                                                    likedPostsAggregate: {
+                                                        count_EQ: 2
+                                                    }
+                                                },
+                                                {
+                                                    likedPostsAggregate: {
+                                                        edge: {
+                                                            likedAt_MAX_GT: "${date2.toISOString()}"
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        ]
+                                            ]
+                                        }
                                     }
                                 }
                             }
@@ -436,26 +440,28 @@ describe("Disconnect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId2}" }
-                    disconnect: {
+                    where: { id_EQ: "${postId2}" }
+                    update: {
                         likes: {
                             ${userType.name}: {
-                                where: {
-                                    node: {
-                                        AND: [
-                                            {
-                                                likedPostsAggregate: {
-                                                    count: 2
-                                                }
-                                            },
-                                            {
-                                                likedPostsAggregate: {
-                                                    edge: {
-                                                        NOT: { likedAt_MAX_LTE: "${date2.toISOString()}" }
+                                disconnect: {
+                                    where: {
+                                        node: {
+                                            AND: [
+                                                {
+                                                    likedPostsAggregate: {
+                                                        count_EQ: 2
+                                                    }
+                                                },
+                                                {
+                                                    likedPostsAggregate: {
+                                                        edge: {
+                                                            NOT: { likedAt_MAX_LTE: "${date2.toISOString()}" }
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        ]
+                                            ]
+                                        }
                                     }
                                 }
                             }
@@ -506,37 +512,39 @@ describe("Disconnect UNIONs using aggregate where", () => {
         const query = `
             mutation {
                 ${postType.operations.update}(
-                    where: { id: "${postId2}" }
-                    disconnect: {
+                    where: { id_EQ: "${postId2}" }
+                    update: {
                         likes: {
                             ${userType.name}: {
-                                where: {
-                                    node: {
-                                        OR: [
-                                            {
-                                                AND: [
-                                                    {
-                                                        likedPostsAggregate: {
-                                                            count: 2
-                                                        }
-                                                    },
-                                                    {
-                                                        likedPostsAggregate: {
-                                                            edge: {
-                                                                likedAt_MAX_GT: "${date2.toISOString()}"
+                                disconnect: {
+                                    where: {
+                                        node: {
+                                            OR: [
+                                                {
+                                                    AND: [
+                                                        {
+                                                            likedPostsAggregate: {
+                                                                count_EQ: 2
+                                                            }
+                                                        },
+                                                        {
+                                                            likedPostsAggregate: {
+                                                                edge: {
+                                                                    likedAt_MAX_GT: "${date2.toISOString()}"
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                likedPostsAggregate: {
-                                                    node: {
-                                                        content_AVERAGE_LTE: 4
+                                                    ]
+                                                },
+                                                {
+                                                    likedPostsAggregate: {
+                                                        node: {
+                                                            content_AVERAGE_LENGTH_LTE: 4
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        ]
+                                            ]
+                                        }
                                     }
                                 }
                             }

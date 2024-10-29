@@ -35,12 +35,12 @@ describe("https://github.com/neo4j/graphql/issues/354", () => {
         const testPost = testHelper.createUniqueType("Post");
 
         const typeDefs = gql`
-            type ${testComment.name} {
+            type ${testComment.name} @node {
                 comment_id: ID!
                 post: ${testPost.name}! @relationship(type: "HAS_POST", direction: OUT)
             }
 
-            type ${testPost.name} {
+            type ${testPost.name} @node {
                 post_id: ID!
             }
         `;
@@ -62,7 +62,7 @@ describe("https://github.com/neo4j/graphql/issues/354", () => {
                         comment_id: "${commentId}",
                         post: {
                             connect: {
-                                where: { node: { post_id: "${missingNodeId}" } }
+                                where: { node: { post_id_EQ: "${missingNodeId}" } }
                             }
                         }
                     }]

@@ -28,14 +28,14 @@ describe("tck/rfs/022 subquery projection", () => {
     describe("no auth", () => {
         beforeAll(() => {
             typeDefs = /* GraphQL */ `
-                type Movie {
+                type Movie @node {
                     title: String!
                     released: Int
                     actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
                     directors: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 }
 
-                type Person {
+                type Person @node {
                     name: String!
                     movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                     directed: [Movie!]! @relationship(type: "DIRECTED", direction: OUT)
@@ -54,9 +54,9 @@ describe("tck/rfs/022 subquery projection", () => {
         test("Nested query", async () => {
             const query = /* GraphQL */ `
                 query Query {
-                    movies(where: { released: 1999 }) {
+                    movies(where: { released_EQ: 1999 }) {
                         title
-                        actors(where: { name: "Keanu Reeves" }) {
+                        actors(where: { name_EQ: "Keanu Reeves" }) {
                             name
                         }
                     }
@@ -92,9 +92,9 @@ describe("tck/rfs/022 subquery projection", () => {
         test("Double nested query", async () => {
             const query = /* GraphQL */ `
                 query Query {
-                    movies(where: { released: 1999 }) {
+                    movies(where: { released_EQ: 1999 }) {
                         title
-                        actors(where: { name: "Keanu Reeves" }) {
+                        actors(where: { name_EQ: "Keanu Reeves" }) {
                             name
                             directed {
                                 title
@@ -145,17 +145,18 @@ describe("tck/rfs/022 subquery projection", () => {
                     roles: [String!]!
                 }
 
-                type Movie {
+                type Movie @node {
                     title: String!
                     released: Int
                     actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
                 }
 
                 type Person
+                    @node
                     @authorization(
-                        filter: [{ where: { node: { name: "The Matrix" } } }]
+                        filter: [{ where: { node: { name_EQ: "The Matrix" } } }]
                         validate: [
-                            { when: [BEFORE], where: { node: { name: "$jwt.test" }, jwt: { roles_INCLUDES: "admin" } } }
+                            { when: [BEFORE], where: { node: { name_EQ: "$jwt.test" }, jwt: { roles_INCLUDES: "admin" } } }
                         ]
                     ) {
                     name: String!
@@ -176,9 +177,9 @@ describe("tck/rfs/022 subquery projection", () => {
         test("Nested query", async () => {
             const query = /* GraphQL */ `
                 query Query {
-                    movies(where: { released: 1999 }) {
+                    movies(where: { released_EQ: 1999 }) {
                         title
-                        actors(where: { name: "Keanu Reeves" }) {
+                        actors(where: { name_EQ: "Keanu Reeves" }) {
                             name
                         }
                     }

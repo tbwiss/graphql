@@ -31,12 +31,12 @@ describe("https://github.com/neo4j/graphql/issues/1640", () => {
         testOrganization = testHelper.createUniqueType("Organization");
 
         const typeDefs = `
-            type ${testAdmin} {
+            type ${testAdmin} @node {
                 name: String!
                 organizations: [${testOrganization}!]! @relationship(type: "HAS_ADMINISTRATOR", direction: IN)
             }
 
-            type ${testOrganization} {
+            type ${testOrganization} @node {
                 name: String!
                 admins: [${testAdmin}!]! @relationship(type: "HAS_ADMINISTRATOR", direction: OUT)
             }
@@ -55,8 +55,8 @@ describe("https://github.com/neo4j/graphql/issues/1640", () => {
         const query = `
             mutation DeleteOrganizations {
                 ${testOrganization.operations.delete}(
-                    where: { name: "Org1" }
-                    delete: { admins: [{ where: { node: { organizationsAggregate: { count: 1 } } } }] }
+                    where: { name_EQ: "Org1" }
+                    delete: { admins: [{ where: { node: { organizationsAggregate: { count_EQ: 1 } } } }] }
                 ) {
                     nodesDeleted
                     relationshipsDeleted

@@ -28,7 +28,7 @@ describe("@populatedBy tests", () => {
         describe("Directive combinations", () => {
             test("PopulatedBy and default directives", async () => {
                 const typeDefs = gql`
-                    type Movie {
+                    type Movie @node {
                         id: ID
                         callback1: String!
                             @populatedBy(operations: [CREATE], callback: "callback1")
@@ -66,7 +66,7 @@ describe("@populatedBy tests", () => {
 
             test("PopulatedBy and id directives", async () => {
                 const typeDefs = gql`
-                    type Movie {
+                    type Movie @node {
                         id: ID
                         callback1: ID! @populatedBy(operations: [CREATE], callback: "callback1") @id
                     }
@@ -103,7 +103,7 @@ describe("@populatedBy tests", () => {
 
         test("PopulatedBy - existence", async () => {
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     callback1: String! @populatedBy(operations: [CREATE], callback: "callback1")
                 }
@@ -133,7 +133,7 @@ describe("@populatedBy tests", () => {
             const callback3 = () => "random-string";
 
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     callback1: String! @populatedBy(operations: [CREATE], callback: "callback1")
                     callback2: String! @populatedBy(operations: [UPDATE], callback: "callback2")
@@ -166,7 +166,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created during a create mutation
                 \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -180,7 +179,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships deleted during a delete mutation
                 \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
@@ -243,45 +241,29 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  callback1: String
+                  callback1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_CONTAINS: String
                   callback1_ENDS_WITH: String
+                  callback1_EQ: String
                   callback1_IN: [String!]
-                  callback1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback1_STARTS_WITH: String
-                  callback2: String
+                  callback2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_CONTAINS: String
                   callback2_ENDS_WITH: String
+                  callback2_EQ: String
                   callback2_IN: [String!]
-                  callback2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback2_STARTS_WITH: String
-                  callback3: String
+                  callback3: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_CONTAINS: String
                   callback3_ENDS_WITH: String
+                  callback3_EQ: String
                   callback3_IN: [String!]
-                  callback3_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback3_STARTS_WITH: String
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -306,9 +288,9 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Query {
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
                 \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -328,7 +310,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created and deleted during an update mutation
                 \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!
@@ -348,7 +329,7 @@ describe("@populatedBy tests", () => {
             const callback3 = () => "random-int";
 
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     callback1: Int! @populatedBy(operations: [CREATE], callback: "callback1")
                     callback2: Int! @populatedBy(operations: [UPDATE], callback: "callback2")
@@ -381,7 +362,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created during a create mutation
                 \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -395,7 +375,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships deleted during a delete mutation
                 \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
@@ -467,39 +446,32 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback1_EQ: Int
                   callback1_GT: Int
                   callback1_GTE: Int
                   callback1_IN: [Int!]
                   callback1_LT: Int
                   callback1_LTE: Int
-                  callback1_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2: Int
+                  callback2: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback2_EQ: Int
                   callback2_GT: Int
                   callback2_GTE: Int
                   callback2_IN: [Int!]
                   callback2_LT: Int
                   callback2_LTE: Int
-                  callback2_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3: Int
+                  callback3: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback3_EQ: Int
                   callback3_GT: Int
                   callback3_GTE: Int
                   callback3_IN: [Int!]
                   callback3_LT: Int
                   callback3_LTE: Int
-                  callback3_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -524,9 +496,9 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Query {
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
                 \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -541,7 +513,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created and deleted during an update mutation
                 \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!
@@ -559,7 +530,7 @@ describe("@populatedBy tests", () => {
         describe("Directive combinations", () => {
             test("PopulatedBy and default directives", async () => {
                 const typeDefs = gql`
-                    type Movie {
+                    type Movie @node {
                         id: ID
                         genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
                     }
@@ -571,7 +542,7 @@ describe("@populatedBy tests", () => {
                             @default(value: "Test")
                     }
 
-                    type Genre {
+                    type Genre @node {
                         id: ID!
                     }
                 `;
@@ -606,7 +577,7 @@ describe("@populatedBy tests", () => {
 
             test("PopulatedBy and id directives", async () => {
                 const typeDefs = gql`
-                    type Movie {
+                    type Movie @node {
                         id: ID
                         genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
                     }
@@ -616,7 +587,7 @@ describe("@populatedBy tests", () => {
                         callback1: ID! @populatedBy(operations: [CREATE], callback: "callback4") @id
                     }
 
-                    type Genre {
+                    type Genre @node {
                         id: ID!
                     }
                 `;
@@ -652,7 +623,7 @@ describe("@populatedBy tests", () => {
 
         test("PopulatedBy - existence", async () => {
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
                 }
@@ -662,7 +633,7 @@ describe("@populatedBy tests", () => {
                     callback1: String! @populatedBy(operations: [CREATE], callback: "callback4")
                 }
 
-                type Genre {
+                type Genre @node {
                     id: ID!
                 }
             `;
@@ -696,7 +667,7 @@ describe("@populatedBy tests", () => {
             const callback3 = () => "random-string";
 
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
                 }
@@ -708,7 +679,7 @@ describe("@populatedBy tests", () => {
                     callback3: String! @populatedBy(operations: [CREATE, UPDATE], callback: "callback3")
                 }
 
-                type Genre {
+                type Genre @node {
                     id: ID!
                 }
             `;
@@ -743,7 +714,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created during a create mutation
                 \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -757,7 +727,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships deleted during a delete mutation
                 \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
@@ -808,15 +777,11 @@ describe("@populatedBy tests", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID!]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -832,19 +797,15 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Movie {
-                  genres(directed: Boolean = true, options: GenreOptions, where: GenreWhere): [Genre!]!
-                  genresAggregate(directed: Boolean = true, where: GenreWhere): MovieGenreGenresAggregationSelection
-                  genresConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
+                  genres(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
+                  genresAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenresAggregationSelection
+                  genresConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
                   id: ID
                 }
 
                 type MovieAggregateSelection {
                   count: Int!
                   id: IDAggregateSelection!
-                }
-
-                input MovieConnectInput {
-                  genres: [MovieGenresConnectFieldInput!]
                 }
 
                 input MovieCreateInput {
@@ -854,10 +815,6 @@ describe("@populatedBy tests", () => {
 
                 input MovieDeleteInput {
                   genres: [MovieGenresDeleteFieldInput!]
-                }
-
-                input MovieDisconnectInput {
-                  genres: [MovieGenresDisconnectFieldInput!]
                 }
 
                 type MovieEdge {
@@ -886,7 +843,8 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresAggregateInput!]
                   NOT: MovieGenresAggregateInput
                   OR: [MovieGenresAggregateInput!]
-                  count: Int
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
                   count_LT: Int
@@ -920,9 +878,7 @@ describe("@populatedBy tests", () => {
                   NOT: MovieGenresConnectionWhere
                   OR: [MovieGenresConnectionWhere!]
                   edge: RelPropertiesWhere
-                  edge_NOT: RelPropertiesWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   node: GenreWhere
-                  node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                 }
 
                 input MovieGenresCreateFieldInput {
@@ -947,7 +903,16 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresNodeAggregationWhereInput!]
                   NOT: MovieGenresNodeAggregationWhereInput
                   OR: [MovieGenresNodeAggregationWhereInput!]
-                  id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+                  id_MAX_EQUAL: ID
+                  id_MAX_GT: ID
+                  id_MAX_GTE: ID
+                  id_MAX_LT: ID
+                  id_MAX_LTE: ID
+                  id_MIN_EQUAL: ID
+                  id_MIN_GT: ID
+                  id_MIN_GTE: ID
+                  id_MIN_LT: ID
+                  id_MIN_LTE: ID
                 }
 
                 type MovieGenresRelationship {
@@ -979,10 +944,6 @@ describe("@populatedBy tests", () => {
                   sort: [MovieSort!]
                 }
 
-                input MovieRelationInput {
-                  genres: [MovieGenresCreateFieldInput!]
-                }
-
                 \\"\\"\\"
                 Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                 \\"\\"\\"
@@ -999,9 +960,7 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  genres: GenreWhere @deprecated(reason: \\"Use \`genres_SOME\` instead.\\")
                   genresAggregate: MovieGenresAggregateInput
-                  genresConnection: MovieGenresConnectionWhere @deprecated(reason: \\"Use \`genresConnection_SOME\` instead.\\")
                   \\"\\"\\"
                   Return Movies where all of the related MovieGenresConnections match this filter
                   \\"\\"\\"
@@ -1010,7 +969,6 @@ describe("@populatedBy tests", () => {
                   Return Movies where none of the related MovieGenresConnections match this filter
                   \\"\\"\\"
                   genresConnection_NONE: MovieGenresConnectionWhere
-                  genresConnection_NOT: MovieGenresConnectionWhere @deprecated(reason: \\"Use \`genresConnection_NONE\` instead.\\")
                   \\"\\"\\"
                   Return Movies where one of the related MovieGenresConnections match this filter
                   \\"\\"\\"
@@ -1023,20 +981,15 @@ describe("@populatedBy tests", () => {
                   genres_ALL: GenreWhere
                   \\"\\"\\"Return Movies where none of the related Genres match this filter\\"\\"\\"
                   genres_NONE: GenreWhere
-                  genres_NOT: GenreWhere @deprecated(reason: \\"Use \`genres_NONE\` instead.\\")
                   \\"\\"\\"Return Movies where one of the related Genres match this filter\\"\\"\\"
                   genres_SINGLE: GenreWhere
                   \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
                   genres_SOME: GenreWhere
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -1052,7 +1005,7 @@ describe("@populatedBy tests", () => {
                   deleteGenres(where: GenreWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-                  updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1064,12 +1017,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Query {
-                  genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+                  genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
                   genresAggregate(where: GenreWhere): GenreAggregateSelection!
-                  genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
                 \\"\\"\\"
@@ -1087,112 +1040,61 @@ describe("@populatedBy tests", () => {
                   AND: [RelPropertiesAggregationWhereInput!]
                   NOT: RelPropertiesAggregationWhereInput
                   OR: [RelPropertiesAggregationWhereInput!]
-                  callback1_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback1_AVERAGE_LENGTH_EQUAL: Float
                   callback1_AVERAGE_LENGTH_GT: Float
                   callback1_AVERAGE_LENGTH_GTE: Float
                   callback1_AVERAGE_LENGTH_LT: Float
                   callback1_AVERAGE_LENGTH_LTE: Float
-                  callback1_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback1_LONGEST_LENGTH_EQUAL: Int
                   callback1_LONGEST_LENGTH_GT: Int
                   callback1_LONGEST_LENGTH_GTE: Int
                   callback1_LONGEST_LENGTH_LT: Int
                   callback1_LONGEST_LENGTH_LTE: Int
-                  callback1_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback1_SHORTEST_LENGTH_EQUAL: Int
                   callback1_SHORTEST_LENGTH_GT: Int
                   callback1_SHORTEST_LENGTH_GTE: Int
                   callback1_SHORTEST_LENGTH_LT: Int
                   callback1_SHORTEST_LENGTH_LTE: Int
-                  callback1_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback1_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback2_AVERAGE_LENGTH_EQUAL: Float
                   callback2_AVERAGE_LENGTH_GT: Float
                   callback2_AVERAGE_LENGTH_GTE: Float
                   callback2_AVERAGE_LENGTH_LT: Float
                   callback2_AVERAGE_LENGTH_LTE: Float
-                  callback2_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback2_LONGEST_LENGTH_EQUAL: Int
                   callback2_LONGEST_LENGTH_GT: Int
                   callback2_LONGEST_LENGTH_GTE: Int
                   callback2_LONGEST_LENGTH_LT: Int
                   callback2_LONGEST_LENGTH_LTE: Int
-                  callback2_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback2_SHORTEST_LENGTH_EQUAL: Int
                   callback2_SHORTEST_LENGTH_GT: Int
                   callback2_SHORTEST_LENGTH_GTE: Int
                   callback2_SHORTEST_LENGTH_LT: Int
                   callback2_SHORTEST_LENGTH_LTE: Int
-                  callback2_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback2_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_AVERAGE_EQUAL: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_AVERAGE_GT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_AVERAGE_GTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback3_AVERAGE_LENGTH_EQUAL: Float
                   callback3_AVERAGE_LENGTH_GT: Float
                   callback3_AVERAGE_LENGTH_GTE: Float
                   callback3_AVERAGE_LENGTH_LT: Float
                   callback3_AVERAGE_LENGTH_LTE: Float
-                  callback3_AVERAGE_LT: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_AVERAGE_LTE: Float @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_EQUAL: String @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_LONGEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_LONGEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_LONGEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback3_LONGEST_LENGTH_EQUAL: Int
                   callback3_LONGEST_LENGTH_GT: Int
                   callback3_LONGEST_LENGTH_GTE: Int
                   callback3_LONGEST_LENGTH_LT: Int
                   callback3_LONGEST_LENGTH_LTE: Int
-                  callback3_LONGEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_LONGEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_SHORTEST_EQUAL: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_SHORTEST_GT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_SHORTEST_GTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
                   callback3_SHORTEST_LENGTH_EQUAL: Int
                   callback3_SHORTEST_LENGTH_GT: Int
                   callback3_SHORTEST_LENGTH_GTE: Int
                   callback3_SHORTEST_LENGTH_LT: Int
                   callback3_SHORTEST_LENGTH_LTE: Int
-                  callback3_SHORTEST_LT: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  callback3_SHORTEST_LTE: Int @deprecated(reason: \\"Please use the explicit _LENGTH version for string aggregation.\\")
-                  id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+                  id_MAX_EQUAL: ID
+                  id_MAX_GT: ID
+                  id_MAX_GTE: ID
+                  id_MAX_LT: ID
+                  id_MAX_LTE: ID
+                  id_MIN_EQUAL: ID
+                  id_MIN_GT: ID
+                  id_MIN_GTE: ID
+                  id_MIN_LT: ID
+                  id_MIN_LTE: ID
                 }
 
                 input RelPropertiesCreateInput {
@@ -1216,45 +1118,29 @@ describe("@populatedBy tests", () => {
                   AND: [RelPropertiesWhere!]
                   NOT: RelPropertiesWhere
                   OR: [RelPropertiesWhere!]
-                  callback1: String
+                  callback1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_CONTAINS: String
                   callback1_ENDS_WITH: String
+                  callback1_EQ: String
                   callback1_IN: [String!]
-                  callback1_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback1_STARTS_WITH: String
-                  callback2: String
+                  callback2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_CONTAINS: String
                   callback2_ENDS_WITH: String
+                  callback2_EQ: String
                   callback2_IN: [String!]
-                  callback2_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback2_STARTS_WITH: String
-                  callback3: String
+                  callback3: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_CONTAINS: String
                   callback3_ENDS_WITH: String
+                  callback3_EQ: String
                   callback3_IN: [String!]
-                  callback3_NOT: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_CONTAINS: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_ENDS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_IN: [String!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_STARTS_WITH: String @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   callback3_STARTS_WITH: String
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID!]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -1280,7 +1166,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created and deleted during an update mutation
                 \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!
@@ -1300,7 +1185,7 @@ describe("@populatedBy tests", () => {
             const callback3 = () => "random-int";
 
             const typeDefs = gql`
-                type Movie {
+                type Movie @node {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
                 }
@@ -1312,7 +1197,7 @@ describe("@populatedBy tests", () => {
                     callback3: Int! @populatedBy(operations: [CREATE, UPDATE], callback: "callback3")
                 }
 
-                type Genre {
+                type Genre @node {
                     id: ID!
                 }
             `;
@@ -1347,7 +1232,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created during a create mutation
                 \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -1361,7 +1245,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships deleted during a delete mutation
                 \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
@@ -1412,15 +1295,11 @@ describe("@populatedBy tests", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID!]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -1443,19 +1322,15 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Movie {
-                  genres(directed: Boolean = true, options: GenreOptions, where: GenreWhere): [Genre!]!
-                  genresAggregate(directed: Boolean = true, where: GenreWhere): MovieGenreGenresAggregationSelection
-                  genresConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
+                  genres(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
+                  genresAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenresAggregationSelection
+                  genresConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
                   id: ID
                 }
 
                 type MovieAggregateSelection {
                   count: Int!
                   id: IDAggregateSelection!
-                }
-
-                input MovieConnectInput {
-                  genres: [MovieGenresConnectFieldInput!]
                 }
 
                 input MovieCreateInput {
@@ -1465,10 +1340,6 @@ describe("@populatedBy tests", () => {
 
                 input MovieDeleteInput {
                   genres: [MovieGenresDeleteFieldInput!]
-                }
-
-                input MovieDisconnectInput {
-                  genres: [MovieGenresDisconnectFieldInput!]
                 }
 
                 type MovieEdge {
@@ -1497,7 +1368,8 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresAggregateInput!]
                   NOT: MovieGenresAggregateInput
                   OR: [MovieGenresAggregateInput!]
-                  count: Int
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
                   count_LT: Int
@@ -1531,9 +1403,7 @@ describe("@populatedBy tests", () => {
                   NOT: MovieGenresConnectionWhere
                   OR: [MovieGenresConnectionWhere!]
                   edge: RelPropertiesWhere
-                  edge_NOT: RelPropertiesWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   node: GenreWhere
-                  node_NOT: GenreWhere @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                 }
 
                 input MovieGenresCreateFieldInput {
@@ -1558,7 +1428,16 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresNodeAggregationWhereInput!]
                   NOT: MovieGenresNodeAggregationWhereInput
                   OR: [MovieGenresNodeAggregationWhereInput!]
-                  id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+                  id_MAX_EQUAL: ID
+                  id_MAX_GT: ID
+                  id_MAX_GTE: ID
+                  id_MAX_LT: ID
+                  id_MAX_LTE: ID
+                  id_MIN_EQUAL: ID
+                  id_MIN_GT: ID
+                  id_MIN_GTE: ID
+                  id_MIN_LT: ID
+                  id_MIN_LTE: ID
                 }
 
                 type MovieGenresRelationship {
@@ -1590,10 +1469,6 @@ describe("@populatedBy tests", () => {
                   sort: [MovieSort!]
                 }
 
-                input MovieRelationInput {
-                  genres: [MovieGenresCreateFieldInput!]
-                }
-
                 \\"\\"\\"
                 Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                 \\"\\"\\"
@@ -1610,9 +1485,7 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  genres: GenreWhere @deprecated(reason: \\"Use \`genres_SOME\` instead.\\")
                   genresAggregate: MovieGenresAggregateInput
-                  genresConnection: MovieGenresConnectionWhere @deprecated(reason: \\"Use \`genresConnection_SOME\` instead.\\")
                   \\"\\"\\"
                   Return Movies where all of the related MovieGenresConnections match this filter
                   \\"\\"\\"
@@ -1621,7 +1494,6 @@ describe("@populatedBy tests", () => {
                   Return Movies where none of the related MovieGenresConnections match this filter
                   \\"\\"\\"
                   genresConnection_NONE: MovieGenresConnectionWhere
-                  genresConnection_NOT: MovieGenresConnectionWhere @deprecated(reason: \\"Use \`genresConnection_NONE\` instead.\\")
                   \\"\\"\\"
                   Return Movies where one of the related MovieGenresConnections match this filter
                   \\"\\"\\"
@@ -1634,20 +1506,15 @@ describe("@populatedBy tests", () => {
                   genres_ALL: GenreWhere
                   \\"\\"\\"Return Movies where none of the related Genres match this filter\\"\\"\\"
                   genres_NONE: GenreWhere
-                  genres_NOT: GenreWhere @deprecated(reason: \\"Use \`genres_NONE\` instead.\\")
                   \\"\\"\\"Return Movies where one of the related Genres match this filter\\"\\"\\"
                   genres_SINGLE: GenreWhere
                   \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
                   genres_SOME: GenreWhere
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -1663,7 +1530,7 @@ describe("@populatedBy tests", () => {
                   deleteGenres(where: GenreWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-                  updateMovies(connect: MovieConnectInput @deprecated(reason: \\"Top level connect input argument in update is deprecated. Use the nested connect field in the relationship within the update argument\\"), create: MovieRelationInput @deprecated(reason: \\"Top level create input argument in update is deprecated. Use the nested create field in the relationship within the update argument\\"), delete: MovieDeleteInput @deprecated(reason: \\"Top level delete input argument in update is deprecated. Use the nested delete field in the relationship within the update argument\\"), disconnect: MovieDisconnectInput @deprecated(reason: \\"Top level disconnect input argument in update is deprecated. Use the nested disconnect field in the relationship within the update argument\\"), update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1675,12 +1542,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Query {
-                  genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+                  genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
                   genresAggregate(where: GenreWhere): GenreAggregateSelection!
-                  genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
                 \\"\\"\\"
@@ -1703,11 +1570,6 @@ describe("@populatedBy tests", () => {
                   callback1_AVERAGE_GTE: Float
                   callback1_AVERAGE_LT: Float
                   callback1_AVERAGE_LTE: Float
-                  callback1_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback1_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
                   callback1_MAX_EQUAL: Int
                   callback1_MAX_GT: Int
                   callback1_MAX_GTE: Int
@@ -1728,11 +1590,6 @@ describe("@populatedBy tests", () => {
                   callback2_AVERAGE_GTE: Float
                   callback2_AVERAGE_LT: Float
                   callback2_AVERAGE_LTE: Float
-                  callback2_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback2_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
                   callback2_MAX_EQUAL: Int
                   callback2_MAX_GT: Int
                   callback2_MAX_GTE: Int
@@ -1753,11 +1610,6 @@ describe("@populatedBy tests", () => {
                   callback3_AVERAGE_GTE: Float
                   callback3_AVERAGE_LT: Float
                   callback3_AVERAGE_LTE: Float
-                  callback3_EQUAL: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_GT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_GTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_LT: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
-                  callback3_LTE: Int @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
                   callback3_MAX_EQUAL: Int
                   callback3_MAX_GT: Int
                   callback3_MAX_GTE: Int
@@ -1773,7 +1625,16 @@ describe("@populatedBy tests", () => {
                   callback3_SUM_GTE: Int
                   callback3_SUM_LT: Int
                   callback3_SUM_LTE: Int
-                  id_EQUAL: ID @deprecated(reason: \\"Aggregation filters that are not relying on an aggregating function will be deprecated.\\")
+                  id_MAX_EQUAL: ID
+                  id_MAX_GT: ID
+                  id_MAX_GTE: ID
+                  id_MAX_LT: ID
+                  id_MAX_LTE: ID
+                  id_MIN_EQUAL: ID
+                  id_MIN_GT: ID
+                  id_MIN_GTE: ID
+                  id_MIN_LT: ID
+                  id_MIN_LTE: ID
                 }
 
                 input RelPropertiesCreateInput {
@@ -1799,39 +1660,32 @@ describe("@populatedBy tests", () => {
                   AND: [RelPropertiesWhere!]
                   NOT: RelPropertiesWhere
                   OR: [RelPropertiesWhere!]
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback1_EQ: Int
                   callback1_GT: Int
                   callback1_GTE: Int
                   callback1_IN: [Int!]
                   callback1_LT: Int
                   callback1_LTE: Int
-                  callback1_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback1_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2: Int
+                  callback2: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback2_EQ: Int
                   callback2_GT: Int
                   callback2_GTE: Int
                   callback2_IN: [Int!]
                   callback2_LT: Int
                   callback2_LTE: Int
-                  callback2_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback2_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3: Int
+                  callback3: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  callback3_EQ: Int
                   callback3_GT: Int
                   callback3_GTE: Int
                   callback3_IN: [Int!]
                   callback3_LT: Int
                   callback3_LTE: Int
-                  callback3_NOT: Int @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  callback3_NOT_IN: [Int!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID!]
-                  id_NOT: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_CONTAINS: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_ENDS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_IN: [ID!] @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
-                  id_NOT_STARTS_WITH: ID @deprecated(reason: \\"Negation filters will be deprecated, use the NOT operator to achieve the same behavior\\")
                   id_STARTS_WITH: ID
                 }
 
@@ -1852,7 +1706,6 @@ describe("@populatedBy tests", () => {
                 Information about the number of nodes and relationships created and deleted during an update mutation
                 \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String @deprecated(reason: \\"This field has been deprecated because bookmarks are now handled by the driver.\\")
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!

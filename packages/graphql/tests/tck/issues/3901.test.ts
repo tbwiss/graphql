@@ -32,12 +32,13 @@ describe("https://github.com/neo4j/graphql/issues/3901", () => {
                 roles: [String!]!
             }
 
-            type User {
+            type User @node {
                 id: ID! @id
                 series: [Serie!]! @relationship(type: "PUBLISHER", direction: OUT)
             }
 
             type Serie
+                @node
                 @authorization(
                     validate: [
                         {
@@ -45,7 +46,7 @@ describe("https://github.com/neo4j/graphql/issues/3901", () => {
                             when: [AFTER]
                             where: {
                                 AND: [
-                                    { node: { publisher: { id: "$jwt.sub" } } }
+                                    { node: { publisher: { id_EQ: "$jwt.sub" } } }
                                     { jwt: { roles_INCLUDES: "verified" } }
                                     { jwt: { roles_INCLUDES: "creator" } }
                                 ]
@@ -61,6 +62,7 @@ describe("https://github.com/neo4j/graphql/issues/3901", () => {
             }
 
             type Season
+                @node
                 @authorization(
                     validate: [
                         {
@@ -68,7 +70,7 @@ describe("https://github.com/neo4j/graphql/issues/3901", () => {
                             when: [AFTER]
                             where: {
                                 AND: [
-                                    { node: { serie: { publisher: { id: "$jwt.sub" } } } }
+                                    { node: { serie: { publisher: { id_EQ: "$jwt.sub" } } } }
                                     { jwt: { roles_INCLUDES: "verified" } }
                                     { jwt: { roles_INCLUDES: "creator" } }
                                 ]
@@ -99,7 +101,7 @@ describe("https://github.com/neo4j/graphql/issues/3901", () => {
                     input: [
                         {
                             title: $title
-                            publisher: { connect: { where: { node: { id: $userId } } } }
+                            publisher: { connect: { where: { node: { id_EQ: $userId } } } }
                             seasons: { create: { node: { number: 1 } } }
                         }
                     ]
