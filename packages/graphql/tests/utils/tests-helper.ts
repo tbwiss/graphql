@@ -98,6 +98,12 @@ export class TestHelper {
                 "CDC is note enable in test helper. Did you forget to set cdc:true or used isCDCEnabled by mistake?"
             );
         }
+
+        const dbInfo = await this.getDatabaseInfo();
+        if (!dbInfo.isAura()) {
+            await this.executeCypher(`ALTER DATABASE ${this.database} SET OPTION txLogEnrichment "FULL"`);
+        }
+
         const result = await this.executeCypher(`
         SHOW DATABASES YIELD name, options
         WHERE name = "${this._database}"
