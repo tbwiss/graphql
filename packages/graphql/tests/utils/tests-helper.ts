@@ -106,7 +106,7 @@ export class TestHelper {
 
         const result = await this.executeCypher(`
         SHOW DATABASES YIELD name, options
-        WHERE name = "${this._database}"
+        WHERE name = "${this.database}"
         RETURN coalesce(options.txLogEnrichment = "FULL", false) AS cdcEnabled
     `);
 
