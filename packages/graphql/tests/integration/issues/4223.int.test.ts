@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { beforeEach } from "node:test";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
