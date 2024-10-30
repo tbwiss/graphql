@@ -17,18 +17,28 @@
  * limitations under the License.
  */
 
+import console from "console";
 import { generate } from "randomstring";
 import { createBearerToken } from "../../../utils/create-bearer-token";
 import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Subscriptions delete", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
-    afterEach(async () => {
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.isCDCEnabled();
+    });
+
+    afterAll(async () => {
         await testHelper.close();
     });
 
     test("should throw Forbidden when deleting a node with invalid allow", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const typeUser = testHelper.createUniqueType("User");
         const typeDefs = `
         type ${typeUser.name} @node {
