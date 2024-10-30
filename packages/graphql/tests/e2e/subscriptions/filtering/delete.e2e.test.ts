@@ -32,6 +32,10 @@ describe("Delete Subscription", () => {
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         const typeDefs = `

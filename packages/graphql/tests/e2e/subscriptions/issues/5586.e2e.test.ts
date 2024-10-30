@@ -31,6 +31,10 @@ describe("https://github.com/neo4j/graphql/issues/5586", () => {
     let Entity: UniqueType;
     let typeDefs: string;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         Entity = testHelper.createUniqueType("Entity");
 

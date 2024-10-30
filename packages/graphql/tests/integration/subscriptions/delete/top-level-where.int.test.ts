@@ -38,7 +38,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     const content5 = "Some more content";
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     beforeEach(async () => {

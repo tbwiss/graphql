@@ -31,7 +31,7 @@ describe("Create -> ConnectOrCreate", () => {
     const typeActor = testHelper.createUniqueType("Actor");
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
         typeDefs = gql`
         type ${typeMovie.name} @node {
             title: String!

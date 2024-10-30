@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/4429", () => {
     let myUserId: string;
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
         if (!cdcEnabled) {
             await testHelper.close();
         }

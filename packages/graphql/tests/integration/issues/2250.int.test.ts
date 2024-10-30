@@ -29,7 +29,7 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
     let Actor: UniqueType;
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     beforeEach(async () => {
