@@ -65,6 +65,10 @@ export class Neo4jDatabaseInfo {
     lte(version: string) {
         return semver.lt(this.version, this.toSemVer(version));
     }
+
+    isAura(): boolean {
+        return this.rawVersion.includes("aura");
+    }
 }
 
 export async function getNeo4jDatabaseInfo(executor: Executor): Promise<Neo4jDatabaseInfo> {

@@ -25,11 +25,13 @@ import { TestHelper } from "../../../utils/tests-helper";
 describe("Create -> ConnectOrCreate", () => {
     const testHelper = new TestHelper({ cdc: true });
     let typeDefs: DocumentNode;
+    let cdcEnabled: boolean;
 
     const typeMovie = testHelper.createUniqueType("Movie");
     const typeActor = testHelper.createUniqueType("Actor");
 
-    beforeAll(() => {
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.isCDCEnabled();
         typeDefs = gql`
         type ${typeMovie.name} @node {
             title: String!
@@ -60,6 +62,10 @@ describe("Create -> ConnectOrCreate", () => {
     });
 
     test("ConnectOrCreate creates new node", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(

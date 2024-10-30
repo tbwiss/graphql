@@ -23,9 +23,18 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/440", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
+
     let typeDefs: string;
     let Video: UniqueType;
     let Category: UniqueType;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.isCDCEnabled();
+        if (!cdcEnabled) {
+            await testHelper.close();
+        }
+    });
 
     beforeEach(() => {
         Video = testHelper.createUniqueType("Video");
@@ -45,10 +54,16 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
     });
 
     afterEach(async () => {
-        await testHelper.close();
+        if (cdcEnabled) {
+            await testHelper.close();
+        }
     });
 
     test("should be able to disconnect 2 nodes while creating one in the same mutation", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
         const videoID = generate({ charset: "alphabetic" });
         const catIDs = Array(3)
@@ -110,6 +125,10 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
     });
 
     test("should be able to delete 2 nodes while creating one in the same mutation", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
         const videoID = generate({ charset: "alphabetic" });
         const catIDs = Array(3)
@@ -171,6 +190,10 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
     });
 
     test("should be able to delete 2 nodes while creating one in the same mutation - with subscriptions", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
