@@ -28,7 +28,7 @@ describe("https://github.com/neo4j/graphql/issues/3355", () => {
 
     beforeAll(async () => {
         Movie = testHelper.createUniqueType("Movie");
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     afterAll(async () => {

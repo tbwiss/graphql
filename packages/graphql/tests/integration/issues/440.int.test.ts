@@ -30,7 +30,7 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
     let Category: UniqueType;
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
         if (!cdcEnabled) {
             await testHelper.close();
         }

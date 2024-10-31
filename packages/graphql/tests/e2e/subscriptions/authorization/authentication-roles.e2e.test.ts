@@ -39,6 +39,7 @@ describe("Subscription authentication roles", () => {
 
     beforeAll(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
+        await testHelper.assertCDCEnabled();
 
         typeDefs = `
         type JWTPayload @jwt {

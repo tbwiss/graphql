@@ -38,7 +38,7 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
     let ADD_TENANT: string;
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
         if (!cdcEnabled) {
             await testHelper.close();
         }

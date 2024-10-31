@@ -21,7 +21,6 @@ import Cypher from "@neo4j/cypher-builder";
 import type { ExecutionResult, GraphQLArgs } from "graphql";
 import { graphql as graphqlRuntime } from "graphql";
 import * as neo4j from "neo4j-driver";
-import { Memoize } from "typescript-memoize";
 import type { Neo4jGraphQLConstructor, Neo4jGraphQLContext } from "../../src";
 import { Neo4jGraphQL, Neo4jGraphQLSubscriptionsCDCEngine } from "../../src";
 import { Neo4jDatabaseInfo } from "../../src/classes";
@@ -92,15 +91,21 @@ export class TestHelper {
         return this.neo4jGraphQL;
     }
 
-    public async isCDCEnabled(): Promise<boolean> {
+    public async assertCDCEnabled(): Promise<boolean> {
         if (!this.cdc) {
             throw new Error(
-                "CDC is note enable in test helper. Did you forget to set cdc:true or used isCDCEnabled by mistake?"
+                "CDC is note enable in test helper. Did you forget to set cdc:true or used assertCDCEnabled by mistake?"
             );
         }
+
+        const dbInfo = await this.getDatabaseInfo();
+        if (!dbInfo.isAura()) {
+            await this.executeCypher(`ALTER DATABASE ${this.database} SET OPTION txLogEnrichment "FULL"`);
+        }
+
         const result = await this.executeCypher(`
         SHOW DATABASES YIELD name, options
-        WHERE name = "${this._database}"
+        WHERE name = "${this.database}"
         RETURN coalesce(options.txLogEnrichment = "FULL", false) AS cdcEnabled
     `);
 
@@ -198,12 +203,7 @@ export class TestHelper {
         }
 
         this.driver = driver;
-        if (this.cdc) {
-            const dbInfo = await this.getDatabaseInfo();
-            if (!dbInfo.isAura()) {
-                await driver.executeQuery(`ALTER DATABASE ${this.database} SET OPTION txLogEnrichment "FULL"`);
-            }
-        }
+
         return this.driver;
     }
 
@@ -234,7 +234,6 @@ export class TestHelper {
         this.customDB = undefined;
     }
 
-    @Memoize()
     public async getDatabaseInfo(): Promise<Neo4jDatabaseInfo> {
         const DBMS_COMPONENTS_QUERY =
             "CALL dbms.components() YIELD versions, edition UNWIND versions AS version RETURN version, edition";

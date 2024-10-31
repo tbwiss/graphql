@@ -27,7 +27,7 @@ describe("Subscriptions delete", () => {
     let cdcEnabled: boolean;
 
     beforeAll(async () => {
-        cdcEnabled = await testHelper.isCDCEnabled();
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     afterAll(async () => {

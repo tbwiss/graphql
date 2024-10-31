@@ -32,8 +32,9 @@ describe("Subscription authentication", () => {
     let jwtToken: string;
     const secret = "secret";
 
-    beforeAll(() => {
+    beforeAll(async () => {
         jwtToken = createBearerToken(secret, { roles: ["admin"] });
+        await testHelper.assertCDCEnabled();
     });
 
     describe("auth without operations", () => {

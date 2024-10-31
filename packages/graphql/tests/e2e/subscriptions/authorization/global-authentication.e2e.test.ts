@@ -39,8 +39,9 @@ describe("Subscription global authentication", () => {
         extend schema @authentication
     `;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         jwtToken = createBearerToken(secret, { roles: ["admin"] });
+        await testHelper.assertCDCEnabled();
     });
 
     describe("should fail with no JWT token present and global authentication is enabled", () => {
