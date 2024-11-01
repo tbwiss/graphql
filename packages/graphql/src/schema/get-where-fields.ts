@@ -77,13 +77,6 @@ export function getWhereFieldsForAttributes({
                     type: targetEntityAdapter.operations.whereInputTypeName,
                     directives: deprecatedDirectives,
                 };
-
-                if (shouldAddDeprecatedFields(features, "negationFilters")) {
-                    result[`${field.name}_NOT`] = {
-                        type: targetEntityAdapter.operations.whereInputTypeName,
-                        directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_NOT],
-                    };
-                }
                 continue;
             }
         }
