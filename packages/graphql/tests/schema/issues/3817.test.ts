@@ -269,7 +269,7 @@ describe("3817", () => {
 
             input PersonFriendsFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!]
+              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonFriendsCreateFieldInput!]
             }
 

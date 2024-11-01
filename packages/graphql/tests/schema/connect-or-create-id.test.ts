@@ -141,7 +141,7 @@ describe("connect or create with id", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorMoviesCreateFieldInput!]
             }
 
@@ -612,7 +612,7 @@ describe("connect or create with id", () => {
 
             input PostCreatorFieldInput {
               connect: PostCreatorConnectFieldInput
-              connectOrCreate: PostCreatorConnectOrCreateFieldInput
+              connectOrCreate: PostCreatorConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: PostCreatorCreateFieldInput
             }
 
@@ -933,7 +933,7 @@ describe("connect or create with id", () => {
 
             input UserPostsFieldInput {
               connect: [UserPostsConnectFieldInput!]
-              connectOrCreate: [UserPostsConnectOrCreateFieldInput!]
+              connectOrCreate: [UserPostsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [UserPostsCreateFieldInput!]
             }
 

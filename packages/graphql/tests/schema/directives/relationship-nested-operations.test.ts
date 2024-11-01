@@ -2422,7 +2422,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieActorsFieldInput {
-                  connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
+                  connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
                 }
 
                 input MovieActorsNodeAggregationWhereInput {
@@ -6480,7 +6480,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieActorsPersonOneFieldInput {
-                  connectOrCreate: [MovieActorsPersonOneConnectOrCreateFieldInput!]
+                  connectOrCreate: [MovieActorsPersonOneConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
                 }
 
                 input MovieActorsPersonOneUpdateFieldInput {
@@ -6505,7 +6505,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieActorsPersonTwoFieldInput {
-                  connectOrCreate: [MovieActorsPersonTwoConnectOrCreateFieldInput!]
+                  connectOrCreate: [MovieActorsPersonTwoConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
                 }
 
                 input MovieActorsPersonTwoUpdateFieldInput {
