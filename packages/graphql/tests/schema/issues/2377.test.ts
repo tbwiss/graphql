@@ -249,7 +249,7 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
 
             input ResourceContainedByFieldInput {
               connect: [ResourceContainedByConnectFieldInput!]
-              connectOrCreate: [ResourceContainedByConnectOrCreateFieldInput!]
+              connectOrCreate: [ResourceContainedByConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ResourceContainedByCreateFieldInput!]
             }
 

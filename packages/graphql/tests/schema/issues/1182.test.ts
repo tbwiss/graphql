@@ -274,7 +274,7 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieActorsFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
+              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieActorsCreateFieldInput!]
             }
 
