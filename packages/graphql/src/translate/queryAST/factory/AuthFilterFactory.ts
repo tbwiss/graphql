@@ -29,11 +29,8 @@ import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphq
 import { asArray } from "../../../utils/utils";
 import { isLogicalOperator } from "../../utils/logical-operators";
 import type { ConnectionFilter } from "../ast/filters/ConnectionFilter";
-<<<<<<< HEAD
 import type { Filter, FilterOperator, RelationshipWhereOperator } from "../ast/filters/Filter";
-=======
-import { isRelationshipOperator, type Filter } from "../ast/filters/Filter";
->>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
+import { isRelationshipOperator } from "../ast/filters/Filter";
 import { LogicalFilter } from "../ast/filters/LogicalFilter";
 import type { RelationshipFilter } from "../ast/filters/RelationshipFilter";
 import { AuthConnectionFilter } from "../ast/filters/authorization-filters/AuthConnectionFilter";
@@ -145,13 +142,8 @@ export class AuthFilterFactory extends FilterFactory {
         isNot: boolean;
         attachedTo?: "node" | "relationship";
         relationship?: RelationshipAdapter;
-<<<<<<< HEAD
-    }): CypherFilter | PropertyFilter {
-        const filterOperator = operator ?? "EQ";
-=======
     }): Filter {
         const filterOperator = operator || "EQ";
->>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
 
         const isCypherVariable =
             comparisonValue instanceof Cypher.Variable ||

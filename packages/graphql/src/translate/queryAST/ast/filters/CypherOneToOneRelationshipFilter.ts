@@ -19,17 +19,17 @@
 
 import Cypher from "@neo4j/cypher-builder";
 import type { AttributeAdapter } from "../../../../schema-model/attribute/model-adapters/AttributeAdapter";
-import type { RelationshipWhereOperator } from "../../../where/types";
 import type { QueryASTContext } from "../QueryASTContext";
 import type { QueryASTNode } from "../QueryASTNode";
 import type { CustomCypherSelection } from "../selection/CustomCypherSelection";
+import type { FilterOperator, RelationshipWhereOperator } from "./Filter";
 import { Filter } from "./Filter";
 
 export class CypherOneToOneRelationshipFilter extends Filter {
     private returnVariable: Cypher.Node;
     private attribute: AttributeAdapter;
     private selection: CustomCypherSelection;
-    private operator: RelationshipWhereOperator;
+    private operator: FilterOperator;
     private targetNodeFilters: Filter[] = [];
     private isNot: boolean;
     private isNull: boolean;

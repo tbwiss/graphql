@@ -29,12 +29,8 @@ import { fromGlobalId } from "../../../utils/global-ids";
 import { asArray, filterTruthy } from "../../../utils/utils";
 import { isLogicalOperator } from "../../utils/logical-operators";
 import { ConnectionFilter } from "../ast/filters/ConnectionFilter";
-<<<<<<< HEAD
-import type { Filter, FilterOperator, RelationshipWhereOperator } from "../ast/filters/Filter";
-=======
 import { CypherOneToOneRelationshipFilter } from "../ast/filters/CypherOneToOneRelationshipFilter";
-import type { Filter } from "../ast/filters/Filter";
->>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
+import type { Filter, FilterOperator, RelationshipWhereOperator } from "../ast/filters/Filter";
 import { isRelationshipOperator } from "../ast/filters/Filter";
 import { LogicalFilter } from "../ast/filters/LogicalFilter";
 import { RelationshipFilter } from "../ast/filters/RelationshipFilter";
@@ -179,7 +175,7 @@ export class FilterFactory {
     }: {
         attribute: AttributeAdapter;
         comparisonValue: GraphQLWhereArg;
-        operator: WhereOperator | undefined;
+        operator: FilterOperator | undefined;
         isNot: boolean;
     }): Filter | Filter[] {
         const filterOperator = operator || "EQ";
@@ -229,22 +225,13 @@ export class FilterFactory {
     }: {
         attribute: AttributeAdapter;
         relationship?: RelationshipAdapter;
-<<<<<<< HEAD
-        comparisonValue: unknown;
-        operator: FilterOperator | undefined;
-        isNot: boolean;
-        attachedTo?: "node" | "relationship";
-    }): PropertyFilter | CypherFilter {
-        const filterOperator = operator ?? "EQ";
-=======
         comparisonValue: GraphQLWhereArg;
-        operator: WhereOperator | undefined;
+        operator: FilterOperator | undefined;
         isNot: boolean;
         attachedTo?: "node" | "relationship";
     }): Filter | Filter[] {
         const filterOperator = operator || "EQ";
 
->>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
         if (attribute.annotations.cypher) {
             return this.createCypherFilter({
                 attribute,
