@@ -23,12 +23,17 @@ import type { AttributeAdapter } from "../../../schema-model/attribute/model-ada
 import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import type { InterfaceEntityAdapter } from "../../../schema-model/entity/model-adapters/InterfaceEntityAdapter";
 import type { RelationshipAdapter } from "../../../schema-model/relationship/model-adapters/RelationshipAdapter";
+import { getEntityAdapter } from "../../../schema-model/utils/get-entity-adapter";
 import type { GraphQLWhereArg } from "../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { asArray } from "../../../utils/utils";
 import { isLogicalOperator } from "../../utils/logical-operators";
 import type { ConnectionFilter } from "../ast/filters/ConnectionFilter";
+<<<<<<< HEAD
 import type { Filter, FilterOperator, RelationshipWhereOperator } from "../ast/filters/Filter";
+=======
+import { isRelationshipOperator, type Filter } from "../ast/filters/Filter";
+>>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
 import { LogicalFilter } from "../ast/filters/LogicalFilter";
 import type { RelationshipFilter } from "../ast/filters/RelationshipFilter";
 import { AuthConnectionFilter } from "../ast/filters/authorization-filters/AuthConnectionFilter";
@@ -140,8 +145,13 @@ export class AuthFilterFactory extends FilterFactory {
         isNot: boolean;
         attachedTo?: "node" | "relationship";
         relationship?: RelationshipAdapter;
+<<<<<<< HEAD
     }): CypherFilter | PropertyFilter {
         const filterOperator = operator ?? "EQ";
+=======
+    }): Filter {
+        const filterOperator = operator || "EQ";
+>>>>>>> d40590e36 (Merge pull request #5723 from mjfwebb/cypher-filtering-1-to-1-relationships)
 
         const isCypherVariable =
             comparisonValue instanceof Cypher.Variable ||
@@ -154,6 +164,28 @@ export class AuthFilterFactory extends FilterFactory {
                 rawArguments: {},
                 isNested: true,
             });
+
+            if (attribute.annotations.cypher?.targetEntity) {
+                const entityAdapter = getEntityAdapter(attribute.annotations.cypher.targetEntity);
+
+                if (operator && !isRelationshipOperator(operator)) {
+                    throw new Error(`Invalid operator ${operator} for relationship`);
+                }
+
+                return new LogicalFilter({
+                    operation: "AND",
+                    filters: this.createCypherRelationshipFilter({
+                        where: comparisonValue as GraphQLWhereArg,
+                        selection,
+                        target: entityAdapter,
+                        filterOps: {
+                            isNot,
+                            operator,
+                        },
+                        attribute,
+                    }),
+                });
+            }
 
             if (isCypherVariable) {
                 return new CypherFilter({
