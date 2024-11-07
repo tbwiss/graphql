@@ -480,7 +480,7 @@ export default async function translateUpdate({
         ];
     });
 
-    const cypherResult = updateQuery.build("update_");
+    const cypherResult = updateQuery.build({ prefix: "update_" });
     const { cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({
         cypher: cypherResult.cypher,
     });

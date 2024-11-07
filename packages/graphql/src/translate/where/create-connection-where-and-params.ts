@@ -63,6 +63,8 @@ export default function createConnectionWhereAndParams({
     });
 
     // NOTE: the following prefix is just to avoid collision until this is refactored into a single cypher ast
-    const result = whereCypher.build(`${parameterPrefix.replace(/\./g, "_").replace(/\[|\]/g, "")}_${nodeVariable}`);
+    const result = whereCypher.build({
+        prefix: `${parameterPrefix.replace(/\./g, "_").replace(/\[|\]/g, "")}_${nodeVariable}`,
+    });
     return { cypher: result.cypher, subquery, params: result.params };
 }
