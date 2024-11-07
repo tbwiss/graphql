@@ -406,9 +406,9 @@ function getFilters({
     });
     let preComputedWhereFieldsResult = "";
 
-    const whereCypher = new Cypher.Raw((env: Cypher.Environment) => {
+    const whereCypher = new Cypher.Raw((env) => {
         preComputedWhereFieldsResult = compileCypherIfExists(preComputedSubqueries, env);
-        const cypher = (wherePredicate as any)?.getCypher(env) || "";
+        const cypher = wherePredicate ? env.compile(wherePredicate) : "";
         return [cypher, {}];
     });
 

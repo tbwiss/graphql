@@ -290,7 +290,7 @@ function mergeStatement({
             return [relationship.property(key), param];
         }
     );
-    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreate(...onCreateRelationshipParams);
+    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreateSet(...onCreateRelationshipParams);
 
     let withClause: Cypher.Clause | undefined;
 
