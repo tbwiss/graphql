@@ -17,12 +17,12 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
 import type { Node, Relationship } from "../../classes";
 import type { ConnectionWhereArg } from "../../types";
-import Cypher from "@neo4j/cypher-builder";
-import { createConnectionWherePropertyOperation } from "./property-operations/create-connection-operation";
-import { compileCypher } from "../../utils/compile-cypher";
 import type { Neo4jGraphQLTranslationContext } from "../../types/neo4j-graphql-translation-context";
+import { compileCypher } from "../../utils/compile-cypher";
+import { createConnectionWherePropertyOperation } from "./property-operations/create-connection-operation";
 
 export default function createConnectionWhereAndParams({
     whereInput,
@@ -54,8 +54,8 @@ export default function createConnectionWhereAndParams({
     });
 
     let subquery = "";
-    const whereCypher = new Cypher.Raw((env: Cypher.Environment) => {
-        const cypher = (andOp as any)?.getCypher(env) || "";
+    const whereCypher = new Cypher.Raw((env) => {
+        const cypher = andOp ? env.compile(andOp) : "";
         if (preComputedSubqueries) {
             subquery = compileCypher(preComputedSubqueries, env);
         }

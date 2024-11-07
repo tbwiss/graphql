@@ -446,7 +446,7 @@ export default async function translateUpdate({
 
     const relationshipValidationStr = createRelationshipValidationString({ node, context, varName });
 
-    const updateQuery = new Cypher.Raw((env: Cypher.Environment) => {
+    const updateQuery = new Cypher.Raw((env) => {
         const cypher = [
             matchAndWhereStr,
             deleteStr,
