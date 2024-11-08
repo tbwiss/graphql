@@ -17,7 +17,8 @@
  * limitations under the License.
  */
 
-import { Neo4jGraphQLError, Node, type Relationship } from "../../classes";
+import type { Node, Relationship } from "../../classes";
+import { Neo4jGraphQLError } from "../../classes";
 import { findConflictingProperties } from "../../utils/find-conflicting-properties";
 
 export function assertNonAmbiguousUpdate(graphElement: Relationship | Node, input: Record<string, any>): void {
