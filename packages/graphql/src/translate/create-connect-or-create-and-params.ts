@@ -110,7 +110,7 @@ export function createConnectOrCreateAndParams({
     });
 
     const query = Cypher.utils.concat(...wrappedQueries);
-    return query.build(`${varName}_`);
+    return query.build({ prefix: `${varName}_` });
 }
 
 function createConnectOrCreatePartialStatement({
