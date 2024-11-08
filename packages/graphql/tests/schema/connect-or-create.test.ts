@@ -218,7 +218,8 @@ describe("Connect Or Create", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -347,8 +348,10 @@ describe("Connect Or Create", () => {
             }
 
             input MovieUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -523,10 +526,12 @@ describe("Connect Or Create", () => {
             }
 
             input ActedInUpdateInput {
-              characterName: String
-              screentime: Int
+              characterName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              characterName_SET: String
+              screentime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screentime_DECREMENT: Int
               screentime_INCREMENT: Int
+              screentime_SET: Int
             }
 
             input ActedInWhere {
@@ -736,7 +741,8 @@ describe("Connect Or Create", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -872,8 +878,10 @@ describe("Connect Or Create", () => {
             }
 
             input MovieUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

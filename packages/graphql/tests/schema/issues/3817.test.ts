@@ -121,7 +121,8 @@ describe("3817", () => {
             }
 
             input FriendOfUpdateInput {
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
             }
 
             input FriendOfWhere {

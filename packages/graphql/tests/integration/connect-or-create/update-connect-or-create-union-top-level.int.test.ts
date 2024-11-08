@@ -68,7 +68,7 @@ describe("Update -> ConnectOrCreate union top level", () => {
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                            name: "Tom Hanks"
+                        name_SET: "Tom Hanks"
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {
@@ -156,7 +156,7 @@ describe("Update -> ConnectOrCreate union top level", () => {
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                            name: "${actorName}"
+                        name_SET: "${actorName}"
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {

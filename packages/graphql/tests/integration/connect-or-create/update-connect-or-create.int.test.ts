@@ -59,7 +59,7 @@ describe("Update -> ConnectOrCreate", () => {
             mutation {
               ${typeActor.operations.update}(
                 update: {
-                    name: "Tom Hanks 2"
+                    name_SET: "Tom Hanks 2"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
                         where: { node: { id_EQ: 5 } }
@@ -112,7 +112,7 @@ describe("Update -> ConnectOrCreate", () => {
             mutation {
               ${typeActor.operations.update}(
                 update: {
-                    name: "${updatedActorName}"
+                    name_SET: "${updatedActorName}"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
                         where: { node: { id_EQ: 2222 } }

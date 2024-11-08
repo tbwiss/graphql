@@ -213,7 +213,8 @@ describe("connect or create with id", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -345,7 +346,8 @@ describe("connect or create with id", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -709,10 +711,13 @@ describe("connect or create with id", () => {
             }
 
             input PostUpdateInput {
-              content: String
-              createdAt: DateTime
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
               creator: PostCreatorUpdateFieldInput
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             type PostUserCreatorAggregationSelection {
@@ -1011,7 +1016,8 @@ describe("connect or create with id", () => {
             }
 
             input UserUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
 

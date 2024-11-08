@@ -72,9 +72,10 @@ describe("Connect Or Create", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActedInWhere {
@@ -283,7 +284,8 @@ describe("Connect Or Create", () => {
 
             input ActorUpdateInput {
               actedIn: ActorActedInUpdateInput
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -416,8 +418,10 @@ describe("Connect Or Create", () => {
             }
 
             input MovieUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -553,8 +557,10 @@ describe("Connect Or Create", () => {
             }
 
             input SeriesUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input SeriesWhere {

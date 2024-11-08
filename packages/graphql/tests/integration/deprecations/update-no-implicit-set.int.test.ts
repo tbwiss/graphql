@@ -18,8 +18,8 @@
  */
 
 import { generate } from "randomstring";
-import type { UniqueType } from "../utils/graphql-types";
-import { TestHelper } from "../utils/tests-helper";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("update (deprecate implicit _SET)", () => {
     const testHelper = new TestHelper();
@@ -65,7 +65,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: { name_SET: $name }) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -107,7 +107,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name_SET: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -256,7 +256,7 @@ describe("update (deprecate implicit _SET)", () => {
             ${Movie.operations.update}(
               where: { actorsConnection_SOME: { node: { name_EQ: $actorName } } },
               update: {
-                id_SET: $updatedMovieId
+                id: $updatedMovieId
               }
           ) {
               ${Movie.plural} {
@@ -312,7 +312,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id1: ID, $id2: ID, $name: String) {
-            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name_SET: $name}) {
+            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -380,7 +380,7 @@ describe("update (deprecate implicit _SET)", () => {
               update: {
                 actors: [{
                   where: { node: { name_EQ: $initialName } },
-                  update: { node: { name_SET: $updatedName } }
+                  update: { node: { name: $updatedName } }
                 }]
               }
           ) {
@@ -744,10 +744,10 @@ describe("update (deprecate implicit _SET)", () => {
                   where: { node: { name_EQ: "old actor name" } }
                   update: {
                     node: {
-                        name_SET: "new actor name"
+                        name: "new actor name"
                         movies: [{
                             where: { node: { title_EQ: "old movie title" } }
-                            update: { node: { title_SET: "new movie title" } }
+                            update: { node: { title: "new movie title" } }
                         }]
                     }
                   }
@@ -1118,7 +1118,7 @@ describe("update (deprecate implicit _SET)", () => {
                         where: { node: { name_EQ: "Green Photo", id_EQ: "${photo0Id}" } }
                         update: {
                             node: {
-                                name_SET: "Light Green Photo"
+                                name: "Light Green Photo"
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Green", id_EQ: "${photo0Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Green", id_EQ: "${photo0Color0Id}" } } }
@@ -1130,7 +1130,7 @@ describe("update (deprecate implicit _SET)", () => {
                         where: { node: { name_EQ: "Yellow Photo", id_EQ: "${photo1Id}" } }
                         update: {
                             node: {
-                                name_SET: "Light Yellow Photo"
+                                name: "Light Yellow Photo"
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Yellow", id_EQ: "${photo1Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Yellow", id_EQ: "${photo1Color0Id}" } } }

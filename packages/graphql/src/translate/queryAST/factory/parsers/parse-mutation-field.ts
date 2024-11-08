@@ -30,7 +30,7 @@ export type MutationOperator =
 
 export type MutationRegexGroups = {
     fieldName: string;
-operator: MutationOperator | undefined;
+    operator: MutationOperator | undefined;
 };
 
 const mutationRegEx =

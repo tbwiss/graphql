@@ -1597,7 +1597,6 @@ describe("Relationship properties - connect with and without `overwrite` argumen
                         update: {
                             directed: {
                                 connect: {
-
                                     where: { node: { title_EQ: $movieTitle } },
                                     edge: { year: $year },
                                     overwrite: false

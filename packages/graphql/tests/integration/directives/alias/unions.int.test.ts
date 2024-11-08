@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { GraphQLError } from "graphql";
 import { gql } from "graphql-tag";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
@@ -112,16 +113,17 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect((gqlResult?.data as any)?.createDirectors?.directors).toBeUndefined();
     });
     test("Create mutation with alias referring to existing field, include both fields as inputs - second rel type", async () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.create}(
                     input: {
@@ -163,9 +165,9 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`),
+        ]);
         expect((gqlResult?.data as any)?.createDirectors?.directors).toBeUndefined();
     });
     test("Create mutation alias referring to existing field, include only one field as inputs", async () => {
@@ -218,11 +220,11 @@ describe("@alias directive", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                        name: "Tom Hanks"
+                        name_SET: "Tom Hanks"
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {
@@ -262,11 +264,11 @@ describe("@alias directive", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                        name: "Tom Hanks"
+                        name_SET: "Tom Hanks"
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {
@@ -302,9 +304,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
 
@@ -312,11 +315,11 @@ describe("@alias directive", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                        name: "Tom Hanks"
+                        name_SET: "Tom Hanks"
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {
@@ -353,21 +356,22 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
     test("Create mutation with top-level connectOrCreate, alias referring to existing field, include both fields as inputs - update type", async () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                        nameAgain: "oops"
-                        name: "Tom Hanks",
+                        nameAgain_SET: "oops"
+                        name_SET: "Tom Hanks",
                         actedIn: {
                             ${typeMovie.name}: {
                                 connectOrCreate: {
@@ -403,9 +407,9 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeActor.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name_SET]], [[nameAgain_SET]] on type ${typeActor.name}`),
+        ]);
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
 
@@ -413,35 +417,35 @@ describe("@alias directive", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
         mutation {
             ${typeActor.operations.update}(
                 update: {
-                        name: "Tom Hanks"
-                        actedIn: {
-                            ${typeMovie.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${movieIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 105 }
-                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                    }
+                    name_SET: "Tom Hanks"
+                    actedIn: {
+                        ${typeMovie.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${movieIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 105 }
+                                    node: { title: "Forrest Gump", isan: "${movieIsan}" }
                                 }
                             }
-                            ${typeSeries.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${seriesIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 126 }
-                                        node: {
-                                            title: "Band of Brothers"
-                                            isan: "${seriesIsan}"
-                                        }
+                        }
+                        ${typeSeries.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${seriesIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 126 }
+                                    node: {
+                                        title: "Band of Brothers"
+                                        isan: "${seriesIsan}"
                                     }
                                 }
                             }
                         }
                     }
+                }
             ) {
                 ${typeActor.plural} {
                     name
@@ -458,35 +462,35 @@ describe("@alias directive", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
         mutation {
             ${typeActor.operations.update}(
                 update: {
-                        name: "Tom Hanks"
-                        actedIn: {
-                            ${typeMovie.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${movieIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 105 }
-                                        node: { title: "Forrest Gump", titleAgain: "oops", isan: "${movieIsan}" }
-                                    }
+                    name_SET: "Tom Hanks"
+                    actedIn: {
+                        ${typeMovie.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${movieIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 105 }
+                                    node: { title: "Forrest Gump", titleAgain: "oops", isan: "${movieIsan}" }
                                 }
                             }
-                            ${typeSeries.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${seriesIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 126 }
-                                        node: {
-                                            title: "Band of Brothers"
-                                            isan: "${seriesIsan}"
-                                        }
+                        }
+                        ${typeSeries.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${seriesIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 126 }
+                                    node: {
+                                        title: "Band of Brothers"
+                                        isan: "${seriesIsan}"
                                     }
                                 }
                             }
                         }
                     }
+                }
             ) {
                 ${typeActor.plural} {
                     name
@@ -499,45 +503,46 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
     test("Update mutation alias referring to existing field, include both fields as inputs - second rel type", async () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
         mutation {
             ${typeActor.operations.update}(
                 update: {
-                        name: "Tom Hanks"
-                        actedIn: {
-                            ${typeMovie.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${movieIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 105 }
-                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                    }
+                    name_SET: "Tom Hanks"
+                    actedIn: {
+                        ${typeMovie.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${movieIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 105 }
+                                    node: { title: "Forrest Gump", isan: "${movieIsan}" }
                                 }
                             }
-                            ${typeSeries.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${seriesIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 126 }
-                                        node: {
-                                            title: "Band of Brothers",
-                                            titleAgain: "oops", 
-                                            isan: "${seriesIsan}"
-                                        }
+                        }
+                        ${typeSeries.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${seriesIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 126 }
+                                    node: {
+                                        title: "Band of Brothers",
+                                        titleAgain: "oops", 
+                                        isan: "${seriesIsan}"
                                     }
                                 }
                             }
                         }
                     }
+                }
             ) {
                 ${typeActor.plural} {
                     name
@@ -550,45 +555,46 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeSeries.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
     test("Update mutation alias referring to existing field, include both fields as inputs - update type", async () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
         mutation {
             ${typeActor.operations.update}(
                 update: {
-                        name: "Tom Hanks",
-                        nameAgain: "oops", 
-                        actedIn: {
-                            ${typeMovie.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${movieIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 105 }
-                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                    }
+                    name_SET: "Tom Hanks",
+                    nameAgain_SET: "oops", 
+                    actedIn: {
+                        ${typeMovie.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${movieIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 105 }
+                                    node: { title: "Forrest Gump", isan: "${movieIsan}" }
                                 }
                             }
-                            ${typeSeries.name}: {
-                                connectOrCreate: {
-                                    where: { node: { isan_EQ: "${seriesIsan}" } }
-                                    onCreate: {
-                                        edge: { screentime: 126 }
-                                        node: {
-                                            title: "Band of Brothers"
-                                            isan: "${seriesIsan}"
-                                        }
+                        }
+                        ${typeSeries.name}: {
+                            connectOrCreate: {
+                                where: { node: { isan_EQ: "${seriesIsan}" } }
+                                onCreate: {
+                                    edge: { screentime: 126 }
+                                    node: {
+                                        title: "Band of Brothers"
+                                        isan: "${seriesIsan}"
                                     }
                                 }
                             }
                         }
                     }
+                }
             ) {
                 ${typeActor.plural} {
                     name
@@ -601,9 +607,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeActor.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name_SET]], [[nameAgain_SET]] on type ${typeActor.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeActor.operations.update]?.[typeActor.plural]).toBeUndefined();
     });
 });

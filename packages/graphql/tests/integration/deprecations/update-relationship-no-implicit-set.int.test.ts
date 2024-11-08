@@ -21,7 +21,7 @@ import { generate } from "randomstring";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
-describe("Relationship properties - update", () => {
+describe("Update relationship properties (deprecated implicit _SET)", () => {
     let testHelper: TestHelper;
     let Movie: UniqueType;
     let Actor: UniqueType;
@@ -72,7 +72,7 @@ describe("Relationship properties - update", () => {
             mutation {
                 ${Movie.operations.update}(
                     where: { title_EQ: "${movieTitle}" }
-                    update: { actors: [{ where: { node: { name_EQ: "${actor1}" } }, update: { edge: { screenTime_SET: 60 } } }] }
+                    update: { actors: [{ where: { node: { name_EQ: "${actor1}" } }, update: { edge: { screenTime: 60 } } }] }
                 ) {
                     ${Movie.plural} {
                         title
@@ -127,8 +127,8 @@ describe("Relationship properties - update", () => {
                             {
                                 where: { node: { name_EQ: "${actor2}" } }
                                 update: {
-                                    edge: { screenTime_SET: 60 }
-                                    node: { name_SET: "${actor3}" }
+                                    edge: { screenTime: 60 }
+                                    node: { name: "${actor3}" }
                                 }
                             }
                         ]

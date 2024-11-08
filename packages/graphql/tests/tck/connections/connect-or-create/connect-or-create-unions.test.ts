@@ -158,7 +158,7 @@ describe("Create or connect with unions", () => {
             mutation {
                 updateActors(
                     update: {
-                        name: "Tom Hanks"
+                        name_SET: "Tom Hanks"
                         actedIn: {
                             Movie: {
                                 connectOrCreate: {
@@ -194,7 +194,7 @@ describe("Create or connect with unions", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Actor)
             WHERE this.name = $param0
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             WITH this
             CALL {
                 WITH this
@@ -225,7 +225,7 @@ describe("Create or connect with unions", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"Tom Hanks evil twin\\",
-                \\"this_update_name\\": \\"Tom Hanks\\",
+                \\"this_update_name_SET\\": \\"Tom Hanks\\",
                 \\"this_actedIn_Movie0_connectOrCreate_param0\\": \\"0000-0000-03B6-0000-O-0000-0006-P\\",
                 \\"this_actedIn_Movie0_connectOrCreate_param1\\": \\"Forrest Gump\\",
                 \\"this_actedIn_Movie0_connectOrCreate_param2\\": \\"0000-0000-03B6-0000-O-0000-0006-P\\",

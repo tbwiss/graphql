@@ -124,9 +124,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActedInWhere {
@@ -366,11 +367,13 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActorUpdateInput {
-              id: Int
+              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
+              id_SET: Int
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -476,9 +479,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input DirectedUpdateInput {
-              year: Int
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input DirectedWhere {
@@ -544,13 +548,16 @@ describe("Union Interface Relationships", () => {
             }
 
             input InfluencerUpdateInput {
-              reputation: Int
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
-              url: String
+              reviewerId_SET: Int
+              url: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              url_SET: String
             }
 
             input InfluencerWhere {
@@ -1134,11 +1141,13 @@ describe("Union Interface Relationships", () => {
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
               directors: MovieDirectorsUpdateInput
-              imdbId: Int
+              imdbId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbId_DECREMENT: Int
               imdbId_INCREMENT: Int
+              imdbId_SET: Int
               reviewers: [MovieReviewersUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -1505,17 +1514,21 @@ describe("Union Interface Relationships", () => {
             }
 
             input PersonUpdateInput {
-              id: Int
+              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
+              id_SET: Int
               movies: [PersonMoviesUpdateFieldInput!]
-              name: String
-              reputation: Int
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
+              reviewerId_SET: Int
             }
 
             input PersonWhere {
@@ -1645,9 +1658,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewUpdateInput {
-              score: Int
+              score: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               score_DECREMENT: Int
               score_INCREMENT: Int
+              score_SET: Int
             }
 
             input ReviewWhere {
@@ -1711,12 +1725,14 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewerUpdateInput {
-              reputation: Int
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
+              reviewerId_SET: Int
             }
 
             input ReviewerWhere {

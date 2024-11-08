@@ -48,11 +48,11 @@ describe("connectOrCreate", () => {
             }
             `;
 
-            queryUpdate = `
+            queryUpdate = /* GraphQL */ `
                 mutation {
                   ${typeMovie.operations.update}(
                     update: {
-                        title: "Forrest Gump 2"
+                        title_SET: "Forrest Gump 2"
                         genres: {
                           connectOrCreate: {
                             where: { node: { name_EQ: "Horror" } }
@@ -169,7 +169,7 @@ describe("connectOrCreate", () => {
                 mutation {
                   ${typeMovie.operations.update}(
                     update: {
-                        title: "Forrest Gump 2"
+                        title_SET: "Forrest Gump 2"
                         genres: {
                           connectOrCreate: {
                             where: { node: { name_EQ: "Horror" } }

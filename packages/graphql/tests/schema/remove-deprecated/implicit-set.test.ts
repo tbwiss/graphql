@@ -18,27 +18,33 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
-describe("https://github.com/neo4j/graphql/issues/1182", () => {
-    test("DateTime and Point fields are included in onCreate", async () => {
-        const typeDefs = gql`
+describe("Implicit SET field", () => {
+    test("Should remove implicit _SET field if specified by the setting implicitSET", async () => {
+        const typeDefs = /* GraphQL */ `
+            type Actor @node {
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+            }
             type Movie @node {
-                id: ID! @id @unique
-                title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                id: ID
+                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type Actor @node {
-                id: ID! @id @unique
-                name: String!
-                dob: DateTime!
-                homeAddress: Point!
+            type ActedIn @relationshipProperties {
+                role: String
             }
         `;
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const neoSchema = new Neo4jGraphQL({
+            typeDefs,
+            features: {
+                excludeDeprecatedFields: {
+                    implicitSET: true,
+                },
+            },
+        });
         const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
         expect(printedSchema).toMatchInlineSnapshot(`
@@ -47,22 +53,75 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            The edge properties for the following fields:
+            * Actor.movies
+            * Movie.actors
+            \\"\\"\\"
+            type ActedIn {
+              role: String
+            }
+
+            input ActedInAggregationWhereInput {
+              AND: [ActedInAggregationWhereInput!]
+              NOT: ActedInAggregationWhereInput
+              OR: [ActedInAggregationWhereInput!]
+              role_AVERAGE_LENGTH_EQUAL: Float
+              role_AVERAGE_LENGTH_GT: Float
+              role_AVERAGE_LENGTH_GTE: Float
+              role_AVERAGE_LENGTH_LT: Float
+              role_AVERAGE_LENGTH_LTE: Float
+              role_LONGEST_LENGTH_EQUAL: Int
+              role_LONGEST_LENGTH_GT: Int
+              role_LONGEST_LENGTH_GTE: Int
+              role_LONGEST_LENGTH_LT: Int
+              role_LONGEST_LENGTH_LTE: Int
+              role_SHORTEST_LENGTH_EQUAL: Int
+              role_SHORTEST_LENGTH_GT: Int
+              role_SHORTEST_LENGTH_GTE: Int
+              role_SHORTEST_LENGTH_LT: Int
+              role_SHORTEST_LENGTH_LTE: Int
+            }
+
+            input ActedInCreateInput {
+              role: String
+            }
+
+            input ActedInSort {
+              role: SortDirection
+            }
+
+            input ActedInUpdateInput {
+              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              role_SET: String
+            }
+
+            input ActedInWhere {
+              AND: [ActedInWhere!]
+              NOT: ActedInWhere
+              OR: [ActedInWhere!]
+              role: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              role_CONTAINS: String
+              role_ENDS_WITH: String
+              role_EQ: String
+              role_IN: [String]
+              role_STARTS_WITH: String
+            }
+
             type Actor {
-              dob: DateTime!
-              homeAddress: Point!
-              id: ID!
-              name: String!
+              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
+              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+              name: String
             }
 
             type ActorAggregateSelection {
               count: Int!
-              dob: DateTimeAggregateSelection!
-              id: IDAggregateSelection!
               name: StringAggregateSelection!
             }
 
-            input ActorConnectOrCreateWhere {
-              node: ActorUniqueWhere!
+            input ActorConnectInput {
+              movies: [ActorMoviesConnectFieldInput!]
             }
 
             input ActorConnectWhere {
@@ -70,9 +129,16 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input ActorCreateInput {
-              dob: DateTime!
-              homeAddress: PointInput!
-              name: String!
+              movies: ActorMoviesFieldInput
+              name: String
+            }
+
+            input ActorDeleteInput {
+              movies: [ActorMoviesDeleteFieldInput!]
+            }
+
+            input ActorDisconnectInput {
+              movies: [ActorMoviesDisconnectFieldInput!]
             }
 
             type ActorEdge {
@@ -80,10 +146,117 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               node: Actor!
             }
 
-            input ActorOnCreateInput {
-              dob: DateTime!
-              homeAddress: PointInput!
-              name: String!
+            type ActorMovieMoviesAggregationSelection {
+              count: Int!
+              edge: ActorMovieMoviesEdgeAggregateSelection
+              node: ActorMovieMoviesNodeAggregateSelection
+            }
+
+            type ActorMovieMoviesEdgeAggregateSelection {
+              role: StringAggregateSelection!
+            }
+
+            type ActorMovieMoviesNodeAggregateSelection {
+              id: IDAggregateSelection!
+            }
+
+            input ActorMoviesAggregateInput {
+              AND: [ActorMoviesAggregateInput!]
+              NOT: ActorMoviesAggregateInput
+              OR: [ActorMoviesAggregateInput!]
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
+              count_GT: Int
+              count_GTE: Int
+              count_LT: Int
+              count_LTE: Int
+              edge: ActedInAggregationWhereInput
+              node: ActorMoviesNodeAggregationWhereInput
+            }
+
+            input ActorMoviesConnectFieldInput {
+              connect: [MovieConnectInput!]
+              edge: ActedInCreateInput
+              \\"\\"\\"
+              Whether or not to overwrite any matching relationship with the new properties.
+              \\"\\"\\"
+              overwrite: Boolean! = true
+              where: MovieConnectWhere
+            }
+
+            type ActorMoviesConnection {
+              edges: [ActorMoviesRelationship!]!
+              pageInfo: PageInfo!
+              totalCount: Int!
+            }
+
+            input ActorMoviesConnectionSort {
+              edge: ActedInSort
+              node: MovieSort
+            }
+
+            input ActorMoviesConnectionWhere {
+              AND: [ActorMoviesConnectionWhere!]
+              NOT: ActorMoviesConnectionWhere
+              OR: [ActorMoviesConnectionWhere!]
+              edge: ActedInWhere
+              node: MovieWhere
+            }
+
+            input ActorMoviesCreateFieldInput {
+              edge: ActedInCreateInput
+              node: MovieCreateInput!
+            }
+
+            input ActorMoviesDeleteFieldInput {
+              delete: MovieDeleteInput
+              where: ActorMoviesConnectionWhere
+            }
+
+            input ActorMoviesDisconnectFieldInput {
+              disconnect: MovieDisconnectInput
+              where: ActorMoviesConnectionWhere
+            }
+
+            input ActorMoviesFieldInput {
+              connect: [ActorMoviesConnectFieldInput!]
+              create: [ActorMoviesCreateFieldInput!]
+            }
+
+            input ActorMoviesNodeAggregationWhereInput {
+              AND: [ActorMoviesNodeAggregationWhereInput!]
+              NOT: ActorMoviesNodeAggregationWhereInput
+              OR: [ActorMoviesNodeAggregationWhereInput!]
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
+            }
+
+            type ActorMoviesRelationship {
+              cursor: String!
+              node: Movie!
+              properties: ActedIn!
+            }
+
+            input ActorMoviesUpdateConnectionInput {
+              edge: ActedInUpdateInput
+              node: MovieUpdateInput
+            }
+
+            input ActorMoviesUpdateFieldInput {
+              connect: [ActorMoviesConnectFieldInput!]
+              create: [ActorMoviesCreateFieldInput!]
+              delete: [ActorMoviesDeleteFieldInput!]
+              disconnect: [ActorMoviesDisconnectFieldInput!]
+              update: ActorMoviesUpdateConnectionInput
+              where: ActorMoviesConnectionWhere
             }
 
             input ActorOptions {
@@ -99,23 +272,11 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
             input ActorSort {
-              dob: SortDirection
-              homeAddress: SortDirection
-              id: SortDirection
               name: SortDirection
             }
 
-            input ActorUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
-            }
-
             input ActorUpdateInput {
-              dob: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
-              dob_SET: DateTime
-              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
-              homeAddress_SET: PointInput
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              movies: [ActorMoviesUpdateFieldInput!]
               name_SET: String
             }
 
@@ -123,32 +284,36 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              dob: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              dob_EQ: DateTime
-              dob_GT: DateTime
-              dob_GTE: DateTime
-              dob_IN: [DateTime!]
-              dob_LT: DateTime
-              dob_LTE: DateTime
-              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              homeAddress_DISTANCE: PointDistance
-              homeAddress_EQ: PointInput
-              homeAddress_GT: PointDistance
-              homeAddress_GTE: PointDistance
-              homeAddress_IN: [PointInput!]
-              homeAddress_LT: PointDistance
-              homeAddress_LTE: PointDistance
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID!]
-              id_STARTS_WITH: ID
+              moviesAggregate: ActorMoviesAggregateInput
+              \\"\\"\\"
+              Return Actors where all of the related ActorMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_ALL: ActorMoviesConnectionWhere
+              \\"\\"\\"
+              Return Actors where none of the related ActorMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_NONE: ActorMoviesConnectionWhere
+              \\"\\"\\"
+              Return Actors where one of the related ActorMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SINGLE: ActorMoviesConnectionWhere
+              \\"\\"\\"
+              Return Actors where some of the related ActorMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SOME: ActorMoviesConnectionWhere
+              \\"\\"\\"Return Actors where all of the related Movies match this filter\\"\\"\\"
+              movies_ALL: MovieWhere
+              \\"\\"\\"Return Actors where none of the related Movies match this filter\\"\\"\\"
+              movies_NONE: MovieWhere
+              \\"\\"\\"Return Actors where one of the related Movies match this filter\\"\\"\\"
+              movies_SINGLE: MovieWhere
+              \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
+              movies_SOME: MovieWhere
               name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
-              name_IN: [String!]
+              name_IN: [String]
               name_STARTS_WITH: String
             }
 
@@ -176,14 +341,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               movies: [Movie!]!
             }
 
-            \\"\\"\\"A date and time, represented as an ISO-8601 string\\"\\"\\"
-            scalar DateTime
-
-            type DateTimeAggregateSelection {
-              max: DateTime
-              min: DateTime
-            }
-
             \\"\\"\\"
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
@@ -201,18 +358,20 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
               actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
-              id: ID!
-              title: String!
+              id: ID
             }
 
             type MovieActorActorsAggregationSelection {
               count: Int!
+              edge: MovieActorActorsEdgeAggregateSelection
               node: MovieActorActorsNodeAggregateSelection
             }
 
+            type MovieActorActorsEdgeAggregateSelection {
+              role: StringAggregateSelection!
+            }
+
             type MovieActorActorsNodeAggregateSelection {
-              dob: DateTimeAggregateSelection!
-              id: IDAggregateSelection!
               name: StringAggregateSelection!
             }
 
@@ -226,24 +385,18 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               count_GTE: Int
               count_LT: Int
               count_LTE: Int
+              edge: ActedInAggregationWhereInput
               node: MovieActorsNodeAggregationWhereInput
             }
 
             input MovieActorsConnectFieldInput {
+              connect: [ActorConnectInput!]
+              edge: ActedInCreateInput
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
               overwrite: Boolean! = true
               where: ActorConnectWhere
-            }
-
-            input MovieActorsConnectOrCreateFieldInput {
-              onCreate: MovieActorsConnectOrCreateFieldInputOnCreate!
-              where: ActorConnectOrCreateWhere!
-            }
-
-            input MovieActorsConnectOrCreateFieldInputOnCreate {
-              node: ActorOnCreateInput!
             }
 
             type MovieActorsConnection {
@@ -253,6 +406,7 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input MovieActorsConnectionSort {
+              edge: ActedInSort
               node: ActorSort
             }
 
@@ -260,24 +414,27 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               AND: [MovieActorsConnectionWhere!]
               NOT: MovieActorsConnectionWhere
               OR: [MovieActorsConnectionWhere!]
+              edge: ActedInWhere
               node: ActorWhere
             }
 
             input MovieActorsCreateFieldInput {
+              edge: ActedInCreateInput
               node: ActorCreateInput!
             }
 
             input MovieActorsDeleteFieldInput {
+              delete: ActorDeleteInput
               where: MovieActorsConnectionWhere
             }
 
             input MovieActorsDisconnectFieldInput {
+              disconnect: ActorDisconnectInput
               where: MovieActorsConnectionWhere
             }
 
             input MovieActorsFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
               create: [MovieActorsCreateFieldInput!]
             }
 
@@ -285,26 +442,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               AND: [MovieActorsNodeAggregationWhereInput!]
               NOT: MovieActorsNodeAggregationWhereInput
               OR: [MovieActorsNodeAggregationWhereInput!]
-              dob_MAX_EQUAL: DateTime
-              dob_MAX_GT: DateTime
-              dob_MAX_GTE: DateTime
-              dob_MAX_LT: DateTime
-              dob_MAX_LTE: DateTime
-              dob_MIN_EQUAL: DateTime
-              dob_MIN_GT: DateTime
-              dob_MIN_GTE: DateTime
-              dob_MIN_LT: DateTime
-              dob_MIN_LTE: DateTime
-              id_MAX_EQUAL: ID
-              id_MAX_GT: ID
-              id_MAX_GTE: ID
-              id_MAX_LT: ID
-              id_MAX_LTE: ID
-              id_MIN_EQUAL: ID
-              id_MIN_GT: ID
-              id_MIN_GTE: ID
-              id_MIN_LT: ID
-              id_MIN_LTE: ID
               name_AVERAGE_LENGTH_EQUAL: Float
               name_AVERAGE_LENGTH_GT: Float
               name_AVERAGE_LENGTH_GTE: Float
@@ -325,15 +462,16 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             type MovieActorsRelationship {
               cursor: String!
               node: Actor!
+              properties: ActedIn!
             }
 
             input MovieActorsUpdateConnectionInput {
+              edge: ActedInUpdateInput
               node: ActorUpdateInput
             }
 
             input MovieActorsUpdateFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
               create: [MovieActorsCreateFieldInput!]
               delete: [MovieActorsDeleteFieldInput!]
               disconnect: [MovieActorsDisconnectFieldInput!]
@@ -344,16 +482,27 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             type MovieAggregateSelection {
               count: Int!
               id: IDAggregateSelection!
-              title: StringAggregateSelection!
+            }
+
+            input MovieConnectInput {
+              actors: [MovieActorsConnectFieldInput!]
+            }
+
+            input MovieConnectWhere {
+              node: MovieWhere!
             }
 
             input MovieCreateInput {
               actors: MovieActorsFieldInput
-              title: String!
+              id: ID
             }
 
             input MovieDeleteInput {
               actors: [MovieActorsDeleteFieldInput!]
+            }
+
+            input MovieDisconnectInput {
+              actors: [MovieActorsDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -375,13 +524,11 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             \\"\\"\\"
             input MovieSort {
               id: SortDirection
-              title: SortDirection
             }
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              title_SET: String
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -417,14 +564,8 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
-              id_IN: [ID!]
+              id_IN: [ID]
               id_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String!]
-              title_STARTS_WITH: String
             }
 
             type MoviesConnection {
@@ -436,7 +577,7 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             type Mutation {
               createActors(input: [ActorCreateInput!]!): CreateActorsMutationResponse!
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
-              deleteActors(where: ActorWhere): DeleteInfo!
+              deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
@@ -448,31 +589,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               hasNextPage: Boolean!
               hasPreviousPage: Boolean!
               startCursor: String
-            }
-
-            \\"\\"\\"
-            A point in a coordinate system. For more information, see https://neo4j.com/docs/graphql/4/type-definitions/types/spatial/#point
-            \\"\\"\\"
-            type Point {
-              crs: String!
-              height: Float
-              latitude: Float!
-              longitude: Float!
-              srid: Int!
-            }
-
-            \\"\\"\\"Input type for a point with a distance\\"\\"\\"
-            input PointDistance {
-              \\"\\"\\"The distance in metres to be used when comparing two points\\"\\"\\"
-              distance: Float!
-              point: PointInput!
-            }
-
-            \\"\\"\\"Input type for a point\\"\\"\\"
-            input PointInput {
-              height: Float
-              latitude: Float!
-              longitude: Float!
             }
 
             type Query {

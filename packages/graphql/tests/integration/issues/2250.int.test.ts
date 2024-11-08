@@ -73,7 +73,7 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
     });
 
     test("nested update with create while using subscriptions should generate valid Cypher", async () => {
-        const mutation = `
+        const mutation = /* GraphQL */ `
             mutation {
                 ${Movie.operations.update}(
                     update: {
@@ -82,9 +82,9 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
                                 {
                                     where: { node: { name_EQ: "Keanu Reeves" } }
                                     update: {
-                                        edge: { year: 2020 }
+                                        edge: { year_SET: 2020 }
                                         node: {
-                                            name: "KEANU Reeves"
+                                            name_SET: "KEANU Reeves"
                                             movies: [
                                                 {
                                                     create: [

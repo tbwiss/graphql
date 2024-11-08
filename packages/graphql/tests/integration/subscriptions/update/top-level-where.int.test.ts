@@ -80,7 +80,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Implicit AND", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${postType.operations.update}(
                     where: { 
@@ -91,7 +91,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
                             }
                         }
                     }
-                    update: { content: "${updatedContent}" }
+                    update: { content_SET: "${updatedContent}" }
                 ) {
                     ${postType.plural} {
                         id
@@ -112,7 +112,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level OR", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {
@@ -145,7 +145,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level AND", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {

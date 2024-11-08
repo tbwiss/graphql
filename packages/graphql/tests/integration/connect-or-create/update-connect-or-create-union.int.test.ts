@@ -68,31 +68,31 @@ describe("Update -> ConnectOrCreate Union", () => {
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                            name: "Tom Hanks"
-                            actedIn: {
-                                ${typeMovie.name}: {
-                                    connectOrCreate: {
-                                        where: { node: { isan: "${movieIsan}" } }
-                                        onCreate: {
-                                            edge: { screentime: 105 }
-                                            node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                        }
+                        name_SET: "Tom Hanks"
+                        actedIn: {
+                            ${typeMovie.name}: {
+                                connectOrCreate: {
+                                    where: { node: { isan: "${movieIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 105 }
+                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
                                     }
                                 }
-                                ${typeSeries.name}: {
-                                    connectOrCreate: {
-                                        where: { node: { isan: "${seriesIsan}" } }
-                                        onCreate: {
-                                            edge: { screentime: 126 }
-                                            node: {
-                                                title: "Band of Brothers"
-                                                isan: "${seriesIsan}"
-                                            }
+                            }
+                            ${typeSeries.name}: {
+                                connectOrCreate: {
+                                    where: { node: { isan: "${seriesIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 126 }
+                                        node: {
+                                            title: "Band of Brothers"
+                                            isan: "${seriesIsan}"
                                         }
                                     }
                                 }
                             }
                         }
+                    }
                 ) {
                     ${typeActor.plural} {
                         name
@@ -157,31 +157,31 @@ describe("Update -> ConnectOrCreate Union", () => {
             mutation {
                 ${typeActor.operations.update}(
                     update: {
-                            name: "${actorName}"
-                            actedIn: {
-                                ${typeMovie.name}: {
-                                    connectOrCreate: {
-                                        where: { node: { isan: "${movieIsan}" } }
-                                        onCreate: {
-                                            edge: { screentime: 105 }
-                                            node: { title: "Forrest Gump", isan: "${movieIsan}" }
-                                        }
+                        name_SET: "${actorName}"
+                        actedIn: {
+                            ${typeMovie.name}: {
+                                connectOrCreate: {
+                                    where: { node: { isan: "${movieIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 105 }
+                                        node: { title: "Forrest Gump", isan: "${movieIsan}" }
                                     }
                                 }
-                                ${typeSeries.name}: {
-                                    connectOrCreate: {
-                                        where: { node: { isan: "${seriesIsan}" } }
-                                        onCreate: {
-                                            edge: { screentime: 126 }
-                                            node: {
-                                                title: "Band of Brothers"
-                                                isan: "${seriesIsan}"
-                                            }
+                            }
+                            ${typeSeries.name}: {
+                                connectOrCreate: {
+                                    where: { node: { isan: "${seriesIsan}" } }
+                                    onCreate: {
+                                        edge: { screentime: 126 }
+                                        node: {
+                                            title: "Band of Brothers"
+                                            isan: "${seriesIsan}"
                                         }
                                     }
                                 }
                             }
-                        },
+                        }
+                    },
                     where: {
                         name_EQ: "${actorName}"
                     }
