@@ -2,7 +2,7 @@
 "@neo4j/graphql": patch
 ---
 
-Deprecate implicit _SET:
+Deprecate implicit `SET`:
 
 ```graphql
 mutation {
@@ -13,9 +13,9 @@ mutation {
     }
 }
 ```
-in favour of the explicit version:
+in favour of the explicit `_SET` version:
 
-```
+```graphql
 mutation {
     updateMovies(update: { id_SET: "2" }) {
         movies {
