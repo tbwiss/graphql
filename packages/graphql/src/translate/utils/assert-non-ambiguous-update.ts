@@ -17,27 +17,16 @@
  * limitations under the License.
  */
 
-export type MutationOperator =
-    | "SET"
-    | "PUSH"
-    | "POP"
-    | "ADD"
-    | "SUBTRACT"
-    | "MULTIPLY"
-    | "DIVIDE"
-    | "INCREMENT"
-    | "DECREMENT";
+import { Neo4jGraphQLError, Node, type Relationship } from "../../classes";
+import { findConflictingProperties } from "../../utils/find-conflicting-properties";
 
-export type MutationRegexGroups = {
-    fieldName: string;
-operator: MutationOperator | undefined;
-};
-
-const mutationRegEx =
-    /(?<fieldName>[_A-Za-z]\w*?)(?:_(?<operator>SET|PUSH|POP|ADD|SUBTRACT|MULTIPLY|DIVIDE|INCREMENT|DECREMENT))?$/;
-
-export function parseMutationField(field: string): MutationRegexGroups {
-    const match = mutationRegEx.exec(field);
-
-    return match?.groups as MutationRegexGroups;
+export function assertNonAmbiguousUpdate(graphElement: Relationship | Node, input: Record<string, any>): void {
+    const conflictingProperties = findConflictingProperties({ graphElement, input });
+    if (conflictingProperties.length > 0) {
+        throw new Neo4jGraphQLError(
+            `Conflicting modification of ${conflictingProperties.map((n) => `[[${n}]]`).join(", ")} on type ${
+                graphElement.name
+            }`
+        );
+    }
 }

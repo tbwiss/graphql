@@ -19,17 +19,16 @@
 
 import Cypher from "@neo4j/cypher-builder";
 import type { Node, Relationship } from "../classes";
-import { Neo4jGraphQLError } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
 import type { PredicateReturn, PrimitiveField, RelationField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
-import { findConflictingProperties } from "../utils/find-conflicting-properties";
 import { getCypherRelationshipDirection } from "../utils/get-relationship-direction";
 import { asArray, omitFields } from "../utils/utils";
 import { checkAuthentication } from "./authorization/check-authentication";
 import { createAuthorizationAfterPredicate } from "./authorization/create-authorization-after-predicate";
 import { createAuthorizationBeforePredicate } from "./authorization/create-authorization-before-predicate";
 import { parseWhereField } from "./queryAST/factory/parsers/parse-where-field";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParamCypher } from "./utils/callback-utils";
 
 type CreateOrConnectInput = {
@@ -64,17 +63,7 @@ export function createConnectOrCreateAndParams({
     callbackBucket: CallbackBucket;
 }): Cypher.CypherResult {
     asArray(input).forEach((connectOrCreateItem) => {
-        const conflictingProperties = findConflictingProperties({
-            node: refNode,
-            input: connectOrCreateItem.onCreate?.node,
-        });
-        if (conflictingProperties.length > 0) {
-            throw new Neo4jGraphQLError(
-                `Conflicting modification of ${conflictingProperties.map((n) => `[[${n}]]`).join(", ")} on type ${
-                    refNode.name
-                }`
-            );
-        }
+        assertNonAmbiguousUpdate(refNode, connectOrCreateItem.onCreate?.node ?? {});
     });
 
     // todo: add create

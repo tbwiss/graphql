@@ -70,9 +70,13 @@ export interface NodeConstructor extends GraphElementConstructor {
     globalIdFieldIsInt?: boolean;
 }
 
-type MutableField = PrimitiveField | CustomScalarField | CustomEnumField | UnionField | TemporalField | CypherField;
-
-type AuthableField = PrimitiveField | CustomScalarField | CustomEnumField | UnionField | TemporalField | CypherField;
+export type MutableField =
+    | PrimitiveField
+    | CustomScalarField
+    | CustomEnumField
+    | UnionField
+    | TemporalField
+    | CypherField;
 
 type ConstrainableField = PrimitiveField | CustomScalarField | CustomEnumField | TemporalField;
 
@@ -160,21 +164,6 @@ class Node extends GraphElement {
             ...this.objectFields,
             ...this.unionFields,
             ...this.pointFields,
-        ];
-    }
-
-    /** Fields you can apply auth allow and bind to */
-    // Maybe we can remove this as they may not be used anymore in the new auth system
-    public get authableFields(): AuthableField[] {
-        return [
-            ...this.primitiveFields,
-            ...this.scalarFields,
-            ...this.enumFields,
-            ...this.unionFields,
-            ...this.objectFields,
-            ...this.temporalFields,
-            ...this.pointFields,
-            ...this.cypherFields,
         ];
     }
 
