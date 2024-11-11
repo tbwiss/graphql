@@ -667,11 +667,10 @@ describe("Mathematical operations tests", () => {
         });
 
         expect(gqlResult.errors).toBeDefined();
-        expect(
-            (gqlResult.errors as GraphQLError[]).some((el) =>
-                el.message.includes("Cannot mutate the same field multiple times in one Mutation")
-            )
-        ).toBeTruthy();
+        const relationshipType = `${movie.name}ActorsRelationship`;
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[pay]], [[pay_ADD]] on type ${relationshipType}`),
+        ]);
         const storedValue = await testHelper.executeCypher(
             `
                 MATCH(b: ${actor.name}{id: $id}) -[c: ACTED_IN]-> (a: ${movie.name}) RETURN c.pay as pay

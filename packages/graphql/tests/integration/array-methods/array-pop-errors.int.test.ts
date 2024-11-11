@@ -333,11 +333,10 @@ describe("array-pop-errors", () => {
         });
 
         expect(gqlResult.errors).toBeDefined();
-        expect(
-            (gqlResult.errors as GraphQLError[]).some((el) =>
-                el.message.includes("Cannot mutate the same field multiple times in one Mutation")
-            )
-        ).toBeTruthy();
+        const relationshipType = `${movie.name}ActorsRelationship`;
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[pay]], [[pay_POP]] on type ${relationshipType}`),
+        ]);
         expect(gqlResult.data).toBeNull();
     });
 });
