@@ -537,7 +537,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -583,7 +583,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieGenreFieldInput {
               connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
+              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: MovieGenreCreateFieldInput
             }
 
@@ -1206,7 +1206,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -1418,7 +1418,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -1437,7 +1437,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieGenreFieldInput {
               connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
+              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: MovieGenreCreateFieldInput
             }
 
@@ -2069,7 +2069,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2282,7 +2282,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2301,7 +2301,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieGenreFieldInput {
               connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
+              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: MovieGenreCreateFieldInput
             }
 
@@ -2533,7 +2533,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2552,7 +2552,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input SeriesGenreFieldInput {
               connect: SeriesGenreConnectFieldInput
-              connectOrCreate: SeriesGenreConnectOrCreateFieldInput
+              connectOrCreate: SeriesGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: SeriesGenreCreateFieldInput
             }
 

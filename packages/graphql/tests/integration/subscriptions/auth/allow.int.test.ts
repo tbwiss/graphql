@@ -25,10 +25,18 @@ import { TestHelper } from "../../../utils/tests-helper";
 describe("auth/allow", () => {
     const testHelper = new TestHelper({ cdc: true });
     const secret = "secret";
+    let cdcEnabled: boolean;
 
     let userType: UniqueType;
     let postType: UniqueType;
     let commentType: UniqueType;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+        if (!cdcEnabled) {
+            await testHelper.close();
+        }
+    });
 
     beforeEach(() => {
         userType = testHelper.createUniqueType("User");
@@ -37,11 +45,17 @@ describe("auth/allow", () => {
     });
 
     afterEach(async () => {
-        await testHelper.close();
+        if (cdcEnabled) {
+            await testHelper.close();
+        }
     });
 
     describe("read", () => {
         test("should throw forbidden when reading a node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name} @node {
                     id: ID
@@ -84,6 +98,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a property with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name} @node {
                     id: ID
@@ -128,6 +146,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a nested property with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -183,6 +205,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a nested property with invalid allow (using connections)", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -242,6 +268,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a node with invalid allow (across a single relationship)", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     content: String
@@ -299,6 +329,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a node with invalid allow (across a single relationship)(using connections)", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     content: String
@@ -360,6 +394,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw forbidden when reading a node with invalid allow (across multi relationship)", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${commentType.name}  @node {
                     id: ID
@@ -433,6 +471,10 @@ describe("auth/allow", () => {
 
     describe("update", () => {
         test("should throw Forbidden when editing a node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name}  @node {
                     id: ID
@@ -478,6 +520,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a property with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name} @node {
                     id: ID
@@ -525,6 +571,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a nested node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -582,6 +632,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a nested node property with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -643,6 +697,10 @@ describe("auth/allow", () => {
 
     describe("delete", () => {
         test("should throw Forbidden when deleting a node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name} @node {
                     id: ID
@@ -687,6 +745,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when deleting a nested node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${userType.name} @node {
                     id: ID
@@ -753,6 +815,10 @@ describe("auth/allow", () => {
 
     describe("disconnect", () => {
         test("should throw Forbidden when disconnecting a node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -810,6 +876,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when disconnecting a nested node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${commentType.name} @node {
                     id: ID
@@ -892,6 +962,10 @@ describe("auth/allow", () => {
 
     describe("connect", () => {
         test("should throw Forbidden when connecting a node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${postType.name} @node {
                     id: ID
@@ -950,6 +1024,10 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when connecting a nested node with invalid allow", async () => {
+            if (!cdcEnabled) {
+                console.log("CDC NOT AVAILABLE - SKIPPING");
+                return;
+            }
             const typeDefs = `
                 type ${commentType.name} @node {
                     id: ID

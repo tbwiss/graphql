@@ -22,10 +22,15 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/2250", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
     let Movie: UniqueType;
     let Person: UniqueType;
     let Actor: UniqueType;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+    });
 
     beforeEach(async () => {
         Movie = testHelper.createUniqueType("Movie");
@@ -73,6 +78,10 @@ describe("https://github.com/neo4j/graphql/issues/2250", () => {
     });
 
     test("nested update with create while using subscriptions should generate valid Cypher", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const mutation = `
             mutation {
                 ${Movie.operations.update}(

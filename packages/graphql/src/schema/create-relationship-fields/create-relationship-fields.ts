@@ -314,7 +314,7 @@ function createRelationshipFieldsForTarget({
     });
 
     if (relationshipAdapter.target instanceof InterfaceEntityAdapter) {
-        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives });
+        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives, features });
     } else {
         withConnectOrCreateInputType({
             relationshipAdapter,
@@ -355,6 +355,7 @@ function createRelationshipFieldsForTarget({
         composer,
         deprecatedDirectives,
         userDefinedFieldDirectives,
+        features,
     });
 
     augmentConnectInputTypeWithConnectFieldInput({

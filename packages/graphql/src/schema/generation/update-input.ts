@@ -40,6 +40,7 @@ import { withConnectionWhereInputType } from "./connection-where-input";
 import { withDeleteFieldInputType } from "./delete-input";
 import { withDisconnectFieldInputType } from "./disconnect-input";
 import { withCreateFieldInputType } from "./relation-input";
+import { shouldAddDeprecatedFields } from "./utils";
 
 export function withUpdateInputType({
     entityAdapter,
@@ -224,6 +225,7 @@ function makeUpdateFieldInputTypeFields({
     features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields = {};
+
     let connectOrCreateFieldInputType: InputTypeComposer | undefined;
     let connectionWhereInputType: InputTypeComposer | string | undefined;
     const relationshipTarget = relationshipAdapter.target;
@@ -259,7 +261,7 @@ function makeUpdateFieldInputTypeFields({
             directives: [],
         };
     }
-    if (connectOrCreateFieldInputType) {
+    if (connectOrCreateFieldInputType && shouldAddDeprecatedFields(features, "connectOrCreate")) {
         fields["connectOrCreate"] = {
             type: relationshipAdapter.isList
                 ? connectOrCreateFieldInputType.NonNull.List

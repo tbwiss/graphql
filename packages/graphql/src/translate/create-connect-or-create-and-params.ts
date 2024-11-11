@@ -99,7 +99,7 @@ export function createConnectOrCreateAndParams({
     });
 
     const query = Cypher.utils.concat(...wrappedQueries);
-    return query.build(`${varName}_`);
+    return query.build({ prefix: `${varName}_` });
 }
 
 function createConnectOrCreatePartialStatement({
@@ -279,7 +279,7 @@ function mergeStatement({
             return [relationship.property(key), param];
         }
     );
-    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreate(...onCreateRelationshipParams);
+    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreateSet(...onCreateRelationshipParams);
 
     let withClause: Cypher.Clause | undefined;
 

@@ -35,6 +35,10 @@ describe("Delete Subscriptions - with interfaces, unions and nested operations",
     let typeInfluencer: UniqueType;
     let typeDefs: string;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         typeActor = testHelper.createUniqueType("Actor");
         typeMovie = testHelper.createUniqueType("Movie");

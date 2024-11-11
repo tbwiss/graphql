@@ -22,6 +22,7 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/4223", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
     let User: UniqueType;
     let Tenant: UniqueType;
@@ -35,6 +36,13 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
 
     let typeDefs: string;
     let ADD_TENANT: string;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+        if (!cdcEnabled) {
+            await testHelper.close();
+        }
+    });
 
     beforeEach(() => {
         User = testHelper.createUniqueType("User");
@@ -176,10 +184,16 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
     });
 
     afterEach(async () => {
-        await testHelper.close();
+        if (cdcEnabled) {
+            await testHelper.close();
+        }
     });
 
     test("create tenant with nested openingDays and openHoursInterval - subscriptions disabled", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {
@@ -200,6 +214,10 @@ describe("https://github.com/neo4j/graphql/issues/4223", () => {
     });
 
     test("create tenant with nested openingDays and openHoursInterval - subscriptions enabled", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         await testHelper.initNeo4jGraphQL({
             typeDefs,
             features: {

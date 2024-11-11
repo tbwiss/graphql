@@ -91,6 +91,27 @@ export class TestHelper {
         return this.neo4jGraphQL;
     }
 
+    public async assertCDCEnabled(): Promise<boolean> {
+        if (!this.cdc) {
+            throw new Error(
+                "CDC is note enable in test helper. Did you forget to set cdc:true or used assertCDCEnabled by mistake?"
+            );
+        }
+
+        const dbInfo = await this.getDatabaseInfo();
+        if (!dbInfo.isAura()) {
+            await this.executeCypher(`ALTER DATABASE ${this.database} SET OPTION txLogEnrichment "FULL"`);
+        }
+
+        const result = await this.executeCypher(`
+        SHOW DATABASES YIELD name, options
+        WHERE name = "${this.database}"
+        RETURN coalesce(options.txLogEnrichment = "FULL", false) AS cdcEnabled
+    `);
+
+        return result.records[0]?.get("cdcEnabled");
+    }
+
     public createUniqueType(type: string): UniqueType {
         const uniqueType = new UniqueType(type);
         this.uniqueTypes.push(uniqueType);
@@ -181,11 +202,8 @@ export class TestHelper {
             throw new Error(`Could not connect to neo4j @ ${NEO_URL}, Error: ${error.message}`);
         }
 
-        if (this.cdc) {
-            await driver.executeQuery(`ALTER DATABASE ${this.database} SET OPTION txLogEnrichment "FULL"`);
-        }
-
         this.driver = driver;
+
         return this.driver;
     }
 

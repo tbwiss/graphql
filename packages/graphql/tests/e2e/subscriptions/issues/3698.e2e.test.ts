@@ -32,6 +32,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
     let typeGenre: UniqueType;
     let typeDefs: string;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         typeGenre = testHelper.createUniqueType("Genre");

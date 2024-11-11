@@ -221,7 +221,7 @@ describe("3817", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PersonConnectWhere
             }
 
@@ -269,7 +269,7 @@ describe("3817", () => {
 
             input PersonFriendsFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!]
+              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonFriendsCreateFieldInput!]
             }
 
