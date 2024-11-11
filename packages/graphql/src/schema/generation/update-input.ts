@@ -246,7 +246,6 @@ function makeUpdateFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
         connectOrCreateFieldInputType = withConnectOrCreateFieldInputType({
             relationshipAdapter,
@@ -316,7 +315,6 @@ function makeUpdateFieldInputTypeFields({
         relationshipAdapter,
         ifUnionMemberEntity,
         composer,
-        features,
     });
     if (deleteFieldInputType) {
         fields["delete"] = {

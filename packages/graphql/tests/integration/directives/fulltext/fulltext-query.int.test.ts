@@ -1255,7 +1255,7 @@ describe("@fulltext directive", () => {
                 sessionConfig: { database: databaseName },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                     query {
                         ${queryType}(phrase: "a name") {
                             score
@@ -1945,26 +1945,7 @@ describe("@fulltext directive", () => {
 
         const indexName1 = "indexCreationName1";
         const indexName2 = "indexCreationName2";
-        const label = "someCustomLabel";
         const aliasName = "someFieldAlias";
-
-        const indexQueryCypher = `
-            SHOW INDEXES yield
-                name AS name,
-                type AS type,
-                entityType AS entityType,
-                labelsOrTypes AS labelsOrTypes,
-                properties AS properties
-            WHERE name = "${indexName1}" OR name = "${indexName2}"
-            RETURN {
-                name: name,
-                type: type,
-                entityType: entityType,
-                labelsOrTypes: labelsOrTypes,
-                properties: properties
-            } as result
-            ORDER BY result.name ASC
-        `;
 
         const deleteIndex1Cypher = `
             DROP INDEX ${indexName1} IF EXISTS
