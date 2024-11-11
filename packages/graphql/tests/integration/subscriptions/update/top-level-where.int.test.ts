@@ -84,16 +84,12 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Implicit AND", async () => {
-<<<<<<< HEAD
-        const query = /* GraphQL */ `
-=======
         if (!cdcEnabled) {
             console.log("CDC NOT AVAILABLE - SKIPPING");
             return;
         }
 
         const query = `
->>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(
                     where: { 
@@ -125,16 +121,12 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level OR", async () => {
-<<<<<<< HEAD
-        const query = /* GraphQL */ `
-=======
         if (!cdcEnabled) {
             console.log("CDC NOT AVAILABLE - SKIPPING");
             return;
         }
 
         const query = `
->>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {
@@ -167,16 +159,12 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level AND", async () => {
-<<<<<<< HEAD
-        const query = /* GraphQL */ `
-=======
         if (!cdcEnabled) {
             console.log("CDC NOT AVAILABLE - SKIPPING");
             return;
         }
 
         const query = `
->>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {

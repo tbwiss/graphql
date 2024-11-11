@@ -41,7 +41,7 @@ describe("Implicit SET field", () => {
             typeDefs,
             features: {
                 excludeDeprecatedFields: {
-                    implicitSET: true,
+                    implicitSet: true,
                 },
             },
         });

@@ -151,7 +151,7 @@ export function concreteEntityToUpdateInputFields({
                 userDefinedDirectivesOnField.filter((directive) => directive.name.value === DEPRECATED)
             );
         }
-        if (shouldAddDeprecatedFields(features, "implicitSET")) {
+        if (shouldAddDeprecatedFields(features, "implicitSet")) {
             updateInputFields[field.name] = {
                 type: newInputField.type,
                 directives: newInputField.directives?.length ? newInputField.directives : [DEPRECATE_IMPLICIT_SET],
