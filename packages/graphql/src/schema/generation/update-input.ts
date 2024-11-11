@@ -69,7 +69,7 @@ export function withUpdateInputType({
             concreteEntityToUpdateInputFields(entityAdapter.updateInputFields, userDefinedFieldDirectives, [
                 withMathOperators(),
                 withArrayOperators(),
-            ]),
+            ])
         );
     } else {
         const hasNestedRelationships = entityAdapter.relationshipDeclarations.size > 0;
@@ -81,7 +81,7 @@ export function withUpdateInputType({
         updateInputType.addFields(
             concreteEntityToUpdateInputFields(entityAdapter.updateInputFields, userDefinedFieldDirectives, [
                 withMathOperators(),
-            ]),
+            ])
         );
     }
     return updateInputType;
@@ -315,7 +315,6 @@ function makeUpdateFieldInputTypeFields({
         relationshipAdapter,
         ifUnionMemberEntity,
         composer,
-        features,
     });
     if (deleteFieldInputType) {
         fields["delete"] = {

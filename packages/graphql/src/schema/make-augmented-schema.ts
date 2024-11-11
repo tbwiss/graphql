@@ -126,8 +126,8 @@ function makeAugmentedSchema({
         schemaModel,
         definitionNodes,
         [customResolvers.customQuery, customResolvers.customMutation, customResolvers.customSubscription].filter(
-            (x): x is ObjectTypeDefinitionNode => Boolean(x),
-        ),
+            (x): x is ObjectTypeDefinitionNode => Boolean(x)
+        )
     );
     const generatorComposer = schemaGenerator.generate();
     composer.merge(generatorComposer);
@@ -215,7 +215,7 @@ function makeAugmentedSchema({
             // strip-out the schema config directives from the union type
             const def = composer.getUTC(unionEntityAdapter.name);
             def.setDirectives(
-                graphqlDirectivesToCompose(userDefinedDirectivesForUnion.get(unionEntityAdapter.name) || []),
+                graphqlDirectivesToCompose(userDefinedDirectivesForUnion.get(unionEntityAdapter.name) || [])
             );
             if (unionEntityAdapter.isReadable) {
                 composer.Query.addFields({
@@ -266,7 +266,7 @@ function makeAugmentedSchema({
 
             const propagatedDirectives = propagatedDirectivesForNode.get(entity.name) || [];
             const userDefinedObjectDirectives = (userDefinedDirectivesForNode.get(entity.name) || []).concat(
-                propagatedDirectives,
+                propagatedDirectives
             );
             generateObjectType({
                 composer,
@@ -386,7 +386,7 @@ function makeAugmentedSchema({
     // It is possible to make types "writeonly". In this case adding a resolver for them breaks schema generation.
     schemaModel.compositeEntities.forEach((compositeEntity) => {
         const definitionIsOfTheSameType = (
-            def: DefinitionNode,
+            def: DefinitionNode
         ): def is UnionTypeDefinitionNode | InterfaceTypeDefinitionNode =>
             (def.kind === Kind.UNION_TYPE_DEFINITION && compositeEntity instanceof UnionEntity) ||
             (def.kind === Kind.INTERFACE_TYPE_DEFINITION && compositeEntity instanceof InterfaceEntity);
@@ -405,10 +405,10 @@ function makeAugmentedSchema({
         if (compositeEntity instanceof InterfaceEntity) {
             for (const relationshipDeclaration of compositeEntity.relationshipDeclarations.values()) {
                 const relationshipDeclarationPropertiesType = new RelationshipDeclarationAdapter(
-                    relationshipDeclaration,
+                    relationshipDeclaration
                 ).operations.relationshipPropertiesFieldTypename;
                 const isPropertiesTypeInSchema = parsedDoc.definitions.some(
-                    (def): boolean => def["name"]?.value === relationshipDeclarationPropertiesType,
+                    (def): boolean => def["name"]?.value === relationshipDeclarationPropertiesType
                 );
                 if (isPropertiesTypeInSchema && !generatedResolvers[relationshipDeclarationPropertiesType]) {
                     generatedResolvers[relationshipDeclarationPropertiesType] = {
@@ -427,7 +427,7 @@ function makeAugmentedSchema({
             operationTypes: schemaExtension.operationTypes,
             directives: schemaExtension.directives?.filter(
                 (schemaDirective) =>
-                    !["query", "mutation", "subscription", "authentication"].includes(schemaDirective.name.value),
+                    !["query", "mutation", "subscription", "authentication"].includes(schemaDirective.name.value)
             ),
         };
     });
@@ -556,7 +556,7 @@ function generateObjectType({
         });
         composer.Query.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.read,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
 
         composer.Query.addFields({
@@ -568,7 +568,7 @@ function generateObjectType({
         });
         composer.Query.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.connection,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
     if (concreteEntityAdapter.isAggregable) {
@@ -586,7 +586,7 @@ function generateObjectType({
         });
         composer.Query.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.aggregate,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
 
@@ -599,7 +599,7 @@ function generateObjectType({
         });
         composer.Mutation.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.create,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
 
@@ -612,7 +612,7 @@ function generateObjectType({
         });
         composer.Mutation.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.delete,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
 
@@ -625,7 +625,7 @@ function generateObjectType({
         });
         composer.Mutation.setFieldDirectives(
             concreteEntityAdapter.operations.rootTypeFieldNames.update,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
 }
@@ -695,7 +695,7 @@ function generateInterfaceObjectType({
 
         composer.Query.setFieldDirectives(
             interfaceEntityAdapter.operations.rootTypeFieldNames.read,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
 
         composer.Query.addFields({
@@ -707,7 +707,7 @@ function generateInterfaceObjectType({
         });
         composer.Query.setFieldDirectives(
             interfaceEntityAdapter.operations.rootTypeFieldNames.connection,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
     if (interfaceEntityAdapter.isAggregable) {
@@ -725,7 +725,7 @@ function generateInterfaceObjectType({
         });
         composer.Query.setFieldDirectives(
             interfaceEntityAdapter.operations.rootTypeFieldNames.aggregate,
-            graphqlDirectivesToCompose(propagatedDirectives),
+            graphqlDirectivesToCompose(propagatedDirectives)
         );
     }
 }
