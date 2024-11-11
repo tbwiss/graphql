@@ -25,12 +25,13 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
     let neoSchema: Neo4jGraphQL;
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
-            type Owner {
+            type Owner @node {
                 id: ID! @unique @id
                 owns: [MyNode!]! @relationship(type: "OWNS", direction: OUT)
             }
 
             type MyNode
+                @node
                 @authorization(
                     validate: [
                         {
