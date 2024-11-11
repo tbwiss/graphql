@@ -99,7 +99,7 @@ export function createConnectOrCreateAndParams({
     });
 
     const query = Cypher.utils.concat(...wrappedQueries);
-    return query.build(`${varName}_`);
+    return query.build({ prefix: `${varName}_` });
 }
 
 function createConnectOrCreatePartialStatement({
@@ -152,7 +152,6 @@ function createConnectOrCreatePartialStatement({
     const mergeCypher = mergeStatement({
         input,
         refNode,
-        parentRefNode: node,
         context,
         relationField,
         parentNode: new Cypher.NamedNode(parentVar),
@@ -196,17 +195,14 @@ function createConnectOrCreatePartialStatement({
 function mergeStatement({
     input,
     refNode,
-    parentRefNode,
     context,
     relationField,
     parentNode,
     varName,
     callbackBucket,
-    withVars,
 }: {
     input: CreateOrConnectInput;
     refNode: Node;
-    parentRefNode: Node;
     context: Neo4jGraphQLTranslationContext;
     relationField: RelationField;
     parentNode: Cypher.Node;
@@ -279,7 +275,7 @@ function mergeStatement({
             return [relationship.property(key), param];
         }
     );
-    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreate(...onCreateRelationshipParams);
+    const relationshipMerge = new Cypher.Merge(relationshipPattern).onCreateSet(...onCreateRelationshipParams);
 
     let withClause: Cypher.Clause | undefined;
 

@@ -97,7 +97,7 @@ describe("connect or create with id", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -141,7 +141,7 @@ describe("connect or create with id", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorMoviesCreateFieldInput!]
             }
 
@@ -568,7 +568,7 @@ describe("connect or create with id", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -614,7 +614,7 @@ describe("connect or create with id", () => {
 
             input PostCreatorFieldInput {
               connect: PostCreatorConnectFieldInput
-              connectOrCreate: PostCreatorConnectOrCreateFieldInput
+              connectOrCreate: PostCreatorConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: PostCreatorCreateFieldInput
             }
 
@@ -892,7 +892,7 @@ describe("connect or create with id", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 
@@ -938,7 +938,7 @@ describe("connect or create with id", () => {
 
             input UserPostsFieldInput {
               connect: [UserPostsConnectFieldInput!]
-              connectOrCreate: [UserPostsConnectOrCreateFieldInput!]
+              connectOrCreate: [UserPostsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [UserPostsCreateFieldInput!]
             }
 

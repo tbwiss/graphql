@@ -22,9 +22,15 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/2261", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
     let ProgrammeItem: UniqueType;
     let Edition: UniqueType;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+        await testHelper.close();
+    });
 
     beforeEach(async () => {
         ProgrammeItem = testHelper.createUniqueType("ProgrammeItem");
@@ -62,6 +68,10 @@ describe("https://github.com/neo4j/graphql/issues/2261", () => {
     });
 
     test("nested query with top level @cypher directive with subscriptions should return valid Cypher", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         await testHelper.executeCypher(
             `CREATE (e:${Edition} {id: "ed-id"})<-[:HAS_EDITION]-(p:${ProgrammeItem} {id: "p-id"})`
         );

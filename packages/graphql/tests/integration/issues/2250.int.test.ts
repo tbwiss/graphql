@@ -22,10 +22,15 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/2250", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
     let Movie: UniqueType;
     let Person: UniqueType;
     let Actor: UniqueType;
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+    });
 
     beforeEach(async () => {
         Movie = testHelper.createUniqueType("Movie");

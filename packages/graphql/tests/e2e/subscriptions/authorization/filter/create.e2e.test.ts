@@ -33,6 +33,10 @@ describe("Subscriptions authorization with create events", () => {
     let User: UniqueType;
     let key: string;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         key = "secret";
 

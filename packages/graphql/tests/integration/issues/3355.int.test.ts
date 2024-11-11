@@ -23,10 +23,12 @@ import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/3355", () => {
     const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
     let Movie: UniqueType;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         Movie = testHelper.createUniqueType("Movie");
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     afterAll(async () => {
@@ -34,6 +36,10 @@ describe("https://github.com/neo4j/graphql/issues/3355", () => {
     });
 
     test("should return info object when subscriptions enabled", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
         const typeDefs = `
             type ${Movie} @node {
                 id: ID!

@@ -31,6 +31,10 @@ describe("Create Subscription with filters valid of number types (Int, Float, Bi
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
 
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");
         const typeDefs = `

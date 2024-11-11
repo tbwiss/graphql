@@ -223,7 +223,7 @@ describe("Union Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -273,7 +273,7 @@ describe("Union Interface Relationships", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorMoviesCreateFieldInput!]
             }
 
@@ -647,7 +647,7 @@ describe("Union Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -697,7 +697,7 @@ describe("Union Interface Relationships", () => {
 
             input MovieActorsFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
+              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieActorsCreateFieldInput!]
             }
 
@@ -838,7 +838,7 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsActorFieldInput {
               connect: [MovieDirectorsActorConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsActorConnectOrCreateFieldInput!]
+              connectOrCreate: [MovieDirectorsActorConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieDirectorsActorCreateFieldInput!]
             }
 
@@ -933,7 +933,7 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsPersonFieldInput {
               connect: [MovieDirectorsPersonConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsPersonConnectOrCreateFieldInput!]
+              connectOrCreate: [MovieDirectorsPersonConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieDirectorsPersonCreateFieldInput!]
             }
 
@@ -1364,7 +1364,7 @@ describe("Union Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -1414,7 +1414,7 @@ describe("Union Interface Relationships", () => {
 
             input PersonMoviesFieldInput {
               connect: [PersonMoviesConnectFieldInput!]
-              connectOrCreate: [PersonMoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [PersonMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonMoviesCreateFieldInput!]
             }
 

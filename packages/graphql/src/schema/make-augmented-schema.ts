@@ -606,7 +606,6 @@ function generateObjectType({
     if (concreteEntityAdapter.isDeletable) {
         composer.Mutation.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.delete]: deleteResolver({
-                node,
                 composer,
                 concreteEntityAdapter,
             }),
@@ -621,9 +620,7 @@ function generateObjectType({
         composer.Mutation.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.update]: updateResolver({
                 node,
-                composer,
                 concreteEntityAdapter,
-                features,
             }),
         });
         composer.Mutation.setFieldDirectives(

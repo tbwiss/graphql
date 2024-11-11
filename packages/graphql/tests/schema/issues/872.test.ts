@@ -109,7 +109,7 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -153,7 +153,7 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input Actor2MoviesFieldInput {
               connect: [Actor2MoviesConnectFieldInput!]
-              connectOrCreate: [Actor2MoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [Actor2MoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [Actor2MoviesCreateFieldInput!]
             }
 
@@ -318,7 +318,7 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -362,7 +362,7 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorMoviesCreateFieldInput!]
             }
 

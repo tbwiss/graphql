@@ -160,7 +160,7 @@ describe("Connect Or Create", () => {
 
             input ActorActedInMovieFieldInput {
               connect: [ActorActedInMovieConnectFieldInput!]
-              connectOrCreate: [ActorActedInMovieConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorActedInMovieConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorActedInMovieCreateFieldInput!]
             }
 
@@ -223,7 +223,7 @@ describe("Connect Or Create", () => {
 
             input ActorActedInSeriesFieldInput {
               connect: [ActorActedInSeriesConnectFieldInput!]
-              connectOrCreate: [ActorActedInSeriesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorActedInSeriesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorActedInSeriesCreateFieldInput!]
             }
 

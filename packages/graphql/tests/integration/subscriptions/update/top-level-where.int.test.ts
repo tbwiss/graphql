@@ -22,7 +22,7 @@ import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Delete using top level aggregate where - subscriptions enabled", () => {
     const testHelper = new TestHelper({ cdc: true });
-
+    let cdcEnabled: boolean;
     let userType: UniqueType;
     let postType: UniqueType;
 
@@ -37,6 +37,10 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     const content4 = "Baz";
     const content5 = "Some more content";
     const updatedContent = "This has been updated;";
+
+    beforeAll(async () => {
+        cdcEnabled = await testHelper.assertCDCEnabled();
+    });
 
     beforeEach(async () => {
         userType = testHelper.createUniqueType("User");
@@ -80,7 +84,16 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Implicit AND", async () => {
+<<<<<<< HEAD
         const query = /* GraphQL */ `
+=======
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = `
+>>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(
                     where: { 
@@ -112,7 +125,16 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level OR", async () => {
+<<<<<<< HEAD
         const query = /* GraphQL */ `
+=======
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = `
+>>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {
@@ -145,7 +167,16 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
     });
 
     test("Top-level AND", async () => {
+<<<<<<< HEAD
         const query = /* GraphQL */ `
+=======
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = `
+>>>>>>> upstream/dev
             mutation {
                 ${postType.operations.update}(where: { 
                     likesAggregate: {

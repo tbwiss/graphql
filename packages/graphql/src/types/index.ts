@@ -452,6 +452,7 @@ export type Neo4jFeaturesSettings = {
         implicitSET?: boolean;
         deprecatedOptionsArgument?: boolean;
         directedArgument?: boolean;
+        connectOrCreate?: boolean;
     };
     vector?: Neo4jVectorSettings;
 };

@@ -31,6 +31,9 @@ describe("Create Subscription", () => {
     let wsClient: WebSocketTestClient;
     let typeMovie: UniqueType;
     let typeActor: UniqueType;
+    beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
 
     beforeEach(async () => {
         typeMovie = testHelper.createUniqueType("Movie");

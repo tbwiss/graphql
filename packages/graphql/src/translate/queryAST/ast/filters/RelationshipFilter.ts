@@ -162,7 +162,7 @@ export class RelationshipFilter extends Filter {
     }
 
     protected getNestedSubqueries(context: QueryASTContext<Cypher.Node>): Cypher.Clause[] {
-        const pattern = new Cypher.Pattern(context.source!)
+        const pattern = new Cypher.Pattern(context.source)
             .related({
                 direction: this.relationship.getCypherDirection(),
                 type: this.relationship.type,
@@ -289,7 +289,7 @@ export class RelationshipFilter extends Filter {
                 throw new Error("No parent node found!");
             }
 
-            const pattern = new Cypher.Pattern(nestedContext.source!)
+            const pattern = new Cypher.Pattern(nestedContext.source)
                 .related({
                     type: this.relationship.type,
                     direction: this.relationship.getCypherDirection(),
@@ -347,9 +347,9 @@ export class RelationshipFilter extends Filter {
         if (!queryASTContext.hasTarget()) {
             throw new Error("No parent node found!");
         }
-        const patternComprehension = new Cypher.PatternComprehension(pattern, new Cypher.Literal(1)).where(
-            innerPredicate
-        );
+        const patternComprehension = new Cypher.PatternComprehension(pattern)
+            .map(new Cypher.Literal(1))
+            .where(innerPredicate);
         return Cypher.single(queryASTContext.target, patternComprehension, new Cypher.Literal(true));
     }
 

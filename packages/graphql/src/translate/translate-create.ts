@@ -135,7 +135,7 @@ export default async function translateCreate({
         )
     );
 
-    const returnStatement = getReturnStatement(projectedVariables, context);
+    const returnStatement = getReturnStatement(projectedVariables);
     const createQuery = new Cypher.Raw((env) => {
         const cypher = filterTruthy([
             `${createStrs.join("\n")}`,
@@ -152,7 +152,7 @@ export default async function translateCreate({
         ];
     });
 
-    const createQueryCypher = createQuery.build("create_");
+    const createQueryCypher = createQuery.build({ prefix: "create_" });
     const { cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({
         cypher: createQueryCypher.cypher,
     });
@@ -168,10 +168,7 @@ export default async function translateCreate({
     return result;
 }
 
-function getReturnStatement(
-    projectedVariables: Cypher.Variable[],
-    context: Neo4jGraphQLTranslationContext
-): Cypher.Return {
+function getReturnStatement(projectedVariables: Cypher.Variable[]): Cypher.Return {
     const ret = new Cypher.Return();
     if (projectedVariables.length) {
         ret.addColumns([new Cypher.List(projectedVariables), new Cypher.NamedVariable("data")]);

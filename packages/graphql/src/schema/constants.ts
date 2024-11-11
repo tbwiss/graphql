@@ -46,3 +46,17 @@ export const DEPRECATE_IMPLICIT_SET = {
         reason: "Please use the explicit _SET field",
     },
 };
+
+export const DEPRECATE_CONNECT_OR_CREATE = {
+    name: DEPRECATED,
+    args: {
+        reason: "The connectOrCreate operation is deprecated and will be removed",
+    },
+};
+
+export const DEPRECATE_OVERWRITE = {
+    name: DEPRECATED,
+    args: {
+        reason: "The overwrite argument is deprecated and will be removed",
+    },
+};
