@@ -121,20 +121,19 @@ export function augmentObjectOrInterfaceTypeWithConnectionField(
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter,
     userDefinedFieldDirectives: Map<string, DirectiveNode[]>,
     schemaComposer: SchemaComposer,
-    features: Neo4jFeaturesSettings | undefined
+    features: Neo4jFeaturesSettings | undefined,
 ): Record<string, { type: string; description?: string; directives: Directive[]; args?: any }> {
     const fields = {};
     const deprecatedDirectives = graphqlDirectivesToCompose(
         (userDefinedFieldDirectives.get(relationshipAdapter.name) || []).filter(
-            (directive) => directive.name.value === DEPRECATED
-        )
+            (directive) => directive.name.value === DEPRECATED,
+        ),
     );
     const composeNodeArgs = addDirectedArgument<ObjectTypeComposerArgumentConfigMapDefinition>(
         {
             where: makeConnectionWhereInputType({
                 relationshipAdapter,
                 composer: schemaComposer,
-                features,
             }),
             first: {
                 type: GraphQLInt,
@@ -144,7 +143,7 @@ export function augmentObjectOrInterfaceTypeWithConnectionField(
             },
         },
         relationshipAdapter,
-        features
+        features,
     );
     const connectionSortITC = withConnectionSortInputType({
         relationshipAdapter,

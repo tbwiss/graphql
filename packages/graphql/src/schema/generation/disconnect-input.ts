@@ -260,7 +260,6 @@ function makeDisconnectFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
 
         if (ifUnionMemberEntity.relationships.size) {

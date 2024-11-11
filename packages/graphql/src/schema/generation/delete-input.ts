@@ -228,7 +228,7 @@ function makeDeleteFieldInputTypeFields({
         if (
             relationshipTargetHasRelationshipWithNestedOperation(
                 relationshipAdapter.target,
-                RelationshipNestedOperationsOption.DELETE
+                RelationshipNestedOperationsOption.DELETE,
             )
         ) {
             const deleteInput = withDeleteInputType({ entityAdapter: relationshipAdapter.target, composer });
@@ -254,7 +254,6 @@ function makeDeleteFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
         if (ifUnionMemberEntity.relationships.size) {
             const deleteInput = withDeleteInputType({ entityAdapter: ifUnionMemberEntity, composer });

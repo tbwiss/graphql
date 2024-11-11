@@ -163,7 +163,6 @@ function createConnectOrCreatePartialStatement({
     const mergeCypher = mergeStatement({
         input,
         refNode,
-        parentRefNode: node,
         context,
         relationField,
         parentNode: new Cypher.NamedNode(parentVar),
@@ -207,17 +206,14 @@ function createConnectOrCreatePartialStatement({
 function mergeStatement({
     input,
     refNode,
-    parentRefNode,
     context,
     relationField,
     parentNode,
     varName,
     callbackBucket,
-    withVars,
 }: {
     input: CreateOrConnectInput;
     refNode: Node;
-    parentRefNode: Node;
     context: Neo4jGraphQLTranslationContext;
     relationField: RelationField;
     parentNode: Cypher.Node;
