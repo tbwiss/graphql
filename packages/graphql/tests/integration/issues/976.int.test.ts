@@ -81,21 +81,21 @@ describe("https://github.com/neo4j/graphql/issues/976", () => {
                 ${testBibliographicReference.operations.update}(
                     where: { iri_EQ: "urn:myiri2" }
                     update: {
-                    prefLabel: "Updated Label"
-                    isInPublication: [
-                        {
-                            connectOrCreate: {
-                                where: { node: { iri_EQ: "new-g" } }
-                                onCreate: { node: { iri: "new-g", prefLabel: "pub" } }
+                        prefLabel_SET: "Updated Label"
+                        isInPublication: [
+                            {
+                                connectOrCreate: {
+                                    where: { node: { iri_EQ: "new-g" } }
+                                    onCreate: { node: { iri: "new-g", prefLabel: "pub" } }
+                                }
                             }
-                        }
-                        {
-                            connectOrCreate: {
-                                where: { node: { iri_EQ: "new-f" } }
-                                onCreate: { node: { iri: "new-f", prefLabel: "pub" } }
+                            {
+                                connectOrCreate: {
+                                    where: { node: { iri_EQ: "new-f" } }
+                                    onCreate: { node: { iri: "new-f", prefLabel: "pub" } }
+                                }
                             }
-                        }
-                    ]
+                        ]
                     }
                 ) {
                     ${testBibliographicReference.plural} {

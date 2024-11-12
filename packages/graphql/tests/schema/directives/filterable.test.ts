@@ -1072,8 +1072,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -1372,7 +1374,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -1724,8 +1727,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -2024,7 +2029,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -2376,8 +2382,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -2664,7 +2672,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -3013,8 +3022,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -3264,7 +3275,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -3617,8 +3629,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -3917,7 +3931,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -4271,8 +4286,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -4571,7 +4588,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -4901,8 +4919,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -5152,7 +5172,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -5498,8 +5519,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -5741,7 +5764,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -5859,7 +5883,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -6155,8 +6180,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -6432,7 +6459,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -6551,7 +6579,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -6847,8 +6876,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -7090,7 +7121,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -7208,7 +7240,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -7520,8 +7553,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -7781,8 +7816,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -8092,7 +8129,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -8482,8 +8520,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -8743,8 +8783,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -9054,7 +9096,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -9444,8 +9487,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -9705,8 +9750,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -10016,7 +10063,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {

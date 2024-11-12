@@ -395,23 +395,23 @@ describe("https://github.com/neo4j/graphql/pull/2068", () => {
                 argType = "input";
             }
 
-            return `
-            mutation {
-                ${mutationType}(
-                    ${argType}: {
-                        title: "${movieTitle}"
-                        genres: {
-                            connectOrCreate: [
-                                { where: { node: { name_EQ: "Horror" } }, onCreate: { node: { name: "Horror" } } }
-                            ]
+            return /* GraphQL */ `
+                mutation {
+                    ${mutationType}(
+                        ${argType}: {
+                            title${mutationType.startsWith("update") ? "_SET" : ""}: "${movieTitle}"
+                            genres: {
+                                connectOrCreate: [
+                                    { where: { node: { name_EQ: "Horror" } }, onCreate: { node: { name: "Horror" } } }
+                                ]
+                            }
+                        }
+                    ) {
+                        ${movieTypePlural} {
+                            title
                         }
                     }
-                ) {
-                    ${movieTypePlural} {
-                        title
-                    }
                 }
-            }
         `;
         }
         test("Create with createOrConnect and CREATE_RELATIONSHIP operation rule - valid auth", async () => {

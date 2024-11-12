@@ -210,7 +210,8 @@ describe("Connect Or Create", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -325,8 +326,10 @@ describe("Connect Or Create", () => {
             }
 
             input MovieUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

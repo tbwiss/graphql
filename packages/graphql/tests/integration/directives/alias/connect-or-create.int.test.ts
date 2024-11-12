@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { GraphQLError } from "graphql";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
 
@@ -55,11 +56,11 @@ describe("@alias directive", () => {
     });
 
     test("Update mutation with top-level connectOrCreate alias referring to existing field, include both fields as inputs", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.update}(
                 update: {
-                  name: "Tom Hanks 2"
+                  name_SET: "Tom Hanks 2"
                     movies: {
                       connectOrCreate: {
                         where: { node: { id_EQ: 5 } }
@@ -80,9 +81,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
     });
 
     test("Create mutation with alias referring to existing field, include only field as inputs", async () => {
@@ -156,17 +158,18 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect((gqlResult?.data as any)?.[typeActor.operations.create]?.actors).toBeUndefined();
     });
 
     test("Update mutation with alias referring to existing field, include only one field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(update: {
-                    name: "a",
+                    name_SET: "a",
                     movies: [
                       {
                         connectOrCreate: [
@@ -198,10 +201,10 @@ describe("@alias directive", () => {
         expect(gqlResult.errors).toBeUndefined();
     });
     test("Update mutation with alias referring to existing field, include both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(update: {
-                    name: "a",
+                    name_SET: "a",
                     movies: [
                       {
                         connectOrCreate: [
@@ -232,21 +235,22 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect((gqlResult?.data as any)?.[typeActor.operations.update]?.info).toBeUndefined();
     });
     test("Update mutation nested with create, alias referring to existing field, include both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(update: {
-                    name: "a",
+                    name_SET: "a",
                     movies: [
                         {
                             update: {
                               node: {
-                                title: "b",
+                                title_SET: "b",
                                 actors: [
                                   {
                                     create: [
@@ -290,21 +294,22 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+      
         expect((gqlResult?.data as any)?.[typeActor.operations.update]?.info).toBeUndefined();
     });
     test("Update mutation nested with create, alias referring to existing field, include only one field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(update: {
-                    name: "a",
+                    name_SET: "a",
                     movies: [
                         {
                             update: {
                               node: {
-                                title: "b",
+                                title_SET: "b",
                                 actors: [
                                   {
                                     create: [

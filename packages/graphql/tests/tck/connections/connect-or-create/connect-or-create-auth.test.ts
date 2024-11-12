@@ -255,7 +255,7 @@ describe("connectOrCreate", () => {
             mutation {
                 updateMovies(
                     update: {
-                        title: "Cool Movie"
+                        title_SET: "Cool Movie"
                         genres: {
                             connectOrCreate: [
                                 { where: { node: { name: "Horror" } }, onCreate: { node: { name: "Horror" } } }
@@ -281,7 +281,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -298,7 +298,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -322,7 +322,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -339,7 +339,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -363,7 +363,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -380,7 +380,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -404,7 +404,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -419,7 +419,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"resolvedCallbacks\\": {}
@@ -433,7 +433,7 @@ describe("connectOrCreate", () => {
             mutation {
                 updateMovies(
                     update: {
-                        title: "Cool Movie"
+                        title_SET: "Cool Movie"
                         genres: {
                             connectOrCreate: {
                                 where: { node: { name: "Horror" } }
@@ -460,7 +460,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -477,7 +477,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -501,7 +501,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -518,7 +518,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -542,7 +542,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -559,7 +559,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"isAuthenticated\\": true,
@@ -583,7 +583,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -598,7 +598,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"resolvedCallbacks\\": {}
@@ -607,7 +607,7 @@ describe("connectOrCreate", () => {
         });
 
         test("Create with createOrConnect and allow in auth", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type Movie @node {
                     title: String
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT)
@@ -617,7 +617,10 @@ describe("connectOrCreate", () => {
                     name: String @unique
                 }
 
-                extend type Genre @authorization(validate: [{ when: [BEFORE], operations: [CREATE], where: { node: { name: "$jwt.sub" } } }])
+                extend type Genre
+                    @authorization(
+                        validate: [{ when: [BEFORE], operations: [CREATE], where: { node: { name: "$jwt.sub" } } }]
+                    )
             `;
 
             neoSchema = new Neo4jGraphQL({
@@ -632,7 +635,7 @@ describe("connectOrCreate", () => {
 
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
-                SET this.title = $this_update_title
+                SET this.title = $this_update_title_SET
                 WITH this
                 CALL {
                     WITH this
@@ -647,7 +650,7 @@ describe("connectOrCreate", () => {
 
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
-                    \\"this_update_title\\": \\"Cool Movie\\",
+                    \\"this_update_title_SET\\": \\"Cool Movie\\",
                     \\"this_genres0_connectOrCreate_param0\\": \\"Horror\\",
                     \\"this_genres0_connectOrCreate_param1\\": \\"Horror\\",
                     \\"resolvedCallbacks\\": {}

@@ -49,7 +49,7 @@ describe("Connect or create with @alias", () => {
                 updateBibliographicReferences(
                     where: { iri_EQ: "urn:myiri2" }
                     update: {
-                        prefLabel: "Updated Label:My BRS with Resource"
+                        prefLabel_SET: "Updated Label:My BRS with Resource"
                         isInPublication: [
                             {
                                 connectOrCreate: {
@@ -83,7 +83,7 @@ describe("Connect or create with @alias", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:BibliographicReference:Resource)
             WHERE this._uri = $param0
-            SET this.prefLabel = $this_update_prefLabel
+            SET this.prefLabel = $this_update_prefLabel_SET
             WITH this
             CALL {
                 WITH this
@@ -121,7 +121,7 @@ describe("Connect or create with @alias", () => {
                     \\"new-e\\"
                 ],
                 \\"param0\\": \\"urn:myiri2\\",
-                \\"this_update_prefLabel\\": [
+                \\"this_update_prefLabel_SET\\": [
                     \\"Updated Label:My BRS with Resource\\"
                 ],
                 \\"this_isInPublication0_connectOrCreate_param0\\": \\"new-g\\",

@@ -233,8 +233,10 @@ describe("@populatedBy tests", () => {
                 }
 
                 input MovieUpdateInput {
-                  callback1: String
-                  id: ID
+                  callback1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  callback1_SET: String
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -436,10 +438,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 input MovieUpdateInput {
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   callback1_DECREMENT: Int
                   callback1_INCREMENT: Int
-                  id: ID
+                  callback1_SET: Int
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -770,7 +774,8 @@ describe("@populatedBy tests", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
@@ -953,7 +958,8 @@ describe("@populatedBy tests", () => {
 
                 input MovieUpdateInput {
                   genres: [MovieGenresUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1110,8 +1116,10 @@ describe("@populatedBy tests", () => {
                 }
 
                 input RelPropertiesUpdateInput {
-                  callback1: String
-                  id: ID
+                  callback1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  callback1_SET: String
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input RelPropertiesWhere {
@@ -1288,7 +1296,8 @@ describe("@populatedBy tests", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
@@ -1478,7 +1487,8 @@ describe("@populatedBy tests", () => {
 
                 input MovieUpdateInput {
                   genres: [MovieGenresUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1650,10 +1660,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 input RelPropertiesUpdateInput {
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   callback1_DECREMENT: Int
                   callback1_INCREMENT: Int
-                  id: ID
+                  callback1_SET: Int
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input RelPropertiesWhere {

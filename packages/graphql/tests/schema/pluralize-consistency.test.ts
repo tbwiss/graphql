@@ -179,7 +179,8 @@ describe("Pluralize consistency", () => {
             }
 
             input super_friendUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_friendWhere {
@@ -332,7 +333,8 @@ describe("Pluralize consistency", () => {
 
             input super_userUpdateInput {
               my_friend: [super_userMy_friendUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_userWhere {

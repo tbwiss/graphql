@@ -82,7 +82,8 @@ describe("Relationship", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -281,7 +282,8 @@ describe("Relationship", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -566,7 +568,8 @@ describe("Relationship", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -805,7 +808,8 @@ describe("Relationship", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {

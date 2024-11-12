@@ -328,10 +328,10 @@ describe("assertIndexesAndConstraints/unique", () => {
                     }
                 `;
 
-            const updateMutation = `
+            const updateMutation = /* GraphQL */ `
                     mutation {
                         ${baseType.operations.update}(update: {
-                            someStringProperty: "notUnique"
+                                someStringProperty_SET: "notUnique"
                         }) {
                             ${baseType.plural} {
                                 someStringProperty

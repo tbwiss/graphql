@@ -93,7 +93,8 @@ describe("Implicit Equality filters", () => {
             }
 
             input ActedInUpdateInput {
-              role: String
+              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              role_SET: String
             }
 
             input ActedInWhere {
@@ -268,7 +269,8 @@ describe("Implicit Equality filters", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -510,7 +512,8 @@ describe("Implicit Equality filters", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {

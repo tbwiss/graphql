@@ -270,8 +270,10 @@ describe("@relationship directive, aggregate argument", () => {
                 }
 
                 input ActorUpdateInput {
-                  password: String
-                  username: String
+                  password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  password_SET: String
+                  username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  username_SET: String
                 }
 
                 input ActorWhere {
@@ -476,7 +478,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -648,8 +651,10 @@ describe("@relationship directive, aggregate argument", () => {
                 }
 
                 input ActorUpdateInput {
-                  password: String
-                  username: String
+                  password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  password_SET: String
+                  username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  username_SET: String
                 }
 
                 input ActorWhere {
@@ -865,7 +870,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1039,8 +1045,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input ActorUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input ActorWhere {
@@ -1241,7 +1249,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     input MovieWhere {
@@ -1356,8 +1365,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input PersonUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -1491,8 +1502,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input ActorUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input ActorWhere {
@@ -1704,7 +1717,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     input MovieWhere {
@@ -1819,8 +1833,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input PersonUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -1962,8 +1978,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input ActorUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input ActorWhere {
@@ -2184,7 +2202,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     input MovieWhere {
@@ -2294,7 +2313,8 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input PersonUpdateInput {
-                      name: String
+                      name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      name_SET: String
                     }
 
                     input PersonWhere {
@@ -2438,8 +2458,10 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input ActorUpdateInput {
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input ActorWhere {
@@ -2660,7 +2682,8 @@ describe("@relationship directive, aggregate argument", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     input MovieWhere {
@@ -2770,7 +2793,8 @@ describe("@relationship directive, aggregate argument", () => {
                     }
 
                     input PersonUpdateInput {
-                      name: String
+                      name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      name_SET: String
                     }
 
                     input PersonWhere {

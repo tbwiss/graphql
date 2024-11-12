@@ -443,7 +443,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1UpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               tiger: TigerJawLevel2Part1TigerUpdateFieldInput
             }
 
@@ -485,7 +486,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2UpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               part1: TigerJawLevel2Part1UpdateFieldInput
             }
 
@@ -527,9 +529,10 @@ describe("162", () => {
             }
 
             input TigerUpdateInput {
-              x: Int
+              x: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               x_DECREMENT: Int
               x_INCREMENT: Int
+              x_SET: Int
             }
 
             input TigerWhere {

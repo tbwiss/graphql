@@ -115,7 +115,7 @@ describe("Create or Connect", () => {
                 mutation {
                     updateActors(
                         update: {
-                            name: "Tom Hanks 2"
+                            name_SET: "Tom Hanks 2"
                             movies: {
                                 connectOrCreate: {
                                     where: { node: { title_EQ: "The Terminal" } }
@@ -137,7 +137,7 @@ describe("Create or Connect", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Actor)
                 WHERE this.name = $param0
-                SET this.name = $this_update_name
+                SET this.name = $this_update_name_SET
                 WITH this
                 CALL {
                     WITH this
@@ -155,7 +155,7 @@ describe("Create or Connect", () => {
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
                     \\"param0\\": \\"Tom Hanks\\",
-                    \\"this_update_name\\": \\"Tom Hanks 2\\",
+                    \\"this_update_name_SET\\": \\"Tom Hanks 2\\",
                     \\"this_movies0_connectOrCreate_param0\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param1\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param2\\": {
@@ -330,7 +330,7 @@ describe("Create or Connect", () => {
                 mutation {
                     updateActors(
                         update: {
-                            name: "Tom Hanks 2"
+                            name_SET: "Tom Hanks 2"
                             movies: {
                                 connectOrCreate: {
                                     where: { node: { title_EQ: "The Terminal" } }
@@ -352,7 +352,7 @@ describe("Create or Connect", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Actor)
                 WHERE this.name = $param0
-                SET this.name = $this_update_name
+                SET this.name = $this_update_name_SET
                 WITH this
                 CALL {
                     WITH this
@@ -372,7 +372,7 @@ describe("Create or Connect", () => {
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
                     \\"param0\\": \\"Tom Hanks\\",
-                    \\"this_update_name\\": \\"Tom Hanks 2\\",
+                    \\"this_update_name_SET\\": \\"Tom Hanks 2\\",
                     \\"this_movies0_connectOrCreate_param0\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param1\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param2\\": {
@@ -389,7 +389,7 @@ describe("Create or Connect", () => {
                 mutation {
                     updateActors(
                         update: {
-                            name: "Tom Hanks 2"
+                            name_SET: "Tom Hanks 2"
                             movies: {
                                 connectOrCreate: {
                                     where: { node: { id_EQ: "movieId" } }
@@ -411,7 +411,7 @@ describe("Create or Connect", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Actor)
                 WHERE this.name = $param0
-                SET this.name = $this_update_name
+                SET this.name = $this_update_name_SET
                 WITH this
                 CALL {
                     WITH this
@@ -430,7 +430,7 @@ describe("Create or Connect", () => {
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
                     \\"param0\\": \\"Tom Hanks\\",
-                    \\"this_update_name\\": \\"Tom Hanks 2\\",
+                    \\"this_update_name_SET\\": \\"Tom Hanks 2\\",
                     \\"this_movies0_connectOrCreate_param0\\": \\"movieId\\",
                     \\"this_movies0_connectOrCreate_param1\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param2\\": {
@@ -542,7 +542,7 @@ describe("Create or Connect", () => {
                 mutation {
                     updateActors(
                         update: {
-                            name: "Tom Hanks 2"
+                            name_SET: "Tom Hanks 2"
                             movies: {
                                 connectOrCreate: {
                                     where: { node: { title_EQ: "The Terminal" } }
@@ -564,7 +564,7 @@ describe("Create or Connect", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Actor)
                 WHERE this.name = $param0
-                SET this.name = $this_update_name
+                SET this.name = $this_update_name_SET
                 WITH this
                 CALL {
                     WITH this
@@ -584,7 +584,7 @@ describe("Create or Connect", () => {
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
                     \\"param0\\": \\"Tom Hanks\\",
-                    \\"this_update_name\\": \\"Tom Hanks 2\\",
+                    \\"this_update_name_SET\\": \\"Tom Hanks 2\\",
                     \\"this_movies0_connectOrCreate_param0\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param1\\": \\"The Terminal\\",
                     \\"this_movies0_connectOrCreate_param2\\": {

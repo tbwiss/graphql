@@ -367,12 +367,15 @@ describe("lower case type names", () => {
             }
 
             input actorUpdateInput {
-              createdAt: DateTime
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
               movies: [actorMoviesUpdateFieldInput!]
-              name: String
-              year: Int
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input actorWhere {
@@ -633,12 +636,16 @@ describe("lower case type names", () => {
 
             input movieUpdateInput {
               actors: [movieActorsUpdateFieldInput!]
-              createdAt: DateTime
-              name: String
-              testId: String
-              year: Int
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              testId: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              testId_SET: String
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input movieWhere {

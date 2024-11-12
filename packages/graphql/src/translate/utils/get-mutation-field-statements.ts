@@ -23,7 +23,6 @@ import mapToDbProperty from "../../utils/map-to-db-property";
 import { buildMathStatements, matchMathField, mathDescriptorBuilder } from "./math";
 import { parseMutableField } from "./parse-mutable-field";
 
-
 /**
  * Transforms a key-value pair such as:
  * { name_SET: "John" }

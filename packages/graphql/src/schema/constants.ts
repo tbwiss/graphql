@@ -40,6 +40,13 @@ export const DEPRECATE_DIRECTED_ARGUMENT = {
     },
 };
 
+export const DEPRECATE_IMPLICIT_SET = {
+    name: DEPRECATED,
+    args: {
+        reason: "Please use the explicit _SET field",
+    },
+};
+
 export const DEPRECATE_CONNECT_OR_CREATE = {
     name: DEPRECATED,
     args: {
