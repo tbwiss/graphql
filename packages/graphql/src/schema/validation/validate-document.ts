@@ -67,6 +67,7 @@ import { WarnIfAMaxLimitCanBeBypassedThroughInterface } from "./custom-rules/war
 import { WarnIfListOfListsFieldDefinition } from "./custom-rules/warnings/list-of-lists";
 import { WarnObjectFieldsWithoutResolver } from "./custom-rules/warnings/object-fields-without-resolver";
 import { WarnIfQueryDirectionIsUsedWithDeprecatedValues } from "./custom-rules/warnings/query-direction-deprecated-values";
+import { WarnIfSingleRelationships } from "./custom-rules/warnings/single-relationship";
 import { WarnIfSubscriptionsAuthorizationMissing } from "./custom-rules/warnings/subscriptions-authorization-missing";
 import { WarnIfTypeIsNotMarkedAsNode } from "./custom-rules/warnings/warn-if-type-is-not-marked-as-node";
 import { validateSchemaCustomizations } from "./validate-schema-customizations";
@@ -227,6 +228,7 @@ function runValidationRulesOnFilteredDocument({
             DirectiveArgumentOfCorrectType(false),
             WarnIfAuthorizationFeatureDisabled(features?.authorization),
             WarnIfListOfListsFieldDefinition,
+            WarnIfSingleRelationships,
             WarnIfAMaxLimitCanBeBypassedThroughInterface(),
             WarnObjectFieldsWithoutResolver({
                 customResolvers: asArray(userCustomResolvers ?? []),
