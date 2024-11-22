@@ -26,8 +26,8 @@ import { ApolloTestServer } from "../../setup/apollo-server";
 import { WebSocketTestClient } from "../../setup/ws-client";
 
 describe("https://github.com/neo4j/graphql/issues/5787", () => {
-    describe("With filterGraphQLEvents", () => {
-        const testHelper = new TestHelper({ cdc: true, filterGraphQLEvents: true });
+    describe("With onlyGraphQLEvents", () => {
+        const testHelper = new TestHelper({ cdc: true, onlyGraphQLEvents: true });
         let server: TestGraphQLServer;
         let wsClient: WebSocketTestClient;
         let typeMovie: UniqueType;
@@ -123,8 +123,8 @@ describe("https://github.com/neo4j/graphql/issues/5787", () => {
         }
     });
 
-    describe("Without filterGraphQLEvents", () => {
-        const testHelper = new TestHelper({ cdc: true, filterTxMeta: false });
+    describe("Without onlyGraphQLEvents", () => {
+        const testHelper = new TestHelper({ cdc: true, onlyGraphQLEvents: false });
         let server: TestGraphQLServer;
         let wsClient: WebSocketTestClient;
         let typeMovie: UniqueType;

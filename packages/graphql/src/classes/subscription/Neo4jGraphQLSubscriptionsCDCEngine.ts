@@ -21,7 +21,7 @@ import Cypher from "@neo4j/cypher-builder";
 import { EventEmitter } from "events";
 import type { Driver, QueryConfig } from "neo4j-driver";
 import { Memoize } from "typescript-memoize";
-import environment from "../../environment";
+import { APP_ID } from "../../constants";
 import type { Neo4jGraphQLSchemaModel } from "../../schema-model/Neo4jGraphQLSchemaModel";
 import type { Neo4jGraphQLSubscriptionsEngine, SubscriptionEngineContext, SubscriptionsEvent } from "../../types";
 import { CDCApi } from "./cdc/cdc-api";
@@ -37,22 +37,22 @@ export class Neo4jGraphQLSubscriptionsCDCEngine implements Neo4jGraphQLSubscript
     private closed = false;
 
     private subscribeToLabels: string[] | undefined;
-    private filterGraphQLEvents: boolean;
+    private onlyGraphQLEvents: boolean;
 
     constructor({
         driver,
         pollTime = 1000,
         queryConfig,
-        filterGraphQLEvents = false,
+        onlyGraphQLEvents = false,
     }: {
         driver: Driver;
         pollTime?: number;
         queryConfig?: QueryConfig;
-        filterGraphQLEvents?: boolean;
+        onlyGraphQLEvents?: boolean;
     }) {
         this.cdcApi = new CDCApi(driver, queryConfig);
         this.pollTime = pollTime;
-        this.filterGraphQLEvents = filterGraphQLEvents;
+        this.onlyGraphQLEvents = onlyGraphQLEvents;
     }
 
     // This memoize is done to keep typings correct whilst avoiding the performance ir of the throw
@@ -104,10 +104,8 @@ export class Neo4jGraphQLSubscriptionsCDCEngine implements Neo4jGraphQLSubscript
 
     private async pollEvents(): Promise<void> {
         let txFilter: Cypher.Map | undefined;
-        if (this.filterGraphQLEvents) {
-            const app = `${environment.NPM_PACKAGE_NAME}@${environment.NPM_PACKAGE_VERSION}`;
-
-            const appMetadata = new Cypher.Param(app);
+        if (this.onlyGraphQLEvents) {
+            const appMetadata = new Cypher.Param(APP_ID);
             txFilter = new Cypher.Map({
                 app: appMetadata,
             });
