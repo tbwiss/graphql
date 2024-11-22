@@ -17,9 +17,11 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
 import { EventEmitter } from "events";
 import type { Driver, QueryConfig } from "neo4j-driver";
 import { Memoize } from "typescript-memoize";
+import environment from "../../environment";
 import type { Neo4jGraphQLSchemaModel } from "../../schema-model/Neo4jGraphQLSchemaModel";
 import type { Neo4jGraphQLSubscriptionsEngine, SubscriptionEngineContext, SubscriptionsEvent } from "../../types";
 import { CDCApi } from "./cdc/cdc-api";
@@ -35,18 +37,22 @@ export class Neo4jGraphQLSubscriptionsCDCEngine implements Neo4jGraphQLSubscript
     private closed = false;
 
     private subscribeToLabels: string[] | undefined;
+    private filterGraphQLEvents: boolean;
 
     constructor({
         driver,
         pollTime = 1000,
         queryConfig,
+        filterGraphQLEvents = false,
     }: {
         driver: Driver;
         pollTime?: number;
         queryConfig?: QueryConfig;
+        filterGraphQLEvents?: boolean;
     }) {
         this.cdcApi = new CDCApi(driver, queryConfig);
         this.pollTime = pollTime;
+        this.filterGraphQLEvents = filterGraphQLEvents;
     }
 
     // This memoize is done to keep typings correct whilst avoiding the performance ir of the throw
@@ -97,7 +103,16 @@ export class Neo4jGraphQLSubscriptionsCDCEngine implements Neo4jGraphQLSubscript
     }
 
     private async pollEvents(): Promise<void> {
-        const cdcEvents = await this.cdcApi.queryEvents(this.subscribeToLabels);
+        let txFilter: Cypher.Map | undefined;
+        if (this.filterGraphQLEvents) {
+            const app = `${environment.NPM_PACKAGE_NAME}@${environment.NPM_PACKAGE_VERSION}`;
+
+            const appMetadata = new Cypher.Param(app);
+            txFilter = new Cypher.Map({
+                app: appMetadata,
+            });
+        }
+        const cdcEvents = await this.cdcApi.queryEvents(this.subscribeToLabels, txFilter);
         for (const cdcEvent of cdcEvents) {
             const parsedEvent = this.parser.parseCDCEvent(cdcEvent);
             if (parsedEvent) {

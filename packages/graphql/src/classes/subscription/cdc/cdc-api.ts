@@ -32,7 +32,7 @@ export class CDCApi {
     }
 
     /** Queries events since last call to queryEvents */
-    public async queryEvents(labels?: string[]): Promise<CDCQueryResponse[]> {
+    public async queryEvents(labels?: string[], txFilter?: Cypher.Map): Promise<CDCQueryResponse[]> {
         if (!this.cursor) {
             this.cursor = await this.fetchCurrentChangeId();
         }
@@ -40,6 +40,12 @@ export class CDCApi {
         const cursorLiteral = new Cypher.Literal(this.cursor);
 
         const selectors = this.createQuerySelectors(labels);
+        if (txFilter) {
+            selectors.map((selector) => {
+                selector.set("txMetadata", txFilter);
+            });
+        }
+
         const queryProcedure = Cypher.db.cdc.query(cursorLiteral, selectors);
 
         const events = await this.runProcedure<CDCQueryResponse>(queryProcedure);
@@ -91,7 +97,6 @@ export class CDCApi {
 
     private async runProcedure<T>(procedure: Cypher.Clause): Promise<T[]> {
         const { cypher, params } = procedure.build();
-
         const result = await this.driver.executeQuery(cypher, params, this.queryConfig);
         return result.records.map((record) => {
             return record.toObject() as Record<string, any>;
