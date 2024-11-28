@@ -27,6 +27,44 @@ import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "./constants";
 import { shouldAddDeprecatedFields } from "./generation/utils";
 import { graphqlDirectivesToCompose } from "./to-compose";
 
+function addCypherListFieldFilters({
+    field,
+    type,
+    result,
+    deprecatedDirectives,
+}: {
+    field: AttributeAdapter;
+    type: string;
+    result: Record<
+        string,
+        {
+            type: string;
+            directives: Directive[];
+        }
+    >;
+    deprecatedDirectives: Directive[];
+}) {
+    result[`${field.name}_ALL`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_NONE`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_SINGLE`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_SOME`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+}
+
 // TODO: refactoring needed!
 // isWhereField, isFilterable, ... extracted out into attributes category
 export function getWhereFieldsForAttributes({
@@ -73,10 +111,24 @@ export function getWhereFieldsForAttributes({
 
             if (field.annotations.cypher.targetEntity) {
                 const targetEntityAdapter = new ConcreteEntityAdapter(field.annotations.cypher.targetEntity);
+                const type = targetEntityAdapter.operations.whereInputTypeName;
+
+                // Always add base where field filter (e.g. name)
                 result[field.name] = {
-                    type: targetEntityAdapter.operations.whereInputTypeName,
+                    type,
                     directives: deprecatedDirectives,
                 };
+
+                // Add list where field filters (e.g. name_ALL, name_NONE, name_SINGLE, name_SOME)
+                if (field.typeHelper.isList()) {
+                    addCypherListFieldFilters({
+                        field,
+                        type,
+                        result,
+                        deprecatedDirectives,
+                    });
+                }
+
                 continue;
             }
         }
