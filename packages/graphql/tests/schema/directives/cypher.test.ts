@@ -934,6 +934,11 @@ describe("Cypher", () => {
               NOT: BlogWhere
               OR: [BlogWhere!]
               post: PostWhere
+              posts: PostWhere
+              posts_ALL: PostWhere
+              posts_NONE: PostWhere
+              posts_SINGLE: PostWhere
+              posts_SOME: PostWhere
               title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
@@ -1209,6 +1214,11 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
+              movies: MovieWhere
+              movies_ALL: MovieWhere
+              movies_NONE: MovieWhere
+              movies_SINGLE: MovieWhere
+              movies_SOME: MovieWhere
               name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
@@ -1287,6 +1297,11 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
+              actors: ActorWhere
+              actors_ALL: ActorWhere
+              actors_NONE: ActorWhere
+              actors_SINGLE: ActorWhere
+              actors_SOME: ActorWhere
             }
 
             type MoviesConnection {
@@ -1395,7 +1410,7 @@ describe("Cypher", () => {
         `);
     });
 
-    test("Filters should be generated only on 1:1 Relationship/Object custom cypher fields", async () => {
+    test("Filters should be generated on 1:1 and *:* Relationship/Object custom cypher fields", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 actors: [Actor]
@@ -1493,6 +1508,11 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
+              movies: MovieWhere
+              movies_ALL: MovieWhere
+              movies_NONE: MovieWhere
+              movies_SINGLE: MovieWhere
+              movies_SOME: MovieWhere
               name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
@@ -1571,6 +1591,11 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
+              actors: ActorWhere
+              actors_ALL: ActorWhere
+              actors_NONE: ActorWhere
+              actors_SINGLE: ActorWhere
+              actors_SOME: ActorWhere
             }
 
             type MoviesConnection {
