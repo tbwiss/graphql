@@ -54,7 +54,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors: { name: "Jada Pinkett Smith" } }) {
+                moviesConnection(where: { actors: { name_EQ: "Jada Pinkett Smith" } }) {
                     edges {
                         node {
                             title
@@ -131,7 +131,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { NOT: { actors: { name: "Jada Pinkett Smith" } } }) {
+                moviesConnection(where: { NOT: { actors: { name_EQ: "Jada Pinkett Smith" } } }) {
                     edges {
                         node {
                             title
@@ -208,7 +208,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors_ALL: { name: "Keanu Reeves" } }) {
+                moviesConnection(where: { actors_ALL: { name_EQ: "Keanu Reeves" } }) {
                     edges {
                         node {
                             title
@@ -285,7 +285,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors_SINGLE: { name: "Carrie-Anne Moss" } }) {
+                moviesConnection(where: { actors_SINGLE: { name_EQ: "Carrie-Anne Moss" } }) {
                     edges {
                         node {
                             title
@@ -362,7 +362,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors_SOME: { name: "Keanu Reeves" } }) {
+                moviesConnection(where: { actors_SOME: { name_EQ: "Keanu Reeves" } }) {
                     edges {
                         node {
                             title
@@ -439,7 +439,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors_SOME: { name: "Keanu Reeves" } }, sort: { title: DESC }) {
+                moviesConnection(where: { actors_SOME: { name_EQ: "Keanu Reeves" } }, sort: { title: DESC }) {
                     edges {
                         node {
                             title
@@ -518,7 +518,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                moviesConnection(where: { actors_NONE: { name: "Keanu Reeves" } }) {
+                moviesConnection(where: { actors_NONE: { name_EQ: "Keanu Reeves" } }) {
                     edges {
                         node {
                             title
@@ -616,7 +616,7 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
         const query = /* GraphQL */ `
             query {
                 moviesConnection(
-                    where: { OR: [{ actors: { name: "Jada Pinkett Smith" } }, { genres: { name: "Romance" } }] }
+                    where: { OR: [{ actors: { name_EQ: "Jada Pinkett Smith" } }, { genres: { name_EQ: "Romance" } }] }
                 ) {
                     edges {
                         node {

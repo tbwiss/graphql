@@ -31,7 +31,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(filter: [{ where: { node: { actors_SOME: { name: "$jwt.custom_value" } } } }]) {
+            type ${Movie} @node @authorization(filter: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [${Actor}!]!
@@ -124,7 +124,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(filter: [{ where: { node: { actors_SOME: { name: "$jwt.custom_value" } } } }]) {
+            type ${Movie} @node @authorization(filter: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [${Actor}!]!
@@ -211,7 +211,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(validate: [{ where: { node: { actors_SOME: { name: "$jwt.custom_value" } } } }]) {
+            type ${Movie} @node @authorization(validate: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [${Actor}!]!
@@ -304,7 +304,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(validate: [{ where: { node: { actors_SOME: { name: "$jwt.custom_value" } } } }]) {
+            type ${Movie} @node @authorization(validate: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [${Actor}!]!

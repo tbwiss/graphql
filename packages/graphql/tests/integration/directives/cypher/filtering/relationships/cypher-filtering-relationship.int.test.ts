@@ -82,7 +82,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         actors: {
-                            name: "Jada Pinkett Smith"
+                            name_EQ: "Jada Pinkett Smith"
                         } 
                     }
                 ) {
@@ -163,7 +163,7 @@ describe("cypher directive filtering - Relationship", () => {
                     where: {
                         NOT: {
                             actors: {
-                                name: "Jada Pinkett Smith"
+                                name_EQ: "Jada Pinkett Smith"
                             }   
                         }
                     }
@@ -234,7 +234,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         actors_ALL: {
-                            name: "Keanu Reeves"
+                            name_EQ: "Keanu Reeves"
                         } 
                     }
                 ) {
@@ -306,7 +306,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         actors_SINGLE: {
-                            name: "Carrie-Anne Moss"
+                            name_EQ: "Carrie-Anne Moss"
                         } 
                     }
                 ) {
@@ -376,7 +376,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         actors_SOME: {
-                            name: "Keanu Reeves"
+                            name_EQ: "Keanu Reeves"
                         } 
                     }
                 ) {
@@ -448,7 +448,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         actors_NONE: {
-                            name: "Keanu Reeves"
+                            name_EQ: "Keanu Reeves"
                         } 
                     }
                 ) {
@@ -553,8 +553,8 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: { 
                         OR: [
-                            { actors: { name: "Jada Pinkett Smith" } },
-                            { genres: { name: "Romance" } }
+                            { actors: { name_EQ: "Jada Pinkett Smith" } },
+                            { genres: { name_EQ: "Romance" } }
                         ]
                     }
                 )

@@ -54,7 +54,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { actors: { name: "Jada Pinkett Smith" } }) {
+                movies(where: { actors: { name_EQ: "Jada Pinkett Smith" } }) {
                     title
                 }
             }
@@ -119,7 +119,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { NOT: { actors: { name: "Jada Pinkett Smith" } } }) {
+                movies(where: { NOT: { actors: { name_EQ: "Jada Pinkett Smith" } } }) {
                     title
                 }
             }
@@ -184,7 +184,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { actors_ALL: { name: "Keanu Reeves" } }) {
+                movies(where: { actors_ALL: { name_EQ: "Keanu Reeves" } }) {
                     title
                 }
             }
@@ -249,7 +249,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { actors_SINGLE: { name: "Carrie-Anne Moss" } }) {
+                movies(where: { actors_SINGLE: { name_EQ: "Carrie-Anne Moss" } }) {
                     title
                 }
             }
@@ -314,7 +314,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { actors_SOME: { name: "Keanu Reeves" } }) {
+                movies(where: { actors_SOME: { name_EQ: "Keanu Reeves" } }) {
                     title
                 }
             }
@@ -378,7 +378,7 @@ describe("cypher directive filtering - Relationship", () => {
         });
         const query = /* GraphQL */ `
             query {
-                movies(where: { actors_NONE: { name: "Keanu Reeves" } }) {
+                movies(where: { actors_NONE: { name_EQ: "Keanu Reeves" } }) {
                     title
                 }
             }
@@ -463,7 +463,9 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { OR: [{ actors: { name: "Jada Pinkett Smith" } }, { genres: { name: "Romance" } }] }) {
+                movies(
+                    where: { OR: [{ actors: { name_EQ: "Jada Pinkett Smith" } }, { genres: { name_EQ: "Romance" } }] }
+                ) {
                     title
                 }
             }

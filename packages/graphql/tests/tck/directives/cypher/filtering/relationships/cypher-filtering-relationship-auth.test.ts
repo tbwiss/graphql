@@ -24,7 +24,9 @@ import { formatCypher, formatParams, translateQuery } from "../../../../utils/tc
 describe("cypher directive filtering - relationship auth filter", () => {
     test("relationship with auth filter on type PASS", async () => {
         const typeDefs = /* GraphQL */ `
-            type Movie @node @authorization(filter: [{ where: { node: { actors: { name: "$jwt.custom_value" } } } }]) {
+            type Movie
+                @node
+                @authorization(filter: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -114,7 +116,9 @@ describe("cypher directive filtering - relationship auth filter", () => {
 
     test("relationship with auth filter on type FAIL", async () => {
         const typeDefs = /* GraphQL */ `
-            type Movie @node @authorization(filter: [{ where: { node: { actors: { name: "$jwt.custom_value" } } } }]) {
+            type Movie
+                @node
+                @authorization(filter: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -206,7 +210,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(validate: [{ where: { node: { actors: { name: "$jwt.custom_value" } } } }]) {
+                @authorization(validate: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -298,7 +302,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(validate: [{ where: { node: { actors: { name: "$jwt.custom_value" } } } }]) {
+                @authorization(validate: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
