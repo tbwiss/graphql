@@ -62,6 +62,7 @@ import {
 import { ValidFieldTypes } from "./custom-rules/valid-types/valid-field-types";
 import { ValidObjectType } from "./custom-rules/valid-types/valid-object-type";
 import { WarnIfAuthorizationFeatureDisabled } from "./custom-rules/warnings/authorization-feature-disabled";
+import { WarnPrivateDeprecation } from "./custom-rules/warnings/deprecated-private";
 import { WarnUniqueDeprecation } from "./custom-rules/warnings/deprecated-unique";
 import { WarnIfAMaxLimitCanBeBypassedThroughInterface } from "./custom-rules/warnings/limit-max-can-be-bypassed";
 import { WarnIfListOfListsFieldDefinition } from "./custom-rules/warnings/list-of-lists";
@@ -237,6 +238,7 @@ function runValidationRulesOnFilteredDocument({
             WarnIfTypeIsNotMarkedAsNode(),
             WarnIfQueryDirectionIsUsedWithDeprecatedValues,
             WarnUniqueDeprecation(),
+            WarnPrivateDeprecation(),
         ],
         schema
     );
