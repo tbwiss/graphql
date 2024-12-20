@@ -230,6 +230,7 @@ export default function createUpdateAndParams({
                             context,
                             nodes: [{ node: refNode, variable: variableName }],
                             operations: ["UPDATE"],
+                            indexPrefix: "update",
                         });
 
                         if (authorizationBeforeAndParams) {

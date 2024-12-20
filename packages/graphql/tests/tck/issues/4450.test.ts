@@ -48,7 +48,9 @@ describe("https://github.com/neo4j/graphql/issues/4450", () => {
 
         const query = /* GraphQL */ `
             query {
-                actors(where: { sceneConnection_SOME: { edge: { cut_EQ: true }, node: { location: { city_EQ: "test" } } } }) {
+                actors(
+                    where: { sceneConnection_SOME: { edge: { cut_EQ: true }, node: { location: { city_EQ: "test" } } } }
+                ) {
                     name
                 }
             }
@@ -62,13 +64,13 @@ describe("https://github.com/neo4j/graphql/issues/4450", () => {
                 WITH this
                 MATCH (this)-[this0:IN_SCENE]->(this1:Scene)
                 OPTIONAL MATCH (this1)-[:AT_LOCATION]->(this2:Location)
-                WITH *, count(this2) AS locationCount
+                WITH *, count(this2) AS var3
                 WITH *
-                WHERE ((locationCount <> 0 AND this2.city = $param0) AND this0.cut = $param1)
-                RETURN count(this1) > 0 AS var3
+                WHERE ((var3 <> 0 AND this2.city = $param0) AND this0.cut = $param1)
+                RETURN count(this1) > 0 AS var4
             }
             WITH *
-            WHERE var3 = true
+            WHERE var4 = true
             RETURN this { .name } AS this"
         `);
 
