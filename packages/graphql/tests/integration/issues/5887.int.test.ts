@@ -39,11 +39,11 @@ describe("https://github.com/neo4j/graphql/issues/5887", () => {
                 id: ID!
             }
 
-            type ${A} implements ${Base} {
+            type ${A} implements ${Base} @node {
                 id: ID!
             }
 
-            type ${B} implements ${Base} {
+            type ${B} implements ${Base} @node {
                 id: ID!
             }
 
@@ -157,11 +157,11 @@ describe("https://github.com/neo4j/graphql/issues/5887 list relationship", () =>
                 name: String!
             }
 
-            type ${Dog} implements ${Animal} {
+            type ${Dog} implements ${Animal} @node {
                 name: String!
             }
 
-            type ${Cat} implements ${Animal} {
+            type ${Cat} implements ${Animal} @node {
                 name: String!
             }
         `;
@@ -182,7 +182,7 @@ describe("https://github.com/neo4j/graphql/issues/5887 list relationship", () =>
 
         const query = /* GraphQL */ `
             query {
-                ${House.plural}(where: { animals: { name: "Roxy" } }) {
+                ${House.plural}(where: { animals_SOME: { name_EQ: "Roxy" } }) {
                     address
                 }
             }
@@ -203,7 +203,7 @@ describe("https://github.com/neo4j/graphql/issues/5887 list relationship", () =>
 
         const query = /* GraphQL */ `
             query {
-                ${House.plural}(where: { animals: { name: "Nala" } }) {
+                ${House.plural}(where: { animals_SOME: { name_EQ: "Nala" } }) {
                     address
                 }
             }
@@ -224,7 +224,7 @@ describe("https://github.com/neo4j/graphql/issues/5887 list relationship", () =>
 
         const query = /* GraphQL */ `
             query {
-                ${House.plural}(where: { animals: { name: "Other" } }) {
+                ${House.plural}(where: { animals_SOME: { name_EQ: "Other" } }) {
                     address
                 }
             }
