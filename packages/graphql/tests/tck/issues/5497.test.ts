@@ -106,9 +106,9 @@ describe("https://github.com/neo4j/graphql/issues/5497", () => {
                 WITH this_category0_disconnect0
                 MATCH (this_category0_disconnect0)<-[:HAS_CATEGORY]-(authorization__before_this1:Cabinet)
                 OPTIONAL MATCH (authorization__before_this1)<-[:HAS_CABINET]-(authorization__before_this2:User)
-                WITH *, count(authorization__before_this2) AS userCount
+                WITH *, count(authorization__before_this2) AS authorization__before_var3
                 WITH *
-                WHERE (userCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this2.id = $jwt.sub))
+                WHERE (authorization__before_var3 <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this2.id = $jwt.sub))
                 RETURN count(authorization__before_this1) = 1 AS authorization__before_var0
             }
             WITH *
@@ -129,9 +129,9 @@ describe("https://github.com/neo4j/graphql/issues/5497", () => {
                 WITH this_category0_connect0_node
                 MATCH (this_category0_connect0_node)<-[:HAS_CATEGORY]-(authorization__before_this1:Cabinet)
                 OPTIONAL MATCH (authorization__before_this1)<-[:HAS_CABINET]-(authorization__before_this2:User)
-                WITH *, count(authorization__before_this2) AS userCount
+                WITH *, count(authorization__before_this2) AS authorization__before_var3
                 WITH *
-                WHERE (userCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this2.id = $jwt.sub))
+                WHERE (authorization__before_var3 <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this2.id = $jwt.sub))
                 RETURN count(authorization__before_this1) = 1 AS authorization__before_var0
             }
             WITH *
