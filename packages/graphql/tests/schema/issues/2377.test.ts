@@ -422,7 +422,7 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               type_EQ: ResourceType
               type_IN: [ResourceType!]
               typename: [ResourceEntityImplementation!]
-              typename_IN: [ResourceEntityImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ResourceEntityImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             input ResourceOnCreateInput {

@@ -202,7 +202,7 @@ describe("@customResolver directive", () => {
               customResolver_IN: [String]
               customResolver_STARTS_WITH: String
               typename: [UserInterfaceImplementation!]
-              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type UserInterfacesConnection {

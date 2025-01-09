@@ -1062,7 +1062,7 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ShowImplementation!]
-              typename_IN: [ShowImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ShowImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ShowsConnection {

@@ -1355,7 +1355,7 @@ describe("Cypher", () => {
               NOT: ProductionWhere
               OR: [ProductionWhere!]
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {

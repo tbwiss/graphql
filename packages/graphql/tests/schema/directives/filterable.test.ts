@@ -5892,7 +5892,7 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename: [PersonImplementation!]
-                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
@@ -6589,7 +6589,7 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename: [PersonImplementation!]
-                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
@@ -7251,7 +7251,7 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename: [PersonImplementation!]
-                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String

@@ -511,7 +511,7 @@ describe("Interface Relationships", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {
@@ -1683,7 +1683,7 @@ describe("Interface Relationships", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {
@@ -3159,7 +3159,7 @@ describe("Interface Relationships", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {
@@ -3916,7 +3916,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               interface2_SOME: Interface2Where
               typename: [Interface1Implementation!]
-              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface1sConnection {
@@ -3985,7 +3985,7 @@ describe("Interface Relationships", () => {
               field2_IN: [String]
               field2_STARTS_WITH: String
               typename: [Interface2Implementation!]
-              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface2sConnection {
@@ -5101,7 +5101,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               interface2_SOME: Interface2Where
               typename: [Interface1Implementation!]
-              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface1sConnection {
@@ -5170,7 +5170,7 @@ describe("Interface Relationships", () => {
               field2_IN: [String]
               field2_STARTS_WITH: String
               typename: [Interface2Implementation!]
-              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface2sConnection {
@@ -6393,7 +6393,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               interface2_SOME: Interface2Where
               typename: [Interface1Implementation!]
-              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface1Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface1sConnection {
@@ -6462,7 +6462,7 @@ describe("Interface Relationships", () => {
               field2_IN: [String]
               field2_STARTS_WITH: String
               typename: [Interface2Implementation!]
-              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [Interface2Implementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Interface2sConnection {
@@ -7912,7 +7912,7 @@ describe("Interface Relationships", () => {
               id_IN: [ID]
               id_STARTS_WITH: ID
               typename: [ContentImplementation!]
-              typename_IN: [ContentImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ContentImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ContentsConnection {
@@ -9209,7 +9209,7 @@ describe("Interface Relationships", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {
@@ -9691,7 +9691,7 @@ describe("Interface Relationships", () => {
               title_IN: [String!]
               title_STARTS_WITH: String
               typename: [ShowImplementation!]
-              typename_IN: [ShowImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ShowImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ShowsConnection {

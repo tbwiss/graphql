@@ -180,7 +180,7 @@ describe("@private directive", () => {
               id_IN: [ID]
               id_STARTS_WITH: ID
               typename: [UserInterfaceImplementation!]
-              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type UserInterfacesConnection {
@@ -395,7 +395,7 @@ describe("@private directive", () => {
               id_IN: [ID]
               id_STARTS_WITH: ID
               typename: [UserInterfaceImplementation!]
-              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type UserInterfacesConnection {

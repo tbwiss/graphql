@@ -207,7 +207,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               id_IN: [ID!]
               id_STARTS_WITH: ID
               typename: [ProfileImplementation!]
-              typename_IN: [ProfileImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProfileImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
               userName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               userName_CONTAINS: String
               userName_ENDS_WITH: String

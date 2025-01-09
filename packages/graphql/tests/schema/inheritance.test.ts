@@ -583,7 +583,7 @@ describe("inheritance", () => {
               name_IN: [String]
               name_STARTS_WITH: String
               typename: [PersonImplementation!]
-              typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type Query {

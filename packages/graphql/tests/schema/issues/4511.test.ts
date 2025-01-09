@@ -225,7 +225,7 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               moviesAggregate: CreatureMoviesAggregateInput
               moviesConnection: CreatureMoviesConnectionWhere
               typename: [CreatureImplementation!]
-              typename_IN: [CreatureImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [CreatureImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type CreaturesConnection {
@@ -693,7 +693,7 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               id_IN: [ID]
               id_STARTS_WITH: ID
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {

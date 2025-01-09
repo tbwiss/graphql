@@ -1626,7 +1626,7 @@ describe("Algebraic", () => {
               NOT: ProductionWhere
               OR: [ProductionWhere!]
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
               viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Int
               viewers_GT: Int
