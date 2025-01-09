@@ -255,7 +255,8 @@ describe("@default directive", () => {
               toBeOverridden_EQ: String
               toBeOverridden_IN: [String!]
               toBeOverridden_STARTS_WITH: String
-              typename_IN: [UserInterfaceImplementation!]
+              typename: [UserInterfaceImplementation!]
+              typename_IN: [UserInterfaceImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
             }
 
             type UserInterfacesConnection {

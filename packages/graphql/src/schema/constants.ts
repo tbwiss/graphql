@@ -60,3 +60,10 @@ export const DEPRECATE_OVERWRITE = {
         reason: "The overwrite argument is deprecated and will be removed",
     },
 };
+
+export const DEPRECATE_TYPENAME_IN = {
+    name: DEPRECATED,
+    args: {
+        reason: "The typename_IN filter is deprecated, please use the typename filters instead",
+    },
+};

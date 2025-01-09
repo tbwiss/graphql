@@ -1753,7 +1753,8 @@ describe("Union Interface Relationships", () => {
               reviewerId_IN: [Int]
               reviewerId_LT: Int
               reviewerId_LTE: Int
-              typename_IN: [ReviewerImplementation!]
+              typename: [ReviewerImplementation!]
+              typename_IN: [ReviewerImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
             }
 
             type ReviewersConnection {

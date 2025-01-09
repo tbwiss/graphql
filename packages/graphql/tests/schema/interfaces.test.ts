@@ -322,7 +322,8 @@ describe("Interfaces", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return MovieNodes where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              typename_IN: [MovieNodeImplementation!]
+              typename: [MovieNodeImplementation!]
+              typename_IN: [MovieNodeImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
             }
 
             type MovieNodesConnection {
@@ -751,7 +752,8 @@ describe("Interfaces", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return MovieNodes where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              typename_IN: [MovieNodeImplementation!]
+              typename: [MovieNodeImplementation!]
+              typename_IN: [MovieNodeImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
             }
 
             type MovieNodesConnection {

@@ -5030,7 +5030,8 @@ describe("@settable", () => {
                   title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
-                  typename_IN: [ProductionImplementation!]
+                  typename: [ProductionImplementation!]
+                  typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
                 }
 
                 type ProductionsConnection {
@@ -5566,7 +5567,8 @@ describe("@settable", () => {
                   title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
-                  typename_IN: [ProductionImplementation!]
+                  typename: [ProductionImplementation!]
+                  typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
                 }
 
                 type ProductionsConnection {
@@ -6344,7 +6346,8 @@ describe("@settable", () => {
                   title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
-                  typename_IN: [ProductionImplementation!]
+                  typename: [ProductionImplementation!]
+                  typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
                 }
 
                 type ProductionsConnection {
@@ -7263,7 +7266,8 @@ describe("@settable", () => {
                   title_EQ: String
                   title_IN: [String!]
                   title_STARTS_WITH: String
-                  typename_IN: [ProductionImplementation!]
+                  typename: [ProductionImplementation!]
+                  typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filters instead\\")
                 }
 
                 type ProductionsConnection {

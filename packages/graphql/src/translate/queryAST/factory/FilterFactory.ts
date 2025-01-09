@@ -430,7 +430,7 @@ export class FilterFactory {
                         filters: nestedFilters,
                     });
                 }
-                if (key === "typename_IN") {
+                if (key === "typename_IN" || key === "typename") {
                     const acceptedEntities = entity.concreteEntities.filter((concreteEntity) => {
                         return valueAsArray.some((typenameFilterValue) => typenameFilterValue === concreteEntity.name);
                     });

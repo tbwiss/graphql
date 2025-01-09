@@ -32,7 +32,7 @@ import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/Uni
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
+import { DEPRECATE_IMPLICIT_EQUAL_FILTERS, DEPRECATE_TYPENAME_IN } from "../constants";
 import { getWhereFieldsForAttributes } from "../get-where-fields";
 import { withAggregateInputType } from "./aggregate-types";
 import {
@@ -143,7 +143,13 @@ export function withWhereInputType({
                 name: entityAdapter.operations.implementationEnumTypename,
                 values: enumValues,
             });
-            whereInputType.addFields({ typename_IN: { type: interfaceImplementation.NonNull.List } });
+            if (shouldAddDeprecatedFields(features, "typename_IN")) {
+                whereInputType.addFields({
+                    typename_IN: { type: interfaceImplementation.NonNull.List, directives: [DEPRECATE_TYPENAME_IN] },
+                });
+            }
+
+            whereInputType.addFields({ typename: { type: interfaceImplementation.NonNull.List } });
         }
     }
     return whereInputType;
