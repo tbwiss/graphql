@@ -141,7 +141,7 @@ describe("@customResolver directive", () => {
 
             type UserAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               password: StringAggregateSelection!
               username: StringAggregateSelection!
             }

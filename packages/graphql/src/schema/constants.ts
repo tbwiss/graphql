@@ -60,3 +60,12 @@ export const DEPRECATE_OVERWRITE = {
         reason: "The overwrite argument is deprecated and will be removed",
     },
 };
+
+
+export const DEPRECATE_ID_AGGREGATION = {
+    name: DEPRECATED,
+    args: {
+        reason: "aggregation of ID fields are deprecated and will be removed",
+    },
+};
+

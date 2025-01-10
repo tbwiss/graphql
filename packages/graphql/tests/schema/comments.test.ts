@@ -136,7 +136,7 @@ describe("Comments", () => {
               actorCount: IntAggregateSelection!
               averageRating: FloatAggregateSelection!
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input MovieCreateInput {
@@ -507,7 +507,7 @@ describe("Comments", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieCreateInput {
@@ -1330,7 +1330,7 @@ describe("Comments", () => {
 
                 type GenreAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input GenreConnectWhere {
@@ -1399,7 +1399,7 @@ describe("Comments", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieConnectInput {

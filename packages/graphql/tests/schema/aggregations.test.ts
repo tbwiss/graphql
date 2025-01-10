@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Aggregations", () => {
     test("Top Level Aggregations", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
                 isbn: String!
@@ -151,7 +150,7 @@ describe("Aggregations", () => {
             type MovieAggregateSelection {
               count: Int!
               createdAt: DateTimeAggregateSelection!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               imdbRating: FloatAggregateSelection!
               isbn: StringAggregateSelection!
               screenTime: DurationAggregateSelection!
@@ -386,9 +385,9 @@ describe("Aggregations", () => {
     });
 
     test("Where Level Aggregations", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User @node {
-                someId: ID
+                someID: ID
                 someString: String
                 someFloat: Float
                 someInt: Int
@@ -401,12 +400,13 @@ describe("Aggregations", () => {
             }
 
             type Post @node {
+                someID: ID
                 title: String
                 likes: [User!]! @relationship(type: "LIKES", direction: IN, properties: "Likes")
             }
 
             type Likes @relationshipProperties {
-                someId: ID
+                someID: ID
                 someString: String
                 someFloat: Float
                 someInt: Int
@@ -509,7 +509,7 @@ describe("Aggregations", () => {
               someDateTime: DateTime
               someDuration: Duration
               someFloat: Float
-              someId: ID
+              someID: ID
               someInt: Int
               someLocalDateTime: LocalDateTime
               someLocalTime: LocalTime
@@ -586,16 +586,16 @@ describe("Aggregations", () => {
               someFloat_SUM_GTE: Float
               someFloat_SUM_LT: Float
               someFloat_SUM_LTE: Float
-              someId_MAX_EQUAL: ID
-              someId_MAX_GT: ID
-              someId_MAX_GTE: ID
-              someId_MAX_LT: ID
-              someId_MAX_LTE: ID
-              someId_MIN_EQUAL: ID
-              someId_MIN_GT: ID
-              someId_MIN_GTE: ID
-              someId_MIN_LT: ID
-              someId_MIN_LTE: ID
+              someID_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               someInt_AVERAGE_EQUAL: Float
               someInt_AVERAGE_GT: Float
               someInt_AVERAGE_GTE: Float
@@ -668,7 +668,7 @@ describe("Aggregations", () => {
               someDateTime: DateTime
               someDuration: Duration
               someFloat: Float
-              someId: ID
+              someID: ID
               someInt: Int
               someLocalDateTime: LocalDateTime
               someLocalTime: LocalTime
@@ -681,7 +681,7 @@ describe("Aggregations", () => {
               someDateTime: SortDirection
               someDuration: SortDirection
               someFloat: SortDirection
-              someId: SortDirection
+              someID: SortDirection
               someInt: SortDirection
               someLocalDateTime: SortDirection
               someLocalTime: SortDirection
@@ -704,8 +704,8 @@ describe("Aggregations", () => {
               someFloat_MULTIPLY: Float
               someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              someId_SET: ID
+              someID: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someID_SET: ID
               someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
@@ -752,12 +752,12 @@ describe("Aggregations", () => {
               someFloat_IN: [Float]
               someFloat_LT: Float
               someFloat_LTE: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              someId_CONTAINS: ID
-              someId_ENDS_WITH: ID
-              someId_EQ: ID
-              someId_IN: [ID]
-              someId_STARTS_WITH: ID
+              someID: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              someID_CONTAINS: ID
+              someID_ENDS_WITH: ID
+              someID_EQ: ID
+              someID_IN: [ID]
+              someID_STARTS_WITH: ID
               someInt: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someInt_EQ: Int
               someInt_GT: Int
@@ -833,16 +833,19 @@ describe("Aggregations", () => {
               likes(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
               likesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserLikesAggregationSelection
               likesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostLikesConnectionSort!], where: PostLikesConnectionWhere): PostLikesConnection!
+              someID: ID
               title: String
             }
 
             type PostAggregateSelection {
               count: Int!
+              someID: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               title: StringAggregateSelection!
             }
 
             input PostCreateInput {
               likes: PostLikesFieldInput
+              someID: ID
               title: String
             }
 
@@ -984,16 +987,16 @@ describe("Aggregations", () => {
               someFloat_SUM_GTE: Float
               someFloat_SUM_LT: Float
               someFloat_SUM_LTE: Float
-              someId_MAX_EQUAL: ID
-              someId_MAX_GT: ID
-              someId_MAX_GTE: ID
-              someId_MAX_LT: ID
-              someId_MAX_LTE: ID
-              someId_MIN_EQUAL: ID
-              someId_MIN_GT: ID
-              someId_MIN_GTE: ID
-              someId_MIN_LT: ID
-              someId_MIN_LTE: ID
+              someID_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+              someID_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               someInt_AVERAGE_EQUAL: Float
               someInt_AVERAGE_GT: Float
               someInt_AVERAGE_GTE: Float
@@ -1094,11 +1097,14 @@ describe("Aggregations", () => {
             Fields to sort Posts by. The order in which sorts are applied is not guaranteed when specifying many fields in one PostSort object.
             \\"\\"\\"
             input PostSort {
+              someID: SortDirection
               title: SortDirection
             }
 
             input PostUpdateInput {
               likes: [PostLikesUpdateFieldInput!]
+              someID: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someID_SET: ID
               title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
@@ -1114,7 +1120,7 @@ describe("Aggregations", () => {
               someDateTime: DateTimeAggregateSelection!
               someDuration: DurationAggregateSelection!
               someFloat: FloatAggregateSelection!
-              someId: IDAggregateSelection!
+              someID: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               someInt: IntAggregateSelection!
               someLocalDateTime: LocalDateTimeAggregateSelection!
               someLocalTime: LocalTimeAggregateSelection!
@@ -1127,7 +1133,7 @@ describe("Aggregations", () => {
               someDateTime: DateTimeAggregateSelection!
               someDuration: DurationAggregateSelection!
               someFloat: FloatAggregateSelection!
-              someId: IDAggregateSelection!
+              someID: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               someInt: IntAggregateSelection!
               someLocalDateTime: LocalDateTimeAggregateSelection!
               someLocalTime: LocalTimeAggregateSelection!
@@ -1164,6 +1170,12 @@ describe("Aggregations", () => {
               likes_SINGLE: UserWhere
               \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
               likes_SOME: UserWhere
+              someID: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              someID_CONTAINS: ID
+              someID_ENDS_WITH: ID
+              someID_EQ: ID
+              someID_IN: [ID]
+              someID_STARTS_WITH: ID
               title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
@@ -1233,7 +1245,7 @@ describe("Aggregations", () => {
               someDateTime: DateTime
               someDuration: Duration
               someFloat: Float
-              someId: ID
+              someID: ID
               someInt: Int
               someLocalDateTime: LocalDateTime
               someLocalTime: LocalTime
@@ -1247,7 +1259,7 @@ describe("Aggregations", () => {
               someDateTime: DateTimeAggregateSelection!
               someDuration: DurationAggregateSelection!
               someFloat: FloatAggregateSelection!
-              someId: IDAggregateSelection!
+              someID: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               someInt: IntAggregateSelection!
               someLocalDateTime: LocalDateTimeAggregateSelection!
               someLocalTime: LocalTimeAggregateSelection!
@@ -1264,7 +1276,7 @@ describe("Aggregations", () => {
               someDateTime: DateTime
               someDuration: Duration
               someFloat: Float
-              someId: ID
+              someID: ID
               someInt: Int
               someLocalDateTime: LocalDateTime
               someLocalTime: LocalTime
@@ -1294,7 +1306,7 @@ describe("Aggregations", () => {
               someDateTime: SortDirection
               someDuration: SortDirection
               someFloat: SortDirection
-              someId: SortDirection
+              someID: SortDirection
               someInt: SortDirection
               someLocalDateTime: SortDirection
               someLocalTime: SortDirection
@@ -1317,8 +1329,8 @@ describe("Aggregations", () => {
               someFloat_MULTIPLY: Float
               someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              someId_SET: ID
+              someID: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someID_SET: ID
               someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
@@ -1365,12 +1377,12 @@ describe("Aggregations", () => {
               someFloat_IN: [Float]
               someFloat_LT: Float
               someFloat_LTE: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              someId_CONTAINS: ID
-              someId_ENDS_WITH: ID
-              someId_EQ: ID
-              someId_IN: [ID]
-              someId_STARTS_WITH: ID
+              someID: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              someID_CONTAINS: ID
+              someID_ENDS_WITH: ID
+              someID_EQ: ID
+              someID_IN: [ID]
+              someID_STARTS_WITH: ID
               someInt: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someInt_EQ: Int
               someInt_GT: Int

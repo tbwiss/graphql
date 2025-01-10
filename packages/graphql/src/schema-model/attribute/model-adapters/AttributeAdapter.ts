@@ -192,17 +192,24 @@ export class AttributeAdapter {
 
     isAggregableField(): boolean {
         return (
-            !this.typeHelper.isList() && (this.typeHelper.isScalar() || this.typeHelper.isEnum()) && this.isAggregable()
+            !this.typeHelper.isList() &&
+         //uncomment me on 7.x   !this.typeHelper.isID() &&
+            (this.typeHelper.isScalar() || this.typeHelper.isEnum()) &&
+            this.isAggregable()
         );
     }
 
     isAggregationWhereField(): boolean {
-        const isGraphQLBuiltInScalarWithoutBoolean =
-            this.typeHelper.isGraphQLBuiltInScalar() && !this.typeHelper.isBoolean();
-        const isTemporalWithoutDate = this.typeHelper.isTemporal() && !this.typeHelper.isDate();
+        if (
+            this.typeHelper.isList() ||
+            // uncomment me on 7.x this.typeHelper.isID() ||
+            this.typeHelper.isBoolean() ||
+            this.typeHelper.isDate()
+        ) {
+            return false;
+        }
         return (
-            !this.typeHelper.isList() &&
-            (isGraphQLBuiltInScalarWithoutBoolean || isTemporalWithoutDate || this.typeHelper.isBigInt()) &&
+            (this.typeHelper.isGraphQLBuiltInScalar() || this.typeHelper.isTemporal() || this.typeHelper.isBigInt()) &&
             this.isAggregationFilterable()
         );
     }

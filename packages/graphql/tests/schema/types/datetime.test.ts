@@ -81,7 +81,7 @@ describe("Datetime", () => {
             type MovieAggregateSelection {
               count: Int!
               datetime: DateTimeAggregateSelection!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input MovieCreateInput {

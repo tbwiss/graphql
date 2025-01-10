@@ -55,7 +55,7 @@ describe("200", () => {
             }
 
             type CategoryAggregateSelection {
-              categoryId: IDAggregateSelection!
+              categoryId: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               count: Int!
               description: StringAggregateSelection!
               name: StringAggregateSelection!

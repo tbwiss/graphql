@@ -33,7 +33,7 @@ import type { RelationshipAdapter } from "../../schema-model/relationship/model-
 import { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
 import type { AggregationTypesMapper } from "../aggregations/aggregation-types-mapper";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
+import { DEPRECATE_ID_AGGREGATION, DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
 import { numericalResolver } from "../resolvers/field/numerical";
 import { graphqlDirectivesToCompose } from "../to-compose";
 import { shouldAddDeprecatedFields } from "./utils";
@@ -76,7 +76,15 @@ function makeAggregableFields({
     for (const attribute of aggregableAttributes) {
         const objectTypeComposer = aggregationTypesMapper.getAggregationType(attribute.getTypeName());
         if (objectTypeComposer) {
-            aggregableFields[attribute.name] = objectTypeComposer.NonNull;
+            // TODO: REMOVE ID FIELD ON 7.x
+            if (attribute.typeHelper.isID()) {
+                aggregableFields[attribute.name] = {
+                    type: objectTypeComposer.NonNull,
+                    directives: [DEPRECATE_ID_AGGREGATION],
+                };
+                continue;
+            }
+            aggregableFields[attribute.name] = { type: objectTypeComposer.NonNull };
         }
     }
     return aggregableFields;
@@ -211,6 +219,7 @@ function addAggregationFieldsByType(
     const deprecatedDirectives = graphqlDirectivesToCompose(
         (directivesOnField || []).filter((d) => d.name.value === DEPRECATED)
     );
+
     if (attribute.typeHelper.isString()) {
         for (const operator of AGGREGATION_COMPARISON_OPERATORS) {
             fields[`${attribute.name}_AVERAGE_LENGTH_${operator}`] = {
@@ -251,13 +260,26 @@ function addAggregationFieldsByType(
             const averageType = attribute.typeHelper.isBigInt()
                 ? "BigInt"
                 : attribute.typeHelper.isDuration()
-                ? "Duration"
-                : GraphQLFloat;
+                  ? "Duration"
+                  : GraphQLFloat;
             fields[`${attribute.name}_AVERAGE_${operator}`] = { type: averageType, directives: deprecatedDirectives };
         }
         return fields;
     }
     for (const operator of AGGREGATION_COMPARISON_OPERATORS) {
+        // TODO: REMOVE ID FIELD ON 7.x
+        if (attribute.typeHelper.isID()) {
+            fields[`${attribute.name}_MIN_${operator}`] = {
+                type: attribute.getTypeName(),
+                directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_ID_AGGREGATION],
+            };
+            fields[`${attribute.name}_MAX_${operator}`] = {
+                type: attribute.getTypeName(),
+                directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_ID_AGGREGATION],
+            };
+            continue;
+        }
+
         fields[`${attribute.name}_MIN_${operator}`] = {
             type: attribute.getTypeName(),
             directives: deprecatedDirectives,

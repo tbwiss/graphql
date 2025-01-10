@@ -73,7 +73,7 @@ describe("Node Interface Types", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              imdb: IDAggregateSelection!
+              imdb: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               title: StringAggregateSelection!
             }
 

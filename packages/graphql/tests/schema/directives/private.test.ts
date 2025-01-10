@@ -123,7 +123,7 @@ describe("@private directive", () => {
 
             type UserAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input UserCreateInput {
@@ -141,7 +141,7 @@ describe("@private directive", () => {
 
             type UserInterfaceAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             type UserInterfaceEdge {
@@ -335,7 +335,7 @@ describe("@private directive", () => {
 
             type UserAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               private: StringAggregateSelection!
             }
 
@@ -355,7 +355,7 @@ describe("@private directive", () => {
 
             type UserInterfaceAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             type UserInterfaceEdge {
