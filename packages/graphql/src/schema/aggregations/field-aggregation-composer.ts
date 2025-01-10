@@ -25,7 +25,9 @@ import type { InterfaceEntityAdapter } from "../../schema-model/entity/model-ada
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
+import type { Neo4jFeaturesSettings } from "../../types";
 import { DEPRECATE_ID_AGGREGATION } from "../constants";
+import { shouldAddDeprecatedFields } from "../generation/utils";
 import { numericalResolver } from "../resolvers/field/numerical";
 import { AggregationTypesMapper } from "./aggregation-types-mapper";
 
@@ -52,7 +54,8 @@ export class FieldAggregationComposer {
     }
 
     public createAggregationTypeObject(
-        relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter
+        relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter,
+        features: Neo4jFeaturesSettings | undefined
     ): ObjectTypeComposer {
         let aggregateSelectionEdge: ObjectTypeComposer | undefined;
 
@@ -60,7 +63,7 @@ export class FieldAggregationComposer {
             throw new Error("UnionEntityAdapter not implemented");
         }
 
-        const aggregateSelectionNodeFields = this.getAggregationFields(relationshipAdapter.target);
+        const aggregateSelectionNodeFields = this.getAggregationFields(relationshipAdapter.target, features);
         const aggregateSelectionNodeName = relationshipAdapter.operations.getAggregationFieldTypename("node");
 
         const aggregateSelectionNode = this.createAggregationField(
@@ -69,7 +72,7 @@ export class FieldAggregationComposer {
         );
 
         if (relationshipAdapter instanceof RelationshipAdapter && relationshipAdapter.attributes.size > 0) {
-            const aggregateSelectionEdgeFields = this.getAggregationFields(relationshipAdapter);
+            const aggregateSelectionEdgeFields = this.getAggregationFields(relationshipAdapter, features);
             const aggregateSelectionEdgeName = relationshipAdapter.operations.getAggregationFieldTypename("edge");
 
             aggregateSelectionEdge = this.createAggregationField(
@@ -93,7 +96,8 @@ export class FieldAggregationComposer {
     }
 
     private getAggregationFields(
-        entity: RelationshipAdapter | ConcreteEntityAdapter | InterfaceEntityAdapter
+        entity: RelationshipAdapter | ConcreteEntityAdapter | InterfaceEntityAdapter,
+        features: Neo4jFeaturesSettings | undefined
     ): ObjectTypeComposerFieldConfigMapDefinition<any, any> {
         return entity.aggregableFields.reduce((res, field) => {
             const objectTypeComposer = this.aggregationTypesMapper.getAggregationType(field.getTypeName());
@@ -103,7 +107,10 @@ export class FieldAggregationComposer {
             }
             // TODO: REMOVE ID FIELD ON 7.x
             if (field.typeHelper.isID()) {
-                res[field.name] = { type: objectTypeComposer.NonNull, directives: [DEPRECATE_ID_AGGREGATION] };
+                if (shouldAddDeprecatedFields(features, "idAggregations")) {
+                    res[field.name] = { type: objectTypeComposer.NonNull, directives: [DEPRECATE_ID_AGGREGATION] };
+                }
+                return res;
             } else {
                 res[field.name] = objectTypeComposer.NonNull;
             }
