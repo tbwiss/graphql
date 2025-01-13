@@ -5040,7 +5040,8 @@ describe("Subscriptions", () => {
               movies: ProductionWhere
               moviesAggregate: CreatureMoviesAggregateInput
               moviesConnection: CreatureMoviesConnectionWhere
-              typename_IN: [CreatureImplementation!]
+              typename: [CreatureImplementation!]
+              typename_IN: [CreatureImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type CreaturesConnection {
@@ -5507,7 +5508,8 @@ describe("Subscriptions", () => {
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              typename_IN: [ProductionImplementation!]
+              typename: [ProductionImplementation!]
+              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {

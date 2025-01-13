@@ -454,6 +454,7 @@ export type Neo4jFeaturesSettings = {
         directedArgument?: boolean;
         connectOrCreate?: boolean;
         idAggregations?: boolean;
+        typename_IN?: boolean;
     };
     vector?: Neo4jVectorSettings;
 };

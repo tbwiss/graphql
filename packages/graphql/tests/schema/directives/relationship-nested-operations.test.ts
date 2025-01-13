@@ -8350,7 +8350,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -8837,7 +8838,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -9323,7 +9325,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -9805,7 +9808,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -10286,7 +10290,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -10763,7 +10768,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -11388,7 +11394,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {
@@ -11989,7 +11996,8 @@ describe("Relationship nested operations", () => {
                   name_EQ: String
                   name_IN: [String]
                   name_STARTS_WITH: String
-                  typename_IN: [PersonImplementation!]
+                  typename: [PersonImplementation!]
+                  typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                 }
 
                 type Query {

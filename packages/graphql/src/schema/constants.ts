@@ -69,3 +69,9 @@ export const DEPRECATE_ID_AGGREGATION = {
     },
 };
 
+export const DEPRECATE_TYPENAME_IN = {
+    name: DEPRECATED,
+    args: {
+        reason: "The typename_IN filter is deprecated, please use the typename filter instead",
+    },
+};
