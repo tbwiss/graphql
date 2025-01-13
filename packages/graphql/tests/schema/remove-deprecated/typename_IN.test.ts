@@ -102,7 +102,7 @@ describe("typename_IN", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               title: StringAggregateSelection!
             }
 
@@ -188,7 +188,7 @@ describe("typename_IN", () => {
 
             type ProductionAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               title: StringAggregateSelection!
             }
 
@@ -264,7 +264,7 @@ describe("typename_IN", () => {
 
             type SeriesAggregateSelection {
               count: Int!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               numberOfEpisodes: IntAggregateSelection!
               title: StringAggregateSelection!
             }
