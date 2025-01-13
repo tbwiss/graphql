@@ -61,6 +61,14 @@ export const DEPRECATE_OVERWRITE = {
     },
 };
 
+
+export const DEPRECATE_ID_AGGREGATION = {
+    name: DEPRECATED,
+    args: {
+        reason: "aggregation of ID fields are deprecated and will be removed",
+    },
+};
+
 export const DEPRECATE_TYPENAME_IN = {
     name: DEPRECATED,
     args: {

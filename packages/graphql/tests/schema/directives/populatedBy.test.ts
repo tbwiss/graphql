@@ -200,7 +200,7 @@ describe("@populatedBy tests", () => {
                   callback2: StringAggregateSelection!
                   callback3: StringAggregateSelection!
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieCreateInput {
@@ -405,7 +405,7 @@ describe("@populatedBy tests", () => {
                   callback2: IntAggregateSelection!
                   callback3: IntAggregateSelection!
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieCreateInput {
@@ -741,7 +741,7 @@ describe("@populatedBy tests", () => {
 
                 type GenreAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input GenreConnectWhere {
@@ -810,7 +810,7 @@ describe("@populatedBy tests", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieCreateInput {
@@ -837,11 +837,11 @@ describe("@populatedBy tests", () => {
                   callback1: StringAggregateSelection!
                   callback2: StringAggregateSelection!
                   callback3: StringAggregateSelection!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 type MovieGenreGenresNodeAggregateSelection {
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieGenresAggregateInput {
@@ -908,16 +908,16 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresNodeAggregationWhereInput!]
                   NOT: MovieGenresNodeAggregationWhereInput
                   OR: [MovieGenresNodeAggregationWhereInput!]
-                  id_MAX_EQUAL: ID
-                  id_MAX_GT: ID
-                  id_MAX_GTE: ID
-                  id_MAX_LT: ID
-                  id_MAX_LTE: ID
-                  id_MIN_EQUAL: ID
-                  id_MIN_GT: ID
-                  id_MIN_GTE: ID
-                  id_MIN_LT: ID
-                  id_MIN_LTE: ID
+                  id_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 type MovieGenresRelationship {
@@ -1091,16 +1091,16 @@ describe("@populatedBy tests", () => {
                   callback3_SHORTEST_LENGTH_GTE: Int
                   callback3_SHORTEST_LENGTH_LT: Int
                   callback3_SHORTEST_LENGTH_LTE: Int
-                  id_MAX_EQUAL: ID
-                  id_MAX_GT: ID
-                  id_MAX_GTE: ID
-                  id_MAX_LT: ID
-                  id_MAX_LTE: ID
-                  id_MIN_EQUAL: ID
-                  id_MIN_GT: ID
-                  id_MIN_GTE: ID
-                  id_MIN_LT: ID
-                  id_MIN_LTE: ID
+                  id_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input RelPropertiesCreateInput {
@@ -1263,7 +1263,7 @@ describe("@populatedBy tests", () => {
 
                 type GenreAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input GenreConnectWhere {
@@ -1339,7 +1339,7 @@ describe("@populatedBy tests", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieCreateInput {
@@ -1366,11 +1366,11 @@ describe("@populatedBy tests", () => {
                   callback1: IntAggregateSelection!
                   callback2: IntAggregateSelection!
                   callback3: IntAggregateSelection!
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 type MovieGenreGenresNodeAggregateSelection {
-                  id: IDAggregateSelection!
+                  id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input MovieGenresAggregateInput {
@@ -1437,16 +1437,16 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresNodeAggregationWhereInput!]
                   NOT: MovieGenresNodeAggregationWhereInput
                   OR: [MovieGenresNodeAggregationWhereInput!]
-                  id_MAX_EQUAL: ID
-                  id_MAX_GT: ID
-                  id_MAX_GTE: ID
-                  id_MAX_LT: ID
-                  id_MAX_LTE: ID
-                  id_MIN_EQUAL: ID
-                  id_MIN_GT: ID
-                  id_MIN_GTE: ID
-                  id_MIN_LT: ID
-                  id_MIN_LTE: ID
+                  id_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 type MovieGenresRelationship {
@@ -1635,16 +1635,16 @@ describe("@populatedBy tests", () => {
                   callback3_SUM_GTE: Int
                   callback3_SUM_LT: Int
                   callback3_SUM_LTE: Int
-                  id_MAX_EQUAL: ID
-                  id_MAX_GT: ID
-                  id_MAX_GTE: ID
-                  id_MAX_LT: ID
-                  id_MAX_LTE: ID
-                  id_MIN_EQUAL: ID
-                  id_MIN_GT: ID
-                  id_MIN_GTE: ID
-                  id_MIN_LT: ID
-                  id_MIN_LTE: ID
+                  id_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+                  id_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
                 }
 
                 input RelPropertiesCreateInput {

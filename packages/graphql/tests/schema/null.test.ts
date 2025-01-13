@@ -119,7 +119,7 @@ describe("Null", () => {
               averageRating: FloatAggregateSelection!
               count: Int!
               createdAt: DateTimeAggregateSelection!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               name: StringAggregateSelection!
             }
 

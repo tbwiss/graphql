@@ -577,6 +577,7 @@ function generateObjectType({
             aggregationTypesMapper,
             propagatedDirectives,
             composer,
+            features,
         });
 
         composer.Query.addFields({
@@ -716,6 +717,7 @@ function generateInterfaceObjectType({
             aggregationTypesMapper,
             propagatedDirectives,
             composer,
+            features,
         });
 
         composer.Query.addFields({

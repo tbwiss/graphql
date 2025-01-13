@@ -177,7 +177,7 @@ describe("@default directive", () => {
             type UserAggregateSelection {
               count: Int!
               fromInterface: StringAggregateSelection!
-              id: IDAggregateSelection!
+              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               name: StringAggregateSelection!
               numberOfFriends: IntAggregateSelection!
               rating: FloatAggregateSelection!

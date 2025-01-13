@@ -33,7 +33,7 @@ import type { RelationshipAdapter } from "../../schema-model/relationship/model-
 import { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
 import type { AggregationTypesMapper } from "../aggregations/aggregation-types-mapper";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
+import { DEPRECATE_ID_AGGREGATION, DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
 import { numericalResolver } from "../resolvers/field/numerical";
 import { graphqlDirectivesToCompose } from "../to-compose";
 import { shouldAddDeprecatedFields } from "./utils";
@@ -43,11 +43,13 @@ export function withAggregateSelectionType({
     aggregationTypesMapper,
     propagatedDirectives,
     composer,
+    features,
 }: {
     entityAdapter: ConcreteEntityAdapter | InterfaceEntityAdapter;
     aggregationTypesMapper: AggregationTypesMapper;
     propagatedDirectives: DirectiveNode[];
     composer: SchemaComposer;
+    features: Neo4jFeaturesSettings | undefined;
 }): ObjectTypeComposer {
     const aggregateSelection = composer.createObjectTC({
         name: entityAdapter.operations.aggregateTypeNames.selection,
@@ -60,23 +62,35 @@ export function withAggregateSelectionType({
         },
         directives: graphqlDirectivesToCompose(propagatedDirectives),
     });
-    aggregateSelection.addFields(makeAggregableFields({ entityAdapter, aggregationTypesMapper }));
+    aggregateSelection.addFields(makeAggregableFields({ entityAdapter, aggregationTypesMapper, features }));
     return aggregateSelection;
 }
 
 function makeAggregableFields({
     entityAdapter,
     aggregationTypesMapper,
+    features,
 }: {
     entityAdapter: ConcreteEntityAdapter | InterfaceEntityAdapter;
     aggregationTypesMapper: AggregationTypesMapper;
+    features: Neo4jFeaturesSettings | undefined;
 }): ObjectTypeComposerFieldConfigMapDefinition<any, any> {
     const aggregableFields: ObjectTypeComposerFieldConfigMapDefinition<any, any> = {};
     const aggregableAttributes = entityAdapter.aggregableFields;
     for (const attribute of aggregableAttributes) {
         const objectTypeComposer = aggregationTypesMapper.getAggregationType(attribute.getTypeName());
         if (objectTypeComposer) {
-            aggregableFields[attribute.name] = objectTypeComposer.NonNull;
+            // TODO: REMOVE ID FIELD ON 7.x
+            if (attribute.typeHelper.isID()) {
+                if (shouldAddDeprecatedFields(features, "idAggregations")) {
+                    aggregableFields[attribute.name] = {
+                        type: objectTypeComposer.NonNull,
+                        directives: [DEPRECATE_ID_AGGREGATION],
+                    };
+                }
+                continue;
+            }
+            aggregableFields[attribute.name] = { type: objectTypeComposer.NonNull };
         }
     }
     return aggregableFields;
@@ -151,6 +165,7 @@ function withAggregationWhereInputType({
     entityAdapter,
     composer,
     userDefinedDirectivesOnTargetFields,
+    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     entityAdapter:
@@ -186,18 +201,24 @@ function withAggregationWhereInputType({
         NOT: aggregationInput,
     });
 
-    const aggrFields = makeAggregationFields(aggregationFields, userDefinedDirectivesOnTargetFields);
+    const aggrFields = makeAggregationFields(aggregationFields, userDefinedDirectivesOnTargetFields, features);
     aggregationInput.addFields(aggrFields);
     return aggregationInput;
 }
 
 function makeAggregationFields(
     attributes: AttributeAdapter[],
-    userDefinedDirectivesOnTargetFields: Map<string, DirectiveNode[]> | undefined
+    userDefinedDirectivesOnTargetFields: Map<string, DirectiveNode[]> | undefined,
+    features: Neo4jFeaturesSettings | undefined
 ): InputTypeComposerFieldConfigMapDefinition {
     const fields: InputTypeComposerFieldConfigMapDefinition = {};
     for (const attribute of attributes) {
-        addAggregationFieldsByType(attribute, userDefinedDirectivesOnTargetFields?.get(attribute.name), fields);
+        addAggregationFieldsByType(
+            attribute,
+            userDefinedDirectivesOnTargetFields?.get(attribute.name),
+            fields,
+            features
+        );
     }
     return fields;
 }
@@ -206,11 +227,13 @@ function makeAggregationFields(
 function addAggregationFieldsByType(
     attribute: AttributeAdapter,
     directivesOnField: DirectiveNode[] | undefined,
-    fields: InputTypeComposerFieldConfigMapDefinition
+    fields: InputTypeComposerFieldConfigMapDefinition,
+    features: Neo4jFeaturesSettings | undefined
 ): InputTypeComposerFieldConfigMapDefinition {
     const deprecatedDirectives = graphqlDirectivesToCompose(
         (directivesOnField || []).filter((d) => d.name.value === DEPRECATED)
     );
+
     if (attribute.typeHelper.isString()) {
         for (const operator of AGGREGATION_COMPARISON_OPERATORS) {
             fields[`${attribute.name}_AVERAGE_LENGTH_${operator}`] = {
@@ -251,13 +274,29 @@ function addAggregationFieldsByType(
             const averageType = attribute.typeHelper.isBigInt()
                 ? "BigInt"
                 : attribute.typeHelper.isDuration()
-                ? "Duration"
-                : GraphQLFloat;
+                  ? "Duration"
+                  : GraphQLFloat;
             fields[`${attribute.name}_AVERAGE_${operator}`] = { type: averageType, directives: deprecatedDirectives };
         }
         return fields;
     }
     for (const operator of AGGREGATION_COMPARISON_OPERATORS) {
+        // TODO: REMOVE ID FIELD ON 7.x
+        if (attribute.typeHelper.isID()) {
+            if (shouldAddDeprecatedFields(features, "idAggregations")) {
+                fields[`${attribute.name}_MIN_${operator}`] = {
+                    type: attribute.getTypeName(),
+                    directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_ID_AGGREGATION],
+                };
+                fields[`${attribute.name}_MAX_${operator}`] = {
+                    type: attribute.getTypeName(),
+                    directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_ID_AGGREGATION],
+                };
+            }
+
+            continue;
+        }
+
         fields[`${attribute.name}_MIN_${operator}`] = {
             type: attribute.getTypeName(),
             directives: deprecatedDirectives,
