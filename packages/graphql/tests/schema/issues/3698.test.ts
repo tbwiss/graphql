@@ -467,7 +467,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
+              typename: [IProductImplementation!]
+              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type IProductsConnection {
@@ -1354,7 +1355,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
+              typename: [IProductImplementation!]
+              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type IProductsConnection {
@@ -2224,7 +2226,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              typename_IN: [IProductImplementation!]
+              typename: [IProductImplementation!]
+              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type IProductsConnection {

@@ -5891,7 +5891,8 @@ describe("@filterable directive", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      typename_IN: [PersonImplementation!]
+                      typename: [PersonImplementation!]
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
@@ -6587,7 +6588,8 @@ describe("@filterable directive", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      typename_IN: [PersonImplementation!]
+                      typename: [PersonImplementation!]
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
@@ -7248,7 +7250,8 @@ describe("@filterable directive", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      typename_IN: [PersonImplementation!]
+                      typename: [PersonImplementation!]
+                      typename_IN: [PersonImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
                       username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
